@@ -163,12 +163,26 @@
       "redis-cli FLUSHALL*": "deny",
       "redis-cli FLUSHDB*": "deny",
       "redis-cli * *DEL*": "deny",
-      "redis-cli *DEL*": "deny"
+      "redis-cli *DEL*": "deny",
+      "cat *.env*": "deny",
+      "cat * *.env*": "deny",
+      "less *.env*": "deny",
+      "less * *.env*": "deny",
+      "more *.env*": "deny",
+      "more * *.env*": "deny",
+      "head *.env*": "deny",
+      "head * *.env*": "deny",
+      "tail *.env*": "deny",
+      "tail * *.env*": "deny",
+      "grep * *.env*": "deny",
+      "* * > *.env*": "deny",
+      "* * >> *.env*": "deny"
     },
     "edit": {
       "*": "allow",
       "*.env": "deny",
-      "*.env.*": "deny"
+      "*.env.*": "deny",
+      "*.env.example": "allow"
     },
     "read": {
       "*": "allow",

@@ -20,25 +20,56 @@ check() {
 }
 
 echo "== 1. Reglas =="
-check "23 reglas definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P' AGENTS.md) -eq 23"
+check "12 reglas P0 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P0' AGENTS.md) -eq 12"
+check "11 reglas P1 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P1' AGENTS.md) -eq 11"
 check "IDs identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -oE '^### P[0-2]\\.[0-9]+' AGENTS.md | sort -V) <(grep -oE '^### P[0-2]\\.[0-9]+' docs/REGLAS-COMPLETAS.md | sort -V)"
 check "25 limitaciones en REGLAS-COMPLETAS" bash -c "test \$(grep -cE '^\\| \\*\\*' docs/REGLAS-COMPLETAS.md) -eq 25"
 check "25 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 25"
 
 echo "== 2. Config =="
 check "opencode.json es JSON valido" python3 -c "import json; json.load(open('opencode.json'))"
-check "162 patrones de permisos" python3 -c "
+check "175 patrones de permisos" python3 -c "
 import json
 b = json.load(open('opencode.json'))['permission']['bash']
-assert len(b) == 162, len(b)
-assert sum(1 for v in b.values() if v == 'deny') == 76
+assert len(b) == 175, len(b)
+assert sum(1 for v in b.values() if v == 'deny') == 89
 assert sum(1 for v in b.values() if v == 'ask') == 85
 "
-check "edit/read bloquean .env" python3 -c "
+check "edit/read bloquean .env y permiten .env.example" python3 -c "
 import json
 p = json.load(open('opencode.json'))['permission']
 assert p['edit'].get('*.env') == 'deny'
+assert p['edit'].get('*.env.*') == 'deny'
+assert p['edit'].get('*.env.example') == 'allow'
 assert p['read'].get('*.env') == 'deny'
+assert p['read'].get('*.env.*') == 'deny'
+assert p['read'].get('*.env.example') == 'allow'
+"
+check "deny despues de ask en familias criticas" python3 -c "
+import json
+k = list(json.load(open('opencode.json'))['permission']['bash'])
+pares = [
+    ('rm *', 'rm -rf *'), ('rm *', 'rm -r *'), ('rm *', 'rm -f *'),
+    ('git reset *', 'git reset --hard*'),
+    ('git push *', 'git push --force*'),
+    ('mv *', 'mv --force*'), ('mv *', 'mv -f *'),
+    ('rsync *', 'rsync --delete*'),
+    ('docker compose down*', 'docker compose down -v*'),
+    ('pip install *', 'pip install --user *'),
+    ('psql -c *', 'psql * *DROP*'), ('psql -c *', 'psql * *TRUNCATE*'),
+    ('psql -c *', 'psql * *DELETE*'), ('psql -c *', 'psql * *ALTER*'),
+    ('mysql -e *', 'mysql * *DROP*'), ('mysql -e *', 'mysql * *TRUNCATE*'),
+    ('mysql -e *', 'mysql * *DELETE*'), ('mysql -e *', 'mysql * *ALTER*'),
+    ('sqlite3 *', 'sqlite3 * *DROP*'), ('sqlite3 *', 'sqlite3 * *TRUNCATE*'),
+    ('sqlite3 *', 'sqlite3 * *DELETE*'), ('sqlite3 *', 'sqlite3 * *ALTER*'),
+    ('redis-cli *', 'redis-cli FLUSHALL*'),
+    ('redis-cli *', 'redis-cli * FLUSHALL*'),
+    ('redis-cli *', 'redis-cli * *DEL*'),
+]
+for ask, deny in pares:
+    assert ask in k, 'falta ask: ' + ask
+    assert deny in k, 'falta deny: ' + deny
+    assert k.index(ask) < k.index(deny), 'deny antes que ask: ' + ask + ' / ' + deny
 "
 
 echo "== 3. Seguridad (P0.9/P0.10) =="

@@ -10,13 +10,14 @@ desarrollar proyectos como para tomar decisiones.
 | Archivo | Qué es |
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode (y otros agentes) lo cargan automáticamente en cada sesión. |
-| `opencode.json` | **Guardarraíles deterministas** para opencode: 162 patrones (76 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos y ediciones de `.env`. A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `opencode.json` | **Guardarraíles deterministas** para opencode: 175 patrones (89 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env` por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`. A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 | `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
+| `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
 ## Los 25 errores de LLM que se previenen
 

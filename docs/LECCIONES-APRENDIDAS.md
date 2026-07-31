@@ -222,6 +222,27 @@ referencias en README/CHECKLIST (grep + sort). Documentar P1.7 y alinear el cont
 y conteos; es barata y detecta incoherencias invisibles al leer archivos por separado.
 **Estado**: cerrada. Se aplica la revisión cruzada como paso previo a cada commit.
 
+## 2026-07-31 — Permisos: incoherencia entre herramientas y bypass de .env por bash
+
+**Problema**: la revisión integral (P1.10) encontró dos fallos en `opencode.json`:
+(1) `permission.edit` negaba `*.env.*` sin excepción, bloqueando la edición de
+`.env.example` (template legítimo) mientras `permission.read` sí la permitía; (2) los
+deny de `edit`/`read` solo cubren esas herramientas: con config REAL y `--auto`, el
+agente leyó y modificó `.env` por bash (`cat .env`, `printf 'X=1\n' >> .env`) sin
+ningún bloqueo.
+**Solución**: (1) `"*.env.example": "allow"` al final de `edit` (last matching rule
+wins), coherente con `read`; (2) 13 patrones bash deny para accesos comunes
+(`cat`/`less`/`more`/`head`/`tail`/`grep` sobre `*.env*` y redirecciones `> / >>`),
+verificados 9/9 con comandos reales; operaciones normales siguen permitidas. El
+verificador ahora comprueba la coherencia entre secciones y el orden deny-después-de-ask
+en 25 pares de familias (lección de la ronda 8 automatizada).
+**Evidencia**: ronda 12 de `docs/PRUEBAS.md` (pruebas 44–50).
+**Lección**: las secciones de permisos de una configuración se revisan de forma cruzada
+(P1.10): una excepción decidida en una herramienta debe decidirse conscientemente en las
+demás; y la capa determinista de una herramienta NO protege a otra (bash bypasea
+edit/read): los deny bash son defensa en profundidad, nunca cobertura completa.
+**Estado**: cerrada.
+
 ## 2026-07-31 — Push fallido: la clave SSH por defecto era de otra cuenta
 
 **Problema**: `git push` al remote de GitHub del proyecto falló con
