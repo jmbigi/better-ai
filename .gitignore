@@ -24,3 +24,12 @@ build/
 
 # Backups
 backup-*/
+
+# Editores y OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
