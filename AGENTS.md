@@ -5,7 +5,7 @@
 
 ## Prioridad de las reglas
 
-- **P0 — NUNCA VIOLAR**: errores graves (destrucción, seguridad, falsedad). Violar una P0 es inaceptable.
+- **P0 — NUNCA VIOLAR**: errores graves (destrucción, seguridad, falsedad, privacidad, producción, sistema, claves). Violar una P0 es inaceptable.
 - **P1 — SIEMPRE CUMPLIR**: errores comunes (verificación, alcance, contexto).
 - **P2 — CUANDO APLIQUE**: preferencias de estilo y calidad.
 

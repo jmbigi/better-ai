@@ -15,6 +15,7 @@ desarrollar proyectos como para tomar decisiones.
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
+| `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
 
 ## Los 25 errores de LLM que se previenen
 
