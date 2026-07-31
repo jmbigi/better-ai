@@ -50,7 +50,7 @@ if [ "${1:-}" = "--pre-commit" ]; then
     echo "  [SKIP] comprobaciones de repositorio (modo pre-commit: los archivos staged son el cambio)"
 else
     check "arbol de trabajo limpio" bash -c "test -z \"\$(git status --porcelain)\""
-    check "rama master sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
+    check "rama main sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
 fi
 
 echo
