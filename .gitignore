@@ -1,0 +1,26 @@
+# Entorno y dependencias
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Artefactos y caché
+.pytest_cache/
+.coverage
+dist/
+build/
+*.log
+
+# Backups
+backup-*/
