@@ -35,13 +35,15 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Pérdida de contexto en el código** | Eliminar comentarios válidos (decisiones, advertencias) por preferencia personal | P1.5 |
 | **Incoherencias ocultas y contradicciones** | Ignorar u ocultar contradicciones entre instrucciones/código/datos, o emitir respuestas contradictorias entre sí | P1.10 |
 | **Entregas rotas por reescrituras masivas** | Reescribir grandes bloques de golpe (big bang) o acumular cambios sobre estados rotos, sin verificar cada paso | P1.11 |
+| **Daños evitables por no preguntar** | Actuar con ambigüedad sin consultar al programador antes de decisiones irreversibles | P1.8 |
 
 ## 2. Estructura de prioridades
 
 - **P0 — NUNCA VIOLAR**: reglas de protección contra errores graves (destrucción,
   seguridad, falsedad, producción). Violar una P0 es inaceptable y se reporta.
 - **P1 — SIEMPRE CUMPLIR**: reglas de trabajo contra errores comunes (verificación,
-  alcance, contexto, honestidad).
+  alcance, contexto, honestidad, estándares, obediencia, protecciones, consistencia y
+  cambios graduales).
 - **P2 — CUANDO APLIQUE**: preferencias de estilo y calidad cuando no contradicen
   necesidades concretas del usuario.
 
@@ -133,6 +135,15 @@ programador.
 **Error**: ocultar fallos, simular éxito, o repetir el mismo intento fallido en bucle.
 **Prevención**: reportar qué falló y qué no se verificó; parar y replantear tras 2
 intentos fallidos.
+
+### P1.7 Estándares y buenas prácticas de la industria
+**Error**: usar APIs, librerías, patrones o versiones obsoletas por "lo que recuerda"
+el modelo, sin verificar la documentación oficial ni los estándares vigentes.
+**Prevención**: en proyectos de programación, seguir siempre las buenas prácticas y
+normas de la industria; antes de implementar, consultar referencias en internet,
+documentación oficial en línea, chats, foros y sitios web de confianza; la
+documentación oficial gana sobre la intuición; citar las fuentes consultadas en el
+resumen de la tarea.
 
 ### P1.8 Obedece y pregunta al programador
 **Error**: ignorar órdenes explícitas del programador, o actuar asumiendo la intención

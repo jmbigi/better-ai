@@ -103,3 +103,17 @@ el comando real (P1.1). Además: un LLM puede auto-limitarse por la regla de tex
 provocar el intento para observarlo.
 **Estado**: cerrada. Se añade a la checklist: "¿Probé el patrón/guardarraíl contra el
 comando real?"
+
+## 2026-07-31 — Revisión cruzada: detecta reglas definidas pero no documentadas
+
+**Problema**: la revisión integral del proyecto (P1.10) encontró que la regla **P1.7**
+existía en `AGENTS.md` pero NO estaba documentada en `docs/REGLAS-COMPLETAS.md`
+(la sección 3 saltaba de P1.6 a P1.8). Además, la tabla de limitaciones tenía 20
+filas frente a los 21 errores del README (faltaba "daños por no preguntar").
+**Solución**: verificación automática de coherencia: comparar los IDs de reglas
+definidos en AGENTS.md contra los documentados en REGLAS-COMPLETAS.md y las
+referencias en README/CHECKLIST (grep + sort). Documentar P1.7 y alinear el conteo.
+**Evidencia**: salidas de grep de la revisión del 31-07-2026.
+**Lección**: tras cada modificación del ruleset, ejecutar la revisión cruzada de IDs
+y conteos; es barata y detecta incoherencias invisibles al leer archivos por separado.
+**Estado**: cerrada. Se aplica la revisión cruzada como paso previo a cada commit.
