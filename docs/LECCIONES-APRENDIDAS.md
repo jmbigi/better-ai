@@ -135,6 +135,21 @@ historial de git es prácticamente inmortal; purgarlo es la última opción y si
 coordinada con el programador (P0.10, P0.11, P0.12).
 **Estado**: cerrada.
 
+## 2026-07-31 — Verificar URLs citadas: HTTP real, no asumir
+
+**Problema**: al revisar las fuentes de `REGLAS-COMPLETAS.md` (P1.7), la URL de
+Medium devolvía 403 a clientes no navegador (Cloudflare "Just a moment..."), mientras
+que el resto devolvía 200. Sin la verificación, se habría dado la fuente por
+"accesible" sin evidencia.
+**Solución**: `curl -o /dev/null -w "%{http_code}" -L` sobre cada URL citada (con
+`--max-time`); documentar el resultado en el propio documento, distinguiendo "404
+(rota)" de "403 (bloqueo de bots, accesible en navegador)".
+**Evidencia**: verificación del 31-07-2026 (10 URLs, 9× 200, 1× 403 documentado).
+**Lección**: toda URL citada se verifica con HTTP real antes de publicarla como
+referencia; un 403 no siempre significa fuente rota — comprobar si es bloqueo de
+bots antes de descartarla.
+**Estado**: cerrada.
+
 ## 2026-07-31 — Renombrar un repo: remote, menciones y verificación
 
 **Problema**: el repositorio pasó de `better-ia` a `better-ai` en GitHub. La URL
