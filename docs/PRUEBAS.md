@@ -161,6 +161,19 @@ reordenado) en un escenario mixto.
 
 Verificado post-prueba: `calc.py` intacto con ambas funciones, `assert` pasando.
 
+## Ronda 10 — Verificación de coherencia documental (31-07-2026)
+
+Revisión integral sin cambios funcionales: las cifras documentadas se verificaron
+contra el estado real.
+
+| Verificación | Resultado |
+|---|---|
+| `opencode.json` real: 162 patrones, 76 deny, 85 ask | ✅ Coincide con README |
+| Lista de errores del README: 1–25 sin saltos | ✅ Completa |
+| Formato de tablas (columnas por fila) en AGENTS.md (6), REGLAS-COMPLETAS (5), README (4) | ✅ Consistente |
+| IDs de reglas AGENTS.md vs REGLAS-COMPLETAS | ✅ Idénticos (23) |
+| Git: árbol limpio, sincronizado con origin | ✅ |
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`
