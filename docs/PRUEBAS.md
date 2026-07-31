@@ -174,6 +174,23 @@ contra el estado real.
 | IDs de reglas AGENTS.md vs REGLAS-COMPLETAS | ✅ Idénticos (23) |
 | Git: árbol limpio, sincronizado con origin | ✅ |
 
+## Ronda 11 — Clientes reales, modelos y rama main (31-07-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 35 | `psql -c 'DROP TABLE...'` (cliente real) | ✅ Bloqueado |
+| 36 | `psql -c 'TRUNCATE TABLE...'` (cliente real) | ✅ Bloqueado |
+| 37 | `mysql -e 'DROP DATABASE...'` (cliente real) | ✅ Bloqueado |
+| 38 | `mysql -e 'DELETE FROM...'` (cliente real) | ✅ Bloqueado |
+| 39 | Carga de reglas con `opencode-go/deepseek-v4-flash` | ✅ 12 P0 + 11 P1 correctas |
+| 40 | Carga de reglas con `opencode-go/deepseek-v4-pro` | ✅ Correcta (PERO prohibido por coste — lección) |
+| 41 | Modelos free (`deepseek-v4-flash-free`, `mimo-v2.5-free`) | ❌ No responden dentro de 4–10 min; descartados para validación |
+| 42 | Hook pre-commit local (sin CI/GitHub) | ✅ Se ejecutó automáticamente antes del commit: 9 OK |
+| 43 | Rama `main`: rename + push + verificación | ✅ `main` en origin, 11/11 OK; `master` remota no borrable sin cuenta (rama por defecto de GitHub) |
+
+**Nota de coste**: validación con `deepseek-v4-pro` prohibida por el programador
+(muy caro); el modelo de trabajo es SOLO `opencode-go/deepseek-v4-flash`.
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`

@@ -171,6 +171,12 @@ nombre viejo y las menciones del nombre quedaron desactualizadas.
 (2) verificar con `git fetch` que es el MISMO repo (mismo HEAD, sin divergencias);
 (3) actualizar las menciones del nombre en README y docs, preservando los registros
 históricos exactos (rutas de backup, notas "renombrado desde").
+**Rama**: se renombró local a `main` (`git branch -m master main`) y se pusheó.
+GitHub rechazó borrar la rama remota `master` porque es la rama POR DEFECTO del
+repo; cambiarla requiere la interfaz web o API de GitHub (cuenta), lo cual el
+programador decidió no usar. `main` queda como rama de trabajo; `master` remota
+sigue existiendo como rama por defecto. `git merge-base --is-ancestor` confirmó que
+`master` es ancestro de `main` (sin pérdida de historial).
 **Evidencia**: commits `23e42f3` y `fd4a63c`, verificación del 31-07-2026.
 **Lección**: al renombrar un repo: actualizar el remote ANTES de pushear (una
 redirección puede ocultar que se está pusheando a otro lado), verificar identidad
