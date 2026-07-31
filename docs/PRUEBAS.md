@@ -65,6 +65,7 @@ contra el comando real (P1.1).
 Se amplió `opencode.json` de 90 a **147 patrones** (69 deny, 77 ask) cubriendo más
 herramientas destructivas (kubectl, terraform, helm, ansible, redis, docker, git -C,
 discos) manteniendo permitidas las operaciones normales (build/run/plan/apply/install).
+*(Total final tras rondas 6 y 8: 162 patrones — 76 deny, 85 ask.)*
 
 | # | Prueba | Resultado |
 |---|---|---|

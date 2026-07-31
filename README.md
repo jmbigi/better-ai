@@ -10,7 +10,7 @@ desarrollar proyectos como para tomar decisiones.
 | Archivo | Qué es |
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode (y otros agentes) lo cargan automáticamente en cada sesión. |
-| `opencode.json` | **Guardarraíles deterministas** para opencode: bloquea por permisos (`deny`) los comandos destructivos y las ediciones de `.env`. A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `opencode.json` | **Guardarraíles deterministas** para opencode: 162 patrones (76 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos y ediciones de `.env`. A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
