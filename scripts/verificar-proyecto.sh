@@ -46,8 +46,12 @@ check "sin IPs, claves o rutas .ssh en archivos" bash -c "! grep -rnE '(id_rsa|i
 check "sin emails personales en archivos" bash -c "! grep -rnE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/' | grep -qvE '(youremail@example|creativecommons)'"
 
 echo "== 4. Repositorio =="
-check "arbol de trabajo limpio" bash -c "test -z \"\$(git status --porcelain)\""
-check "rama master sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
+if [ "${1:-}" = "--pre-commit" ]; then
+    echo "  [SKIP] comprobaciones de repositorio (modo pre-commit: los archivos staged son el cambio)"
+else
+    check "arbol de trabajo limpio" bash -c "test -z \"\$(git status --porcelain)\""
+    check "rama master sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
+fi
 
 echo
 echo "Resultado: $PASS OK, $FAIL FALLOS"
