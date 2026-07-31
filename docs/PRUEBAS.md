@@ -98,6 +98,22 @@ historial, no solo el estado actual (P0.10/P0.11).
 **Resultado**: no hay ni hubo información privada, confidencial o de seguridad en
 ningún commit (estado actual ni versiones antiguas).
 
+## Ronda 6 — Refuerzo de deny: git y filesystem (31-07-2026)
+
+Patrones añadidos tras la revisión integral: `git checkout .*` (descarta TODO el árbol
+sin `--`), `git stash clear`, `git reset *` (ask), `mv --force`/`mv -f`, `cp -f`,
+`rsync --delete`, `unzip`, `tar -x`, `ssh-copy-id`.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 23 | `git checkout .*` = deny vs `git checkout .` | ✅ Bloqueado |
+| 24 | `git stash clear*` = deny vs `git stash clear` | ✅ Bloqueado |
+| 25 | `mv --force*` = deny vs `mv --force a.txt b.txt` | ✅ Bloqueado |
+| 26 | `rsync --delete*` = deny vs `rsync --delete ...` | ✅ Bloqueado |
+| 27 | `cp -f *` = deny vs `cp -f a.txt d.txt` | ✅ Bloqueado |
+
+Todos verificados con config mínima + `--auto`; archivo de prueba intacto.
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`

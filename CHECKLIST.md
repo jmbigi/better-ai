@@ -9,6 +9,18 @@
 - [ ] ¿Entiendo la tarea? ¿Declaré mis supuestos?
 - [ ] ¿Es compleja? ¿Planifiqué (explorar → planificar → implementar → verificar)?
 
+## Evidencia (P0.1)
+
+- [ ] ¿Cada afirmación de éxito tiene evidencia real (salida de comando, resultado de test, diff)?
+- [ ] ¿Si no pude verificar algo, lo declaré explícitamente ("no verificado")?
+
+## Comandos seguros (P1.4)
+
+- [ ] ¿Investigué antes de ejecutar comandos desconocidos (`--help`, man, docs)?
+- [ ] ¿Usé la variante segura cuando aplicaba (dry-run/`--check`/`--pretend`)?
+- [ ] ¿Evité pipes a `bash`/`sh` de contenido descargado?
+- [ ] ¿No ejecuté en paralelo comandos dependientes entre sí?
+
 ## Anti-alucinación (P0.2)
 
 - [ ] ¿Verifiqué que existen las APIs, funciones, paquetes y archivos que usé? (grep/glob/--help)
