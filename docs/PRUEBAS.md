@@ -81,6 +81,23 @@ discos) manteniendo permitidas las operaciones normales (build/run/plan/apply/in
 `<cmd> -C <dir> <flag>` (el flag no está en el token esperado). Cada forma real de
 comando requiere su patrón; solo la prueba contra el comando real lo confirma.
 
+## Ronda 5 — Auditoría de seguridad del historial completo (31-07-2026)
+
+Repo público (github.com/jmbigi/better-ia). Se auditaron TODOS los commits del
+historial, no solo el estado actual (P0.10/P0.11).
+
+| Verificación | Comando | Resultado |
+|---|---|---|
+| Alcance | `git log --all --oneline --decorate --graph` | 5 commits, 1 rama (`master`), sincronizada con `origin/master` |
+| Objetos huérfanos | `git fsck --unreachable` | ✅ Ninguno (no hay blobs sueltos con contenido descartado) |
+| Emails/IPs/claves/tokens en árboles | `git grep` con regex en cada commit de `git rev-list --all` | ✅ Cero coincidencias (solo placeholders y dominio oficial de licencia) |
+| Parches completos (añadidas/eliminadas) | `git log --all -p` + grep | ✅ Solo placeholders anonimizados (`<alias-jmbigi>`, `<clave-jmbigi>`, `<org>`) |
+| Lección SSH sensible | Comparación de versiones | ✅ La versión sin anonimizar NUNCA se commiteó; se reescribió antes del commit |
+| Identidades de autores | `git log --format="%h %an <%ae>"` | ✅ Placeholders (`YourName` / `youremail@example.com`) |
+
+**Resultado**: no hay ni hubo información privada, confidencial o de seguridad en
+ningún commit (estado actual ni versiones antiguas).
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`

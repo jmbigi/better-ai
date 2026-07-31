@@ -119,6 +119,22 @@ desplaza la posición del subcomando).
 forma de 2 tokens, la forma con argumentos y la forma con `-C`/`--git-dir`.
 **Estado**: cerrada.
 
+## 2026-07-31 — Auditoría de historial: el commit NO es el momento de limpiar
+
+**Problema**: antes de pushear el primer commit del repo (que es público), había una
+lección con información sensible (rutas de claves SSH y nombres de cuentas reales).
+**Solución**: la versión sensible se reescribió anonimizada ANTES de commitear, y la
+auditoría posterior (`git fsck --unreachable`, `git grep` en todos los commits,
+`git log -p` en todos los patches) confirmó que nunca existió ningún blob con ese
+contenido en el historial. Si se hubiera commiteado, la remediación sería mucho más
+costosa: rotación de credenciales + purga de historial con herramienta de filtrado.
+**Evidencia**: ronda 5 de `docs/PRUEBAS.md`.
+**Lección**: la limpieza se hace ANTES del commit, no después: auditar cada archivo
+antes de stagearlo (grep de emails, IPs, rutas de claves, nombres de cuentas). El
+historial de git es prácticamente inmortal; purgarlo es la última opción y siempre
+coordinada con el programador (P0.10, P0.11, P0.12).
+**Estado**: cerrada.
+
 ## 2026-07-31 — Revisión cruzada: detecta reglas definidas pero no documentadas
 
 **Problema**: la revisión integral del proyecto (P1.10) encontró que la regla **P1.7**
