@@ -135,6 +135,22 @@ historial de git es prácticamente inmortal; purgarlo es la última opción y si
 coordinada con el programador (P0.10, P0.11, P0.12).
 **Estado**: cerrada.
 
+## 2026-07-31 — Renombrar un repo: remote, menciones y verificación
+
+**Problema**: el repositorio pasó de `better-ia` a `better-ai` en GitHub. La URL
+antigua seguía funcionando (redirección de GitHub), pero el remote local apuntaba al
+nombre viejo y las menciones del nombre quedaron desactualizadas.
+**Solución**: (1) `git remote set-url origin git@github-jmbigi:jmbigi/better-ai.git`;
+(2) verificar con `git fetch` que es el MISMO repo (mismo HEAD, sin divergencias);
+(3) actualizar las menciones del nombre en README y docs, preservando los registros
+históricos exactos (rutas de backup, notas "renombrado desde").
+**Evidencia**: commits `23e42f3` y `fd4a63c`, verificación del 31-07-2026.
+**Lección**: al renombrar un repo: actualizar el remote ANTES de pushear (una
+redirección puede ocultar que se está pusheando a otro lado), verificar identidad
+(HEAD idéntico), y buscar todas las menciones del nombre viejo sin reescribir hechos
+históricos.
+**Estado**: cerrada.
+
 ## 2026-07-31 — CRÍTICA: el orden de los patrones anula los deny (last matching rule wins)
 
 **Problema**: en la config REAL de `opencode.json`, el patrón genérico `rm *` (ask)
