@@ -135,16 +135,20 @@ historial de git es prácticamente inmortal; purgarlo es la última opción y si
 coordinada con el programador (P0.10, P0.11, P0.12).
 **Estado**: cerrada.
 
-## 2026-07-31 — Decisión de coste: usar SOLO deepseek-v4-flash, nunca pro
+## 2026-07-31 — Decisión de coste: SOLO deepseek-v4-flash-free o deepseek-v4-flash (opencode-go)
 
 **Problema**: la validación multi-modelo probó `opencode-go/deepseek-v4-pro`, que
 responde correctamente pero es **muy caro**; el programador ordenó no usarlo nunca.
-**Solución**: fijar como decisión del proyecto: el modelo de trabajo y de pruebas es
-**opencode-go/deepseek-v4-flash** (gratuito dentro de opencode-go). Prohibido usar
-variantes `pro` o modelos de pago sin orden explícita.
-**Evidencia**: orden del programador del 31-07-2026.
+**Solución**: fijar como decisión del proyecto:
+- Modelos PERMITIDOS (precio bajo): **`opencode/deepseek-v4-flash-free`** o
+  **`opencode-go/deepseek-v4-flash`**.
+- PROHIBIDO usar cualquier otro modelo (incluidos `pro` y otros proveedores) sin
+  permiso explícito del programador o presupuesto aprobado.
+- Se documentó en AGENTS.md (sección "Entorno del proyecto"), README y PRUEBAS.
+**Evidencia**: órdenes del programador del 31-07-2026.
 **Lección**: validar modelos y medir coste antes de adoptarlos; registrar las
-decisiones de coste como lección para que futuras sesiones no las ignoren.
+decisiones de coste como lección Y en AGENTS.md para que futuras sesiones no las
+ignoren.
 **Estado**: cerrada.
 
 ## 2026-07-31 — Verificar URLs citadas: HTTP real, no asumir

@@ -71,13 +71,15 @@ Ver `docs/PRUEBAS.md` (informe de pruebas) y `docs/REGLAS-COMPLETAS.md` (secció
 
 ## ⚠️ Advertencia de cobertura
 
-Las reglas y guardarraíles de este proyecto se probaron **solo con el modelo
-deepseek-v4-flash (opencode-go, gratuito)**. Por falta de presupuesto NO se han
-verificado otros modelos (claude, gpt, gemini, etc.). El cumplimiento de las reglas
-de texto (AGENTS.md) puede variar entre modelos; por eso la capa de protección real
-son los `deny` deterministas de `opencode.json`, que se aplican en runtime sin
-depender del modelo. Antes de usar este ruleset con otro modelo, se recomienda
-re-ejecutar la suite de pruebas de `docs/PRUEBAS.md`.
+Las reglas y guardarraíles de este proyecto se probaron **solo con los modelos
+permitidos por precio bajo**: `opencode/deepseek-v4-flash-free` u
+`opencode-go/deepseek-v4-flash`. Por falta de presupuesto/permiso NO se han
+verificado otros modelos (claude, gpt, gemini, `pro`, etc.), y está **prohibido**
+usarlos en este proyecto sin orden explícita. El cumplimiento de las reglas de texto
+(AGENTS.md) puede variar entre modelos; por eso la capa de protección real son los
+`deny` deterministas de `opencode.json`, que se aplican en runtime sin depender del
+modelo. Antes de usar este ruleset con otro modelo, se recomienda re-ejecutar la
+suite de pruebas de `docs/PRUEBAS.md`.
 
 ## Licencia
 

@@ -205,6 +205,15 @@
 - P2.4. Usa nombres descriptivos y consistentes con el proyecto.
 - P2.5. Si una tarea puede tardar o tener efectos amplios: avisa antes de empezar.
 
+## Entorno del proyecto (modelo de IA)
+
+- Modelos permitidos (precio bajo): **`opencode/deepseek-v4-flash-free`** o
+  **`opencode-go/deepseek-v4-flash`**.
+- PROHIBIDO usar cualquier otro modelo (incluidos `pro` y otros proveedores) sin
+  permiso explícito del programador o presupuesto aprobado.
+- Las pruebas y verificaciones de este proyecto se ejecutan SOLO con los modelos
+  permitidos.
+
 ---
 
 ## Checklist pre-entrega (obligatorio al terminar)

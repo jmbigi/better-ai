@@ -188,8 +188,9 @@ contra el estado real.
 | 42 | Hook pre-commit local (sin CI/GitHub) | ✅ Se ejecutó automáticamente antes del commit: 9 OK |
 | 43 | Rama `main`: rename + push + verificación | ✅ `main` en origin, 11/11 OK; `master` remota no borrable sin cuenta (rama por defecto de GitHub) |
 
-**Nota de coste**: validación con `deepseek-v4-pro` prohibida por el programador
-(muy caro); el modelo de trabajo es SOLO `opencode-go/deepseek-v4-flash`.
+**Nota de coste**: modelos PERMITIDOS (precio bajo): `opencode/deepseek-v4-flash-free`
+u `opencode-go/deepseek-v4-flash`. Prohibido usar otros (incluido `deepseek-v4-pro`)
+sin permiso explícito o presupuesto (AGENTS.md, sección "Entorno del proyecto").
 
 ## Pendiente de verificar (declaración honesta)
 
