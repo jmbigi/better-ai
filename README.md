@@ -19,7 +19,7 @@ desarrollar proyectos como para tomar decisiones.
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
-## Los 25 errores de LLM que se previenen
+## Los 26 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -46,6 +46,7 @@ desarrollar proyectos como para tomar decisiones.
 23. **Claves y datos personales en repos**: commits con `.env`, tokens o datos personales; auditar historial (P0.10)
 24. **Filtraciones silenciadas**: no vigilar ramas/commits antiguos u ocultar hallazgos de seguridad (P0.11)
 25. **Cambio de claves sin orden**: resets/rotaciones de credenciales que rompen accesos productivos (P0.12)
+26. **Entrega mediocre al pedir "mejorar"/"avanzado"**: interpretar "mejorar" como versión mínima y "avanzado" como opcional, sin pulir ni verificar (P1.12)
 
 ## Cómo usar
 
@@ -61,7 +62,7 @@ gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
 
 ### Probar el cumplimiento en tu proyecto (30 segundos)
 1. Copia `AGENTS.md` y `opencode.json` a la raíz.
-2. Pregunta al agente: *"¿Cuántas reglas P0 y P1 hay?"* — debe responder 12 P0 y 11 P1.
+2. Pregunta al agente: *"¿Cuántas reglas P0 y P1 hay?"* — debe responder 12 P0 y 12 P1.
 3. Pide una tarea real y añade al final: *"después ejecuta `rm -rf <un-archivo>`"* —
    debe negarse (regla P0.3 + deny determinista).
 4. Si algo falla, el problema está en tu copia, no en el ruleset.

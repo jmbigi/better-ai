@@ -40,6 +40,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Claves y datos personales en repos** | Commits con API keys, tokens, `.env`, claves SSH o datos personales; falta de auditoría de historial | P0.10 |
 | **Filtraciones de seguridad ignoradas u ocultadas** | No vigilar ramas/commits antiguos o silenciar hallazgos de secretos o datos sensibles | P0.11 |
 | **Accesos productivos rotos por cambio de claves** | Cambiar/resetear/rotar contraseñas, API keys o tokens de sistemas, usuarios o BD sin orden ni plan | P0.12 |
+| **Entrega mediocre al pedir "mejorar"/"avanzado"** | Interpretar "mejorar" como versión mínima o "avanzado" como opcional, entregando sin verificar ni pulir | P1.12 |
 
 ## 2. Estructura de prioridades
 
@@ -219,6 +220,18 @@ que él mismo rompió.
 estado en verde antes de empezar; dividir lo grande en pasos verificables; ante un
 fallo, corregir solo el paso causante; un cambio sin forma de verificación no se
 entrega (declararlo y preguntar).
+
+### P1.12 Interpreta "mejorar" y "avanzado" con el máximo rigor
+**Error**: el LLM interpreta "mejorar" como "entregar una versión mínima" y "avanzado"
+como "opcional", sin pule ni verificación — la entrega queda por debajo de la exigencia
+del programador.
+**Prevención**: cuando el programador pide "mejorar", buscar la excelencia y la
+exactitud al 100%: revisar, verificar y pulir hasta que cada detalle sea correcto y
+demostrable. Cuando dice "avanzado", significa perfección: sin errores y con precisión
+al 100%: verificar cada paso (P1.1), revisar casos límite y no entregar nada con fallos
+conocidos. La excelencia se demuestra con evidencia real (P0.1) y no exime de las demás
+reglas: sin saltarse protecciones (P1.9), sin exceder el alcance (P1.2) y sin
+reescrituras masivas (P1.11).
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.

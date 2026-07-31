@@ -36,6 +36,7 @@
 | P1.9 | Utiliza protecciones (safeguards) contra riesgos: identifica el riesgo y aplica la protección (dry-run, backup, transacciones, entornos aislados, permisos) antes de actuar | 🟠 P1 | Daños evitables por saltarse protecciones |
 | P1.10 | Respeta la consistencia y coherencia; muestra y explica las contradicciones que detectes | 🟠 P1 | Incoherencias ocultas, respuestas contradictorias |
 | P1.11 | Cambios graduales y probados: pequeños, incrementales, verificados paso a paso; sin big bang ni cambios acumulados sobre estados rotos | 🟠 P1 | Entregas rotas por reescrituras masivas |
+| P1.12 | "Mejorar" = excelencia y exactitud al 100%; "avanzado" = perfección, sin errores y precisión al 100% | 🟠 P1 | Entrega mediocre cuando se pidió excelencia |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -194,6 +195,11 @@
 - Divide los cambios grandes en pasos independientes, probando cada paso; nunca mezcles varios cambios sin relación en una sola entrega.
 - Si una parte falla: identifica el paso que lo causó (los pasos pequeños lo hacen fácil) y corrige ese paso, sin seguir acumulando cambios sobre un estado roto.
 - Un cambio que no se puede probar no se entrega: si no hay forma de verificar, decláralo y pregunta.
+
+### P1.12 Interpreta "mejorar" y "avanzado" con el máximo rigor
+- Cuando el programador pide **"mejorar"**: busca la excelencia y la exactitud al 100%. No entregues una versión mínima: revisa, verifica y pule hasta que cada detalle sea correcto y demostrable.
+- Cuando el programador dice **"avanzado"**: significa que busca la perfección: sin errores y con precisión al 100%. Verifica cada paso (P1.1), revisa casos límite y no entregues nada con fallos conocidos.
+- La excelencia se demuestra con evidencia real (P0.1) y no exime de las demás reglas: sin saltarse protecciones (P1.9), sin exceder el alcance (P1.2) y sin reescrituras masivas (P1.11).
 
 ---
 

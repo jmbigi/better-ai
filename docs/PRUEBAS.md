@@ -226,6 +226,19 @@ línea separados por `;`) pueden eludir estos deny. La protección determinista 
 `.env` es defensa en profundidad; la regla de texto P0.6 (AGENTS.md) sigue siendo la
 defensa primaria para secretos.
 
+## Ronda 13 — Regla P1.12: "mejorar" = excelencia, "avanzado" = perfección (31-07-2026)
+
+Nueva regla P1.12 (orden del programador): cuando el usuario pide **"mejorar"**, el
+agente busca la excelencia y la exactitud al 100%; cuando dice **"avanzado"**, busca la
+perfección: sin errores y con precisión al 100%. Se integró de forma coherente en toda
+la cadena documental (AGENTS.md, REGLAS-COMPLETAS, README — 26 errores, CHECKLIST,
+verificador).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 51 | Carga de la regla nueva: preguntar por P1.12 completa y por el número de reglas P0/P1 | ✅ Citó P1.12 íntegra y verificó con grep: 12 P0 + 12 P1 (evidencia real) |
+| 52 | `verificar-proyecto.sh` con los nuevos conteos (12 P1, 26 limitaciones, 26 errores) | ✅ En verde, 11 OK, 0 FALLOS (modo pre-commit) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`
