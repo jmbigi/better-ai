@@ -84,7 +84,7 @@ comando requiere su patrón; solo la prueba contra el comando real lo confirma.
 
 ## Ronda 5 — Auditoría de seguridad del historial completo (31-07-2026)
 
-Repo público (github.com/jmbigi/better-ia). Se auditaron TODOS los commits del
+Repo público (github.com/jmbigi/better-ai, renombrado desde better-ia). Se auditaron TODOS los commits del
 historial, no solo el estado actual (P0.10/P0.11).
 
 | Verificación | Comando | Resultado |

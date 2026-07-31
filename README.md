@@ -1,4 +1,4 @@
-# better-ia — Mejor conjunto de reglas para IA
+# better-ai — Mejor conjunto de reglas para IA
 
 Proyecto para probar **opencode** con el modelo **DeepSeek V4 Flash** y generar el
 **mejor conjunto de reglas genéricas e iniciales para cualquier proyecto**:

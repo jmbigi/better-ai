@@ -1,6 +1,6 @@
 # REGLAS-COMPLETAS — Detalle y justificación del conjunto de reglas
 
-> Documento de referencia del proyecto **better-ia**: explica por qué existe cada regla,
+> Documento de referencia del proyecto **better-ai**: explica por qué existe cada regla,
 > qué error del LLM previene y qué fuentes respaldan su diseño.
 
 ## 1. ¿Por qué existe este conjunto de reglas?

@@ -1,4 +1,4 @@
-# LECCIONES-APRENDIDAS — Memoria del proyecto better-ia
+# LECCIONES-APRENDIDAS — Memoria del proyecto better-ai
 
 > Cada prueba, fallo o hallazgo relevante se documenta aquí con su solución.
 > Si algo falla 2+ veces, la lección pasa a ser regla en `AGENTS.md`.
