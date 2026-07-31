@@ -104,6 +104,21 @@ provocar el intento para observarlo.
 **Estado**: cerrada. Se añade a la checklist: "¿Probé el patrón/guardarraíl contra el
 comando real?"
 
+## 2026-07-31 — El matching posicional: cada forma de comando necesita su patrón
+
+**Problema**: al reforzar los deny (ronda 4), dos patrones fallaron contra comandos
+reales: `redis-cli * FLUSHALL*` (3 tokens) no matcheó `redis-cli FLUSHALL` (2 tokens),
+y `git filter-branch*` no matcheó `git -C <repo> filter-branch ...` (el token `-C`
+desplaza la posición del subcomando).
+**Solución**: añadir variantes por forma: `redis-cli FLUSHALL*` (2 tokens),
+`git -C * filter-branch*`, `git -C * reset --hard*`, etc. Verificado con pruebas
+16–21 de `docs/PRUEBAS.md` (ronda 4): todos bloqueados, repos/archivos intactos.
+**Evidencia**: ronda 4 de `docs/PRUEBAS.md`.
+**Lección**: el matching es POSICIONAL: `<cmd> * <flag>` NO cubre `<cmd> <flag>` ni
+`<cmd> -C <dir> <flag>`. Al añadir cualquier patrón de permisos, probar al menos la
+forma de 2 tokens, la forma con argumentos y la forma con `-C`/`--git-dir`.
+**Estado**: cerrada.
+
 ## 2026-07-31 — Revisión cruzada: detecta reglas definidas pero no documentadas
 
 **Problema**: la revisión integral del proyecto (P1.10) encontró que la regla **P1.7**

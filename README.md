@@ -60,6 +60,16 @@ gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
 
 Ver `docs/PRUEBAS.md` (informe de pruebas) y `docs/REGLAS-COMPLETAS.md` (sección 5: fuentes).
 
+## ⚠️ Advertencia de cobertura
+
+Las reglas y guardarraíles de este proyecto se probaron **solo con el modelo
+deepseek-v4-flash (opencode-go, gratuito)**. Por falta de presupuesto NO se han
+verificado otros modelos (claude, gpt, gemini, etc.). El cumplimiento de las reglas
+de texto (AGENTS.md) puede variar entre modelos; por eso la capa de protección real
+son los `deny` deterministas de `opencode.json`, que se aplican en runtime sin
+depender del modelo. Antes de usar este ruleset con otro modelo, se recomienda
+re-ejecutar la suite de pruebas de `docs/PRUEBAS.md`.
+
 ## Licencia
 
 **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**
