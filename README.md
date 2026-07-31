@@ -16,6 +16,7 @@ desarrollar proyectos como para tomar decisiones.
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 | `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
+| `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 
 ## Los 25 errores de LLM que se previenen
 
