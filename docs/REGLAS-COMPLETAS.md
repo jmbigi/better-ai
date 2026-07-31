@@ -36,6 +36,10 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Incoherencias ocultas y contradicciones** | Ignorar u ocultar contradicciones entre instrucciones/código/datos, o emitir respuestas contradictorias entre sí | P1.10 |
 | **Entregas rotas por reescrituras masivas** | Reescribir grandes bloques de golpe (big bang) o acumular cambios sobre estados rotos, sin verificar cada paso | P1.11 |
 | **Daños evitables por no preguntar** | Actuar con ambigüedad sin consultar al programador antes de decisiones irreversibles | P1.8 |
+| **Fuga de información personal** | Leer, imprimir, registrar o publicar datos personales (nombres, correos, IPs, usuarios, rutas de claves) en proyectos públicos o privados | P0.9 |
+| **Claves y datos personales en repos** | Commits con API keys, tokens, `.env`, claves SSH o datos personales; falta de auditoría de historial | P0.10 |
+| **Filtraciones de seguridad ignoradas u ocultadas** | No vigilar ramas/commits antiguos o silenciar hallazgos de secretos o datos sensibles | P0.11 |
+| **Accesos productivos rotos por cambio de claves** | Cambiar/resetear/rotar contraseñas, API keys o tokens de sistemas, usuarios o BD sin orden ni plan | P0.12 |
 
 ## 2. Estructura de prioridades
 
@@ -99,6 +103,41 @@ permisos) no se pueden predecir.
 no ejecutar lo impredecible y preguntar al programador; usar dry-run/sandbox/entorno
 aislado. Si el programador insiste, explicar el riesgo con evidencia y esperar
 confirmación explícita.
+
+### P0.9 Nunca expongas información personal
+**Error**: leer, imprimir, registrar o publicar información personal (nombres reales,
+correos, teléfonos, IPs, hostnames o usuarios internos, datos biométricos, rutas de
+claves) — en proyectos públicos Y privados, porque lo privado puede volverse público.
+**Prevención**: prohibición total de lectura/impresión/registro/commit; al documentar
+fallos, anonimizar (placeholders); ante hallazgos, reportar sin difundir; auditar con
+grep antes de publicar.
+
+### P0.10 En los repos nunca incluyas claves ni datos personales
+**Error**: commitear API keys, tokens, claves SSH, `.env`, certificados o datos
+personales, asumiendo que un repo privado es seguro para siempre.
+**Prevención**: auditoría `git status`/`git diff`/grep antes de cada commit y push;
+auditoría del historial COMPLETO antes de hacer público; si algo ya está en el
+historial, reportar y proponer rotación + purga con herramienta de filtrado (nunca
+`filter-branch` manual sin plan).
+
+### P0.11 Protege los repos contra filtraciones de seguridad
+**Error**: vigilar solo el estado actual del repo y ocultar, minimizar o retrasar
+hallazgos de secretos o datos sensibles (por vergüenza, prisa o "arreglo silencioso").
+**Prevención**: vigilar ramas actuales, commits recientes y el historial COMPLETO
+(commits antiguos); verificar antes de cada merge/PR/push; ante cualquier hallazgo,
+ADVERTIR al programador de forma explícita y visible (⚠️) con qué, dónde y cómo
+remediarlo (rotación, purga, `.gitignore`, revocación); en repos con remoto público,
+verificar también las ramas remotas.
+
+### P0.12 Nunca cambies claves de sistemas, usuarios ni bases de datos
+**Error**: ejecutar `passwd`, `chpasswd`, `ALTER USER ... PASSWORD`, `SET PASSWORD` o
+rotaciones de API keys/tokens "por hacer bien la tarea", rompiendo accesos productivos
+y dejando servicios o usuarios fuera de línea.
+**Prevención**: prohibición total de cambios/resets/rotaciones de credenciales sin
+orden explícita y plan del programador; si la tarea lo requiere, preguntar, explicar
+el riesgo y esperar confirmación; si hay una clave comprometida, la rotación se hace
+coordinada (qué la usa, cómo se propaga, cuándo); no registrar nombres/rutas/valores
+de claves en logs ni docs (P0.9).
 
 ### P1.1 Verificación obligatoria
 **Error**: entregar sin ejecutar tests/lint/build, o "arreglar" ocultando errores.

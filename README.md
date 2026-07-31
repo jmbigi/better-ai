@@ -16,7 +16,7 @@ desarrollar proyectos como para tomar decisiones.
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 
-## Los 21 errores de LLM que se previenen
+## Los 25 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -39,6 +39,10 @@ desarrollar proyectos como para tomar decisiones.
 19. **Daños evitables por no preguntar**: actuar con ambigüedad sin consultar al programador (P1.8)
 20. **Incoherencias ocultas**: ignorar contradicciones o emitir respuestas que se contradicen (P1.10)
 21. **Reescrituras masivas**: big bang sin verificar cada paso, cambios acumulados sobre estados rotos (P1.11)
+22. **Fuga de información personal**: leer/imprimir/publicar datos personales en proyectos públicos o privados (P0.9)
+23. **Claves y datos personales en repos**: commits con `.env`, tokens o datos personales; auditar historial (P0.10)
+24. **Filtraciones silenciadas**: no vigilar ramas/commits antiguos u ocultar hallazgos de seguridad (P0.11)
+25. **Cambio de claves sin orden**: resets/rotaciones de credenciales que rompen accesos productivos (P0.12)
 
 ## Cómo usar
 
@@ -58,5 +62,11 @@ Ver `docs/PRUEBAS.md` (informe de pruebas) y `docs/REGLAS-COMPLETAS.md` (secció
 
 ## Licencia
 
-Uso libre. Basado en estándares abiertos: AGENTS.md (Linux Foundation / Agentic AI
-Foundation), opencode, y buenas prácticas publicadas por Anthropic.
+**Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**
+
+Licencia copyleft: se permite compartir y adaptar este contenido exigiendo la misma
+licencia y atribución. Texto legal completo en `LICENSE` (fuente oficial:
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt).
+
+Basado en estándares abiertos: AGENTS.md (Linux Foundation / Agentic AI Foundation),
+opencode, y buenas prácticas publicadas por Anthropic.

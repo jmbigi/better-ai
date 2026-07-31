@@ -21,6 +21,10 @@
 | P0.6 | Nunca expongas secretos: no leas, imprimas ni comitees `.env`, tokens, claves | 🔴 P0 | Fugas de credenciales |
 | P0.7 | Nunca comitees sin orden: revisa `git status`/`git diff` antes; sin secretos ni artefactos | 🔴 P0 | Commits no deseados |
 | P0.8 | Nunca ejecutes código peligroso: revisa y comprende antes de ejecutar scripts desconocidos; prohibido pipes a `bash`/`sh` de contenido descargado y `eval`/`exec` de entradas no controladas | 🔴 P0 | Ejecución de código malicioso o inesperado |
+| P0.9 | Nunca expongas información personal: no leas, imprimas, registres ni comitees datos personales (nombres, correos, IPs, usuarios, rutas de claves...); aplica en proyectos públicos Y privados | 🔴 P0 | Fuga de información personal |
+| P0.10 | En los repos nunca incluyas claves ni datos personales: audita `git status`/`git diff`/historial antes de cada commit y antes de hacer un repo público | 🔴 P0 | Claves y datos personales en repos |
+| P0.11 | Protege los repos contra filtraciones de seguridad: vigila ramas y commits actuales Y antiguos; ante cualquier hallazgo, ADVIERTE al programador (⚠️) sin ocultarlo ni silenciarlo | 🔴 P0 | Filtraciones de seguridad ignoradas u ocultadas |
+| P0.12 | Nunca cambies claves de sistemas, usuarios ni bases de datos: prohibido `passwd`, `chpasswd`, `ALTER USER...PASSWORD`, resets y rotaciones sin orden explícita y plan | 🔴 P0 | Accesos productivos rotos, servicios caídos |
 | P1.1 | Verificación obligatoria: ejecuta tests/lint/build y muestra la salida; tests que puedan fallar | 🟠 P1 | Entregas rotas |
 | P1.2 | Respeta el alcance: solo lo pedido; sin refactorizar, sin crear archivos innecesarios ni instalar dependencias sin permiso | 🟠 P1 | Scope creep, archivos duplicados |
 | P1.3 | Gestiona el contexto: explorar → planificar → implementar → verificar; declara supuestos | 🟠 P1 | Errores por falta de entendimiento |
@@ -86,6 +90,32 @@
 - Si un comando tiene efectos que no puedes predecir (borra, sobrescribe, instala, cambia permisos): NO lo ejecutes, pregúntalo al programador.
 - Los scripts del proyecto se ejecutan solo tras leerlos y entenderlos, y con las protecciones de P1.9 (dry-run, sandbox, entorno aislado).
 - Si el programador ordena ejecutar algo que consideras peligroso: explica el riesgo con evidencia y espera confirmación explícita.
+
+### P0.9 Nunca expongas información personal
+- PROHIBIDO leer, imprimir, registrar (log), comitear o publicar información personal: nombres reales, correos personales, teléfonos, direcciones, DNI/documentos, IPs, hostnames o usuarios de sistemas internos, datos biométricos o de ubicación. Aplica SIEMPRE: proyectos públicos Y privados.
+- Si encuentras información personal en el proyecto: repórtala al programador, NO la difundas; propón reemplazarla con placeholders o anonimización.
+- Al documentar fallos o incidentes (lecciones, informes): anonimiza siempre (sin rutas de claves, nombres de cuentas, identidades ni datos de terceros).
+- Antes de publicar o hacer público cualquier contenido: audita (grep de correos, IPs, nombres, rutas personales) y verifica que no haya información personal.
+
+### P0.10 En los repos nunca incluyas claves ni datos personales
+- PROHIBIDO incluir en repositorios (públicos O privados): claves (API keys, tokens, claves SSH, certificados, `.env`, contraseñas) ni datos personales.
+- Lo privado de hoy puede ser público mañana: la regla no depende de la visibilidad del repo.
+- Antes de cada commit/push: revisa `git status`, `git diff` y audita el contenido nuevo (grep de claves y datos personales).
+- Si una clave o dato personal ya está en el historial: repórtalo, NO lo difundas; propón rotación de la clave y purga del historial (herramienta de filtrado, nunca `filter-branch` manual sin plan).
+- Antes de hacer un repo público: audita el historial COMPLETO (todos los commits), no solo el último estado.
+
+### P0.11 Protege los repos contra filtraciones de seguridad
+- Vigila la seguridad del repositorio en TODOS sus estados: ramas actuales, commits recientes y el HISTORIAL COMPLETO (commits antiguos).
+- Antes de cada merge/PR/push: verifica que no se introduzcan credenciales, tokens, datos personales, archivos sensibles (`.env`, configs con secretos, artefactos de build, claves) ni información que pueda filtrarse.
+- Si detectas una posible filtración (en ramas actuales O en commits antiguos): ADVIERTE al programador con una advertencia explícita y visible (⚠️), indicando qué se encontró, dónde y cómo remediarlo (rotación de credenciales, purga del historial con herramienta de filtrado, `.gitignore`, revocación).
+- NUNCA ocultes, minimices, "arregles en silencio" ni retrases un hallazgo de seguridad: la advertencia al programador es obligatoria e inmediata.
+- En repos con remoto público: verifica también que las ramas remotas no contengan secretos, y si ya se han filtrado, advierte para rotar las credenciales afectadas.
+
+### P0.12 Nunca cambies claves de sistemas, usuarios ni bases de datos
+- PROHIBIDO cambiar, resetear, rotar o regenerar claves/credenciales (contraseñas, API keys, tokens, claves SSH, certificados) de sistemas, usuarios o bases de datos sin orden explícita del programador: `passwd`, `chpasswd`, `ALTER USER ... PASSWORD`, `SET PASSWORD`, resets de contraseña, cambio de claves de servicios, etc.
+- Cambiar una clave puede romper accesos productivos, tirar servicios o dejar fuera de línea a usuarios: si la tarea parece requerirlo, PREGUNTA, explica el riesgo y espera confirmación explícita.
+- Si una clave está comprometida (p. ej. filtrada en un repo), la rotación es la remediación correcta, pero SIEMPRE coordinada con el programador y con un plan (qué sistemas/usuario la usan, cómo se propaga, cuándo).
+- No registres nombres de claves, rutas ni valores en logs, docs o lecciones (P0.9).
 
 ---
 

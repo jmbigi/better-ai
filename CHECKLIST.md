@@ -40,6 +40,33 @@
 - [ ] ¿No leí/imprimí/comiteé `.env`, tokens, claves o datos personales?
 - [ ] ¿No hay secretos hardcodeados en el código nuevo?
 
+## Privacidad (P0.9)
+
+- [ ] ¿No leí/imprimí/registré información personal (nombres reales, correos, teléfonos, IPs, usuarios internos, rutas de claves)?
+- [ ] ¿Anonimicé lecciones/informes (sin identidades, cuentas, rutas de claves ni datos de terceros)?
+- [ ] ¿Si encontré información personal en el proyecto, la reporté sin difundirla?
+
+## Repos sin claves ni datos personales (P0.10)
+
+- [ ] ¿Revisé `git status`/`git diff` y audité el contenido nuevo (grep de claves y datos personales) antes de commitear/pushear?
+- [ ] ¿El repo no contiene `.env`, claves, tokens ni datos personales, ni siquiera en historial?
+- [ ] ¿Si algo sensible está en el historial, propuse rotación + purga (sin difundirlo)?
+- [ ] ¿Antes de hacer público un repo, audité el historial COMPLETO?
+
+## Protección contra filtraciones (P0.11)
+
+- [ ] ¿Vigilé ramas actuales, commits recientes Y el historial antiguo?
+- [ ] ¿Antes de cada merge/PR/push verifiqué que no entren credenciales, tokens, archivos sensibles ni artefactos de build?
+- [ ] ¿Si detecté una posible filtración, ADVERTÍ al programador de forma explícita y visible (⚠️) indicando qué, dónde y cómo remediarlo?
+- [ ] ¿No oculté, minimicé ni retrasé ningún hallazgo de seguridad?
+- [ ] ¿Si el repo tiene remoto público, verifiqué que las ramas remotas no contengan secretos?
+
+## Claves de sistemas/usuarios/BD (P0.12)
+
+- [ ] ¿No cambié, reseteé ni roté ninguna clave (contraseñas, API keys, tokens, claves SSH) sin orden explícita y plan del programador?
+- [ ] ¿Si la tarea parecía requerir cambiar una clave, pregunté y esperé confirmación?
+- [ ] ¿No registré nombres de claves, rutas ni valores en logs, docs o lecciones?
+
 ## Verificación (P1.1)
 
 - [ ] ¿Ejecuté tests/lint/build/typecheck del proyecto? ¿Pasan? (adjuntar salida)

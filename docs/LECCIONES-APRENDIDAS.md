@@ -117,3 +117,21 @@ referencias en README/CHECKLIST (grep + sort). Documentar P1.7 y alinear el cont
 **Lección**: tras cada modificación del ruleset, ejecutar la revisión cruzada de IDs
 y conteos; es barata y detecta incoherencias invisibles al leer archivos por separado.
 **Estado**: cerrada. Se aplica la revisión cruzada como paso previo a cada commit.
+
+## 2026-07-31 — Push fallido: la clave SSH por defecto era de otra cuenta
+
+**Problema**: `git push` al remote de GitHub del proyecto falló con
+`Permission to <repo> denied to <cuenta-sin-permisos>`: la config SSH por defecto de
+`github.com` usa la clave por defecto, que pertenece a otra cuenta de GitHub sin
+permisos sobre el repositorio.
+**Solución**: usar el alias SSH ya definido en la config SSH del usuario
+(`Host <alias-jmbigi>` → `IdentityFile <clave-jmbigi>`, con `IdentitiesOnly yes`).
+El remote cambió a `git@<alias-jmbigi>:<org>/<repo>.git`, verificado con
+`ssh -T git@<alias-jmbigi>` (autenticación correcta de la cuenta con permisos).
+**Evidencia**: error de push y verificación del alias (31-07-2026).
+**Lección**: antes de pushear, verificar qué identidad SSH usará el remote
+(`ssh -T <alias>` o `git ls-remote`); si el repo está bajo una cuenta distinta a la
+clave por defecto, usar el alias SSH correcto en la URL del remote. Esta lección se
+documenta ANONIMIZADA (sin rutas de claves ni nombres de cuentas): los detalles de
+claves y cuentas personales no se registran ni siquiera en repos privados (P0.9/P0.10).
+**Estado**: cerrada.
