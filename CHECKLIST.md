@@ -95,6 +95,14 @@
 - [ ] ¿Propuse una resolución y pregunté antes de actuar ante cada contradicción?
 - [ ] ¿Revisé que mis respuestas y cambios no se contradicen entre sí?
 
+## Cambios graduales y probados (P1.11)
+
+- [ ] ¿Hice cambios pequeños e incrementales en lugar de reescrituras masivas (big bang)?
+- [ ] ¿Verifiqué el estado en verde ANTES de empezar y probé DESPUÉS de cada paso?
+- [ ] ¿No mezclé cambios sin relación en una sola entrega?
+- [ ] ¿Si algo falló, identifiqué y corregí el paso causante sin acumular cambios sobre el estado roto?
+- [ ] ¿Cada cambio entregado tiene una forma de verificación? ¿Si no, lo declaré y pregunté?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

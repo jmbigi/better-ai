@@ -34,6 +34,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Refactor innecesario y archivos superfluos** | Refactorizar código que funciona o crear archivos duplicados/sin propósito | P1.2 |
 | **Pérdida de contexto en el código** | Eliminar comentarios válidos (decisiones, advertencias) por preferencia personal | P1.5 |
 | **Incoherencias ocultas y contradicciones** | Ignorar u ocultar contradicciones entre instrucciones/código/datos, o emitir respuestas contradictorias entre sí | P1.10 |
+| **Entregas rotas por reescrituras masivas** | Reescribir grandes bloques de golpe (big bang) o acumular cambios sobre estados rotos, sin verificar cada paso | P1.11 |
 
 ## 2. Estructura de prioridades
 
@@ -159,6 +160,15 @@ la coherencia del proyecto (nombres, patrones, estilos) sin señalarlo.
 cualquier contradicción, mostrarla y explicarla al programador con su origen y una
 resolución propuesta, preguntando antes de actuar; revisar las propias afirmaciones
 antes de terminar.
+
+### P1.11 Cambios graduales y probados
+**Error**: el LLM reescribe grandes bloques de una vez ("big bang") y entrega todo
+roto sin saber qué paso lo causó, o sigue añadiendo cambios sobre un estado ya roto
+que él mismo rompió.
+**Prevención**: cambios pequeños e incrementales, cada uno probado antes de continuar;
+estado en verde antes de empezar; dividir lo grande en pasos verificables; ante un
+fallo, corregir solo el paso causante; un cambio sin forma de verificación no se
+entrega (declararlo y preguntar).
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.

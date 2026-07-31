@@ -16,7 +16,7 @@ desarrollar proyectos como para tomar decisiones.
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 
-## Los 20 errores de LLM que se previenen
+## Los 21 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -38,6 +38,7 @@ desarrollar proyectos como para tomar decisiones.
 18. **Pérdida de contexto en el código**: borrar comentarios válidos por gusto (P1.5)
 19. **Daños evitables por no preguntar**: actuar con ambigüedad sin consultar al programador (P1.8)
 20. **Incoherencias ocultas**: ignorar contradicciones o emitir respuestas que se contradicen (P1.10)
+21. **Reescrituras masivas**: big bang sin verificar cada paso, cambios acumulados sobre estados rotos (P1.11)
 
 ## Cómo usar
 

@@ -30,7 +30,7 @@ JSON contra el esquema (`$schema`) o probar `opencode run` con una tarea trivial
 está en la lista `deny` de `opencode.json`.
 **Solución**: las reglas de texto son orientativas; la protección real es el `deny`
 determinista, que se aplica aunque el agente lo ignore. Mantener SIEMPRE ambas capas.
-**Evidencia**: salida del test 6 del informe de pruebas (REGLAS-COMPLETAS.md §7).
+**Evidencia**: prueba 6 de `docs/PRUEBAS.md` (ronda 1).
 **Lección**: no confiar en que el agente conozca todas las reglas de permisos;
 la capa determinista no es negociable.
 **Estado**: cerrada.
@@ -41,7 +41,7 @@ la capa determinista no es negociable.
 auto porque el usuario había ordenado el borrado. `rm -rf` sí quedó bloqueado por "deny".
 **Solución**: si un proyecto necesita protección máxima contra borrados, cambiar
 `rm *` a "deny" en `opencode.json` (cuesta poco y elimina la clase de error completa).
-**Evidencia**: test 3 del informe de pruebas.
+**Evidencia**: prueba 3 de `docs/PRUEBAS.md` (ronda 1, con corrección en ronda 3).
 **Lección**: en modo auto, pedir permiso es solo un formalismo; decidir conscientemente
 qué queda en "ask" y qué pasa a "deny".
 **Estado**: cerrada con decisión registrada (por defecto se mantiene "ask" para `rm`
@@ -53,7 +53,7 @@ de archivos concretos y "deny" para las formas recursivas/forzadas).
 **Solución**: el agente verificó con Read/Glob/grep, confirmó que no existe y se negó
 a inventarla, citando P0.2 y P1.2. Las reglas de texto SÍ cambian el comportamiento
 del modelo si son explícitas y verificables.
-**Evidencia**: test 2 del informe de pruebas.
+**Evidencia**: prueba 2 de `docs/PRUEBAS.md` (ronda 1).
 **Lección**: las reglas de texto funcionan cuando exigen acciones verificables con
 herramientas (leer/ejecutar/buscar), no simples afirmaciones.
 **Estado**: cerrada.
