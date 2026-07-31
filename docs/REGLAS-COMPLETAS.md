@@ -287,6 +287,8 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
 9. **A Field Guide to LLM Failure Modes — Adnan Masood (Medium)**
    https://medium.com/@adnanmasood/a-field-guide-to-llm-failure-modes-5ffaeeb08e80
    - 20+ formas en que los LLMs fallan, con checklists y guardrails.
+   - *Nota de verificación (31-07-2026): Medium devuelve HTTP 403 a clientes no
+     navegador (Cloudflare); la URL es accesible desde un navegador real.*
 
 10. **AI Hallucinations in Coding (2026) — TechnBrains**
     https://www.technbrains.com/blog/ai-hallucinations-in-coding/
