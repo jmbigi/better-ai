@@ -239,6 +239,25 @@ verificador).
 | 51 | Carga de la regla nueva: preguntar por P1.12 completa y por el número de reglas P0/P1 | ✅ Citó P1.12 íntegra y verificó con grep: 12 P0 + 12 P1 (evidencia real) |
 | 52 | `verificar-proyecto.sh` con los nuevos conteos (12 P1, 26 limitaciones, 26 errores) | ✅ En verde, 11 OK, 0 FALLOS (modo pre-commit) |
 
+## Ronda 14 — Revisión integral: esquema oficial, historial, URLs y verificador (31-07-2026)
+
+Revisión de excelencia (P1.12) con investigación en internet (P1.7): se validó la
+config contra la documentación y el esquema oficiales de opencode, se re-auditó el
+historial completo y se verificaron las URLs citadas con HTTP real.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 53 | `opencode.json` validado contra el `$schema` oficial (`https://opencode.ai/config.json`, jsonschema) | ✅ SCHEMA OK, sin errores |
+| 54 | Doc oficial de Permissions (opencode.ai/docs/permissions/, HTTP 200 el 31-07-2026): confirma "last matching rule wins", wildcard `*` (cero o más caracteres) y que el default de `read` (.env deny, .env.example allow) es EXACTAMENTE el nuestro | ✅ Coherente con las lecciones empíricas de las rondas 3, 4, 8 y 12 |
+| 55 | Auditoría del historial completo (P0.10/P0.11): `git fsck --unreachable` + `git grep` en TODOS los commits + `git log --all -p` | ✅ Sin objetos huérfanos; únicas coincidencias: literales de regex del propio verificador y placeholders documentados (`youremail@example`) |
+| 56 | URLs citadas en REGLAS-COMPLETAS con `curl -L -w "%{http_code}"` | ✅ 9 × 200 + 1 × 403 (Medium, bloqueo de bots ya documentado); ninguna rota |
+| 57 | `verificar-proyecto.sh` con 3 checks nuevos: IDs citados en CHECKLIST y README existen en AGENTS.md; hook pre-commit instalado idéntico al script | ✅ En verde, 14 OK, 0 FALLOS (modo pre-commit) |
+
+**Conclusión de la revisión**: la capa de permisos del proyecto reproduce el patrón
+recomendado por la documentación oficial de opencode (default de `read` para `.env`,
+wildcards y orden de reglas), la config pasa el esquema oficial y el historial no
+contiene datos personales ni claves.
+
 ## Pendiente de verificar (declaración honesta)
 
 - Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`

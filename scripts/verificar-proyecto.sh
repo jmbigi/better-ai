@@ -25,6 +25,8 @@ check "12 reglas P1 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P1' 
 check "IDs identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -oE '^### P[0-2]\\.[0-9]+' AGENTS.md | sort -V) <(grep -oE '^### P[0-2]\\.[0-9]+' docs/REGLAS-COMPLETAS.md | sort -V)"
 check "26 limitaciones en REGLAS-COMPLETAS" bash -c "test \$(grep -cE '^\\| \\*\\*' docs/REGLAS-COMPLETAS.md) -eq 26"
 check "26 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 26"
+check "IDs citados en CHECKLIST existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' CHECKLIST.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
+check "IDs citados en README existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' README.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
 
 echo "== 2. Config =="
 check "opencode.json es JSON valido" python3 -c "import json; json.load(open('opencode.json'))"
@@ -77,6 +79,7 @@ check "sin IPs, claves o rutas .ssh en archivos" bash -c "! grep -rnE '(id_rsa|i
 check "sin emails personales en archivos" bash -c "! grep -rnE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/' | grep -qvE '(youremail@example|creativecommons)'"
 
 echo "== 4. Repositorio =="
+check "hook pre-commit instalado identico al script" bash -c "cmp -s scripts/hooks/pre-commit .git/hooks/pre-commit"
 if [ "${1:-}" = "--pre-commit" ]; then
     echo "  [SKIP] comprobaciones de repositorio (modo pre-commit: los archivos staged son el cambio)"
 else
