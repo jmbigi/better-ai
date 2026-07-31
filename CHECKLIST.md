@@ -126,6 +126,7 @@
 - [ ] ¿No salté ninguna protección existente "para ir más rápido"?
 - [ ] ¿Si detecté un riesgo sin protección, propuse crear una y pregunté?
 - [ ] ¿Si configuré/ajusté patrones de permisos, los probé contra el comando real que deben bloquear? (lección: los patrones matchean por tokens, no por subcadenas)
+- [ ] ¿Los deny específicos quedan DESPUÉS de cualquier ask genérico de su familia en el archivo? (lección: last matching rule wins)
 
 ## Consistencia y coherencia (P1.10)
 

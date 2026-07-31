@@ -135,6 +135,26 @@ historial de git es prácticamente inmortal; purgarlo es la última opción y si
 coordinada con el programador (P0.10, P0.11, P0.12).
 **Estado**: cerrada.
 
+## 2026-07-31 — CRÍTICA: el orden de los patrones anula los deny (last matching rule wins)
+
+**Problema**: en la config REAL de `opencode.json`, el patrón genérico `rm *` (ask)
+estaba DESPUÉS de `rm -rf *` (deny). Como opencode aplica "last matching rule wins",
+`rm -rf x` matchea ambos y ganaba el ask → en modo `--auto` el borrado se habría
+ejecutado. Afectaba a `git reset`, `mv --force`, `rsync --delete`, `docker compose
+down -v`. Las pruebas de las rondas 3–7 usaban config MÍNIMA (sin los ask genéricos)
+y por eso nunca se detectó.
+**Solución**: reordenar `opencode.json`: `*` = allow, después TODOS los ask, y TODOS
+los deny al final (85 ask + 76 deny). Verificado con la config REAL completa y
+`--auto`: `rm -rf`, `git reset --hard`, `mv --force` y `DROP TABLE` bloqueados;
+operaciones normales permitidas (pruebas 29–33).
+**Evidencia**: ronda 8 de `docs/PRUEBAS.md`.
+**Lección**: (1) probar los deny SIEMPRE con la config COMPLETA del proyecto, nunca
+con config mínima; (2) al añadir un ask genérico (`rm *`, `git reset *`, `mv *`),
+asegurarse de que los deny específicos de la misma familia queden DESPUÉS en el
+archivo; (3) el orden de las claves del JSON es semántica de seguridad.
+**Estado**: cerrada. Se añade a la checklist: "¿El deny específico queda después de
+cualquier ask genérico de su familia?"
+
 ## 2026-07-31 — Revisión cruzada: detecta reglas definidas pero no documentadas
 
 **Problema**: la revisión integral del proyecto (P1.10) encontró que la regla **P1.7**
