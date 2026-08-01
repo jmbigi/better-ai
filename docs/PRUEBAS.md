@@ -472,12 +472,21 @@ la capa de permisos, verificados contra NUESTRA config real.
 | 115 | Issue #39001 (open, 1.18.3): patrones `ask` `rm *`/`mv *`/`cp *` NO deterministas (50% rm, 90% mv de bypass silencioso). Relevancia para nuestros 85 patrones ask | ⚠️ Riesgo documentado: en modo interactivo un ask no disparado = ejecución sin confirmación; en `--auto` todo ask se auto-aprueba de todos modos (lección ronda 3). La protección determinista real son los 89 deny. Recomendación: endurecer a deny los patrones críticos si se quiere determinismo máximo (decisión del programador, no aplicada) |
 | 116 | `verificar-proyecto.sh` | ✅ 22 OK, 0 FALLOS (modo pre-commit) |
 
+## Ronda 31 — Cierre de pendientes por diseño y auditoría del repo público (01-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 117 | Pendiente multi-modelo CERRADO por orden del programador (01-08-2026: "debes utilizar siempre los modelos que te dije") | ✅ Documentado en "Pendiente de verificar": la verificación con otros modelos no procede; todas las pruebas usaron `opencode-go/deepseek-v4-flash` |
+| 118 | Release notes de opencode: v1.18.10 es la última release publicada (30-07-2026, API de GitHub) | ✅ Sin versiones posteriores con fixes de permisos (pipes ronda 27, `--` ronda 30) |
+| 119 | Auditoría del repo público: `git ls-remote origin` + API (rama única `main`, HEAD = último commit local) | ✅ `main` = `eda7c46` en origin, sincronizado; sin ramas extra; sin secretos (checks automáticos: fsck, .env, historial) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
   (destructivos bloqueados, SELECT permitido, datos intactos).
-- Entornos de **producción** reales.
-- **Cumplimiento multi-modelo**: todas las pruebas se ejecutaron con
-  deepseek-v4-flash (opencode-go). Por presupuesto no se verificaron otros modelos;
-  el cumplimiento de las reglas de texto puede variar entre modelos — la capa
-  determinista (`deny` en opencode.json) es la protección real.
+- **Cumplimiento multi-modelo**: CERRADO POR DISEÑO el 01-08-2026 — el programador
+  ordenó usar SIEMPRE solo los modelos permitidos (`opencode/deepseek-v4-flash-free`
+  u `opencode-go/deepseek-v4-flash`); la verificación con otros modelos no procede.
+  Todas las pruebas de este informe se ejecutaron con `opencode-go/deepseek-v4-flash`.
+- Entornos de **producción** reales (prohibido por P0.4; solo se prueban entornos
+  temporales aislados).
