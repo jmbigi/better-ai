@@ -23,7 +23,7 @@ Repositorio público:
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
-## Los 26 errores de LLM que se previenen
+## Los 32 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -51,6 +51,12 @@ Repositorio público:
 24. **Filtraciones silenciadas**: no vigilar ramas/commits antiguos u ocultar hallazgos de seguridad (P0.11)
 25. **Cambio de claves sin orden**: resets/rotaciones de credenciales que rompen accesos productivos (P0.12)
 26. **Entrega mediocre al pedir "mejorar"/"avanzado"**: interpretar "mejorar" como versión mínima y "avanzado" como opcional, sin pulir ni verificar (P1.12)
+27. **Autoría falsa de IA**: atribuir co-autoría a modelos o presentar slop como obra propia (P1.13)
+28. **Uso de IA oculto**: partes significativas generadas sin declarar (P1.14)
+29. **Slop sin revisión humana**: entregar "vibe code" sin que el humano lo entienda y pruebe (P1.15)
+30. **Violar la política de IA del repo destino**: ignorar restricciones del anfitrión (P1.16)
+31. **IA como intermediaria entre humanos**: responder revisiones con IA en nombre del programador (P1.17)
+32. **Imports no verificados**: importar módulos inexistentes, sin usar o con licencia incompatible (P1.18)
 
 ## Cómo usar
 

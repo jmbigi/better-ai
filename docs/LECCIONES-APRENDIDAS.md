@@ -329,3 +329,25 @@ clave por defecto, usar el alias SSH correcto en la URL del remote. Esta lecció
 documenta ANONIMIZADA (sin rutas de claves ni nombres de cuentas): los detalles de
 claves y cuentas personales no se registran ni siquiera en repos privados (P0.9/P0.10).
 **Estado**: cerrada.
+
+## 2026-08-01 — Cláusulas Anti-Vibe-Code (P1.13–P1.17) y revisión de imports (P1.18)
+
+**Problema**: tras publicar el proyecto en Codeberg (jul 2026) aplica su ToU §2(1)7,
+que prohíbe repos "mayormente" generados por IA; la industria (Flathub, Godot, Blender,
+curl) ha endurecido sus políticas contra el "vibe coding", y la investigación muestra
+que los agentes ignoran las prohibiciones absolutas si solo están en texto.
+**Solución**: 6 reglas nuevas en AGENTS.md (P1.13 autoría humana, P1.14 disclosure con
+trailers estándar, P1.15 revisión/prueba humana obligatoria, P1.16 la política del
+anfitrión manda, P1.17 humanos se comunican con humanos, P1.18 revisión de imports
+antes de commit/push), documentadas en REGLAS-COMPLETAS con 8 fuentes nuevas
+verificadas por HTTP (todas 200), sincronizadas en README (32 errores), CHECKLIST
+(2 secciones) y verificador (18 P1, 32 limitaciones, 32 errores).
+**Evidencia**: investigación web 01-08-2026 (Codeberg ToU/blog, Flathub, Godot,
+Blender, RepoComplianceBench arXiv 2607.26819, Cilium, ml-peg — URLs comprobadas con
+curl); verificador del proyecto en verde tras los cambios.
+**Lección**: según RepoComplianceBench, las reglas de disclosure/verificación
+colocadas en AGENTS.md se cumplen (77–100% con recordatorios), pero las prohibiciones
+("refuse") no las cumple ningún agente: el enforcement del anti-vibe-code debe estar
+fuera del agente (revisión humana, CI, bot). Coherente con la filosofía del proyecto:
+la capa determinista/externa manda sobre la regla de texto.
+**Estado**: cerrada.

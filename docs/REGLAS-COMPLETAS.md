@@ -41,14 +41,20 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Filtraciones de seguridad ignoradas u ocultadas** | No vigilar ramas/commits antiguos o silenciar hallazgos de secretos o datos sensibles | P0.11 |
 | **Accesos productivos rotos por cambio de claves** | Cambiar/resetear/rotar contraseñas, API keys o tokens de sistemas, usuarios o BD sin orden ni plan | P0.12 |
 | **Entrega mediocre al pedir "mejorar"/"avanzado"** | Interpretar "mejorar" como versión mínima o "avanzado" como opcional, entregando sin verificar ni pulir | P1.12 |
+| **Autoría falsa de IA** | Atribuir co-autoría a modelos de IA o presentar salida de IA sin revisión como obra propia | P1.13 |
+| **Uso de IA oculto** | Partes significativas de un commit/PR generadas por IA sin declarar (sin disclosure) | P1.14 |
+| **Slop sin revisión humana (vibe coding)** | Entregar salida de IA sin que el humano la entienda, revise y pruebe ("el modelo lo dice") | P1.15 |
+| **Violar la política de IA del repo destino** | Contribuir a proyectos que prohíben o restringen contenido IA ignorando su política | P1.16 |
+| **IA como intermediaria entre humanos** | Responder revisiones/issues con IA en nombre del programador o usar IA como árbitro final | P1.17 |
+| **Imports rotos o no verificados** | Importar módulos inexistentes (alucinados) o sin usar, con licencia incompatible, o que ejecutan código no confiable al importar | P1.18 |
 
 ## 2. Estructura de prioridades
 
 - **P0 — NUNCA VIOLAR**: reglas de protección contra errores graves (destrucción,
   seguridad, falsedad, producción). Violar una P0 es inaceptable y se reporta.
 - **P1 — SIEMPRE CUMPLIR**: reglas de trabajo contra errores comunes (verificación,
-  alcance, contexto, honestidad, estándares, obediencia, protecciones, consistencia y
-  cambios graduales).
+  alcance, contexto, honestidad, estándares, obediencia, protecciones, consistencia,
+  cambios graduales, autoría y transparencia).
 - **P2 — CUANDO APLIQUE**: preferencias de estilo y calidad cuando no contradicen
   necesidades concretas del usuario.
 
@@ -233,6 +239,57 @@ conocidos. La excelencia se demuestra con evidencia real (P0.1) y no exime de la
 reglas: sin saltarse protecciones (P1.9), sin exceder el alcance (P1.2) y sin
 reescrituras masivas (P1.11).
 
+### P1.13 Autoría humana: el programador es el autor y responsable final
+**Error**: el agente se atribuye la autoría del trabajo o añade modelos como co-autores
+(`Co-authored-by: <modelo>`), diluyendo la responsabilidad humana y generando
+contribuciones de las que nadie responde (estándar Mesa/OpenInfra/Blender: solo humanos
+como autores).
+**Prevención**: solo humanos como autores; el programador es el autor y responsable
+final de cada entrega, sea generada por IA o no; si un bloque generado no se puede
+defender, no entra en la entrega.
+
+### P1.14 Declara el uso de IA (disclosure)
+**Error**: integrar partes significativas generadas por IA sin declararlo: los
+revisores creen hablar con un humano y dedican tiempo de revisión a contenido que el
+autor no entiende.
+**Prevención**: trailer estándar `Assisted-by: <herramienta>` en commits significativos
+(o `Generated-by:` si fue íntegramente generada) y nota en el PR; el uso rutinario
+(autocompletar, gramática) no requiere declaración; ocultar uso significativo se trata
+como ocultación.
+
+### P1.15 Anti-vibe-code: revisión y prueba humana obligatoria
+**Error**: "vibe coding": entregar la salida del LLM como resultado final sin revisión,
+comprensión ni pruebas humanas, apoyándose en "el modelo lo dice".
+**Prevención**: toda salida de IA pasa por revisión, comprensión y prueba del humano
+antes de entregarse (refuerza P0.1/P1.1); regla de oro de curl/FastAPI: una
+contribución debe valer más que el tiempo de revisión que cuesta; la decisión final
+siempre es humana.
+
+### P1.16 Respeta la política de IA del proyecto anfitrión
+**Error**: contribuir con contenido generado por IA a repos que lo prohíben o
+restringen (Términos de Uso, CONTRIBUTING, AI_POLICY, AGENTS.md), ignorando su
+política.
+**Prevención**: leer la política de IA del repo destino antes de contribuir; la
+política del anfitrión gana sobre este ruleset; si el repo prohíbe la IA, no contribuir
+con contenido generado.
+
+### P1.17 Humanos se comunican con humanos
+**Error**: la IA se interpone como intermediaria: responde revisiones de código,
+issues, PRs o correos en nombre del programador, o actúa como árbitro final de
+decisiones sustantivas (Blender: la IA no es árbitro).
+**Prevención**: la comunicación entre humanos es humana: las preguntas de los
+revisores las responde el programador; el agente dice "no lo sé" y consulta (P1.6,
+P1.8); la IA nunca es árbitro final.
+
+### P1.18 Revisa los imports antes de commitear/pushear
+**Error**: importar módulos que no existen (alucinados por el LLM), sin usar, con
+licencia incompatible con el proyecto, o que ejecutan código no confiable al
+importarse (side effects, `eval`/`exec` indirectos).
+**Prevención**: antes de commitear/pushear, verificar que cada import/require/include
+existe (P0.2), se usa de verdad, su procedencia es segura (P0.8, P1.4) y su licencia es
+compatible; declarar cada dependencia nueva en el manifiesto del proyecto
+(requirements.txt, package.json, Cargo.toml...).
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres
@@ -307,11 +364,60 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
     https://www.technbrains.com/blog/ai-hallucinations-in-coding/
     - Medición empírica de alucinaciones de LLMs en código (webhooks, S3, tests).
 
+11. **Codeberg — Términos de Uso §2(1)7 (jul 2026)**
+    https://codeberg.org/Codeberg/org/src/branch/main/TermsOfUse.md
+    - Prohíbe repos "mayormente" generados por IA: copyright poco claro y falta de
+      salvaguardas contra código dañino. Base de las reglas P1.13–P1.16.
+
+12. **Codeberg — Protecting our FLOSS commons from LLMs (blog, 22-07-2026)**
+    https://blog.codeberg.org/protecting-our-floss-commons-from-llms.html
+    - Motivos de la restricción: crawlers de IA que saturan los servidores, costes de
+      hardware y "vibe-coded single-use software" que contamina el commons FLOSS.
+
+13. **Flathub — Requirements: Generative AI policy (may-jul 2026)**
+    https://docs.flathub.org/docs/for-app-authors/requirements
+    - Prohíbe contenido y procesos de subida (incluidos PRs y comentarios) generados
+      por IA; excepción para proyectos maduros y bien mantenidos. Base de P1.15/P1.16.
+
+14. **Godot — FAQ: Disclosure de activos/código generados con IA**
+    https://docs.godotengine.org/en/stable/community/asset_store/faq.html
+    - Todo contenido IA debe declararse (qué y cómo se usó la IA); la fundación
+      rechaza "slop" y exige que los contribuyentes entiendan su código (jul 2026).
+      Base de P1.14/P1.15.
+
+15. **Blender — Propuesta de política de contribuciones IA (feb 2026)**
+    https://devtalk.blender.org/t/ai-contributions-policy-proposal/44202
+    - Responsabilidad + transparencia: trailer `Assisted-by:`, solo humanos como
+      autores, la IA nunca árbitro final, la calidad bar para contenido IA es más alta.
+      Base de P1.13/P1.14/P1.17.
+
+16. **RepoComplianceBench — ¿Cumplen los agentes de código las reglas de IA? (arXiv, jul 2026)**
+    https://arxiv.org/html/2607.26819v1
+    - 106 reglas de 49 repos: las de disclosure/verificación colocadas en AGENTS.md se
+      cumplen al 77–100% (con recordatorio/feedback), pero las prohibiciones absolutas
+      ("refuse") y los handoffs humanos NO las cumple ningún agente: requieren
+      enforcement externo (revisión humana, CI, bot). Base del diseño de P1.13–P1.18:
+      reglas de texto + verificación externa.
+
+17. **Cilium — Generative AI Policy**
+    https://github.com/cilium/community/blob/main/AI-POLICY.md
+    - Política de contribuciones IA de un proyecto grande: disclosure requerida,
+      humanos al mando, DCO. Referencia para P1.13/P1.14.
+
+18. **ml-peg — Contributing with AI: The "Vibe Coding" Guide (Leiden Declaration)**
+    https://ddmms.github.io/ml-peg/developer_guide/vibecoding.html
+    - Autoría humana y responsabilidad final, disclosure en PRs, "The AI said it
+      works" no es un commit message válido, respetar licencias del código sugerido por
+      IA. Base de P1.13/P1.15/P1.18.
+
 **Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
 navegador real, ver nota de la fuente 9). Ninguna URL rota. La re-verificación de la
 ronda 19 incluyó también la URL de la licencia CC (200) y la doc de Config (200).
+Las fuentes 11–18 (anti-vibe-code, añadidas el 01-08-2026) se verificaron con
+`curl -L -o /dev/null -w "%{http_code}" --max-time 20`: **todas × HTTP 200** (Codeberg
+ToU y blog, Flathub, Godot FAQ, Blender devtalk, arXiv, Cilium, ml-peg).
 
 ## 6. Cómo extender este conjunto
 
