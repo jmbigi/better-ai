@@ -374,6 +374,19 @@ El programador cambió la rama por defecto del repo público a `main` en GitHub.
 | 87 | README: URL del repo público documentada en la portada | ✅ Añadida `<https://github.com/jmbigi/better-ai>` |
 | 88 | `verificar-proyecto.sh` | ✅ 21 OK, 0 FALLOS (modo pre-commit) |
 
+## Ronda 23 — write/apply_patch sobre .env probados y fuente 4 verificada (01-08-2026)
+
+Verificación EMPÍRICA de lo que la doc oficial declara (ronda 22: `write` y
+`apply_patch` están controlados por `edit`) + re-verificación de la fuente 4 de
+REGLAS-COMPLETAS en internet.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 89 | Crear archivo NUEVO `.env` (herramienta write, config REAL, `--auto`) | ✅ BLOQUEADO por `edit *.env` (deny) — la protección cubre la creación, no solo la edición |
+| 90 | Crear archivo NUEVO `.env.example.bak` (herramienta write) | ✅ BLOQUEADO por `edit *.env.*` — **hallazgo**: los backups tipo `.env.bak`/`.env.local` también quedan protegidos |
+| 91 | Editar `.env.example` (permitido) y `apply_patch` | ✅ `.env.example` editable; `apply_patch` no está en el toolset de opencode 1.18.10 (la doc lo cubre bajo `edit`, por lo que quedaría igualmente denegado para `.env`) |
+| 92 | Fuente 4 (Anthropic best practices, HTTP 200) verificada: "give Claude a check it can run", "show evidence rather than asserting success", "explore first, then plan, then code", "if removing a line wouldn't cause mistakes, cut it", patrones "kitchen sink", "correcting over and over" (parar tras 2 correcciones = P1.6), "trust-then-verify gap", "infinite exploration" | ✅ Confirma al 100% las afirmaciones de la fuente 4 en REGLAS-COMPLETAS (sección 5) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
