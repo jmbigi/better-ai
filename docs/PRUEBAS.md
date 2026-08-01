@@ -387,6 +387,19 @@ REGLAS-COMPLETAS en internet.
 | 91 | Editar `.env.example` (permitido) y `apply_patch` | ✅ `.env.example` editable; `apply_patch` no está en el toolset de opencode 1.18.10 (la doc lo cubre bajo `edit`, por lo que quedaría igualmente denegado para `.env`) |
 | 92 | Fuente 4 (Anthropic best practices, HTTP 200) verificada: "give Claude a check it can run", "show evidence rather than asserting success", "explore first, then plan, then code", "if removing a line wouldn't cause mistakes, cut it", patrones "kitchen sink", "correcting over and over" (parar tras 2 correcciones = P1.6), "trust-then-verify gap", "infinite exploration" | ✅ Confirma al 100% las afirmaciones de la fuente 4 en REGLAS-COMPLETAS (sección 5) |
 
+## Ronda 24 — Prueba de mutación de los checks y fuente 5 verificada (01-08-2026)
+
+P1.1: un test que no puede fallar no es un test. Se mutó el repositorio
+temporalmente (con backup/restauración, reversible) para demostrar que los checks del
+verificador detectan los errores que declaran prevenir.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 93 | Mutación 1: eliminar la regla P1.12 del AGENTS.md (backup previo en /tmp) | ✅ 5 checks FALLARON (12 P1, IDs, títulos, referencias CHECKLIST y README); restaurado y árbol limpio |
+| 94 | Mutación 2a: `git add .env` (sin fuerza) | ✅ El propio `.gitignore` bloquea el stage (defensa en profundidad, P0.6) |
+| 95 | Mutación 2b: `git add -f .env` + verificador | ✅ Check "ningún .env versionado" FALLÓ; restaurado (remove del stage + borrado del archivo de prueba) y árbol limpio |
+| 96 | Fuente 5 (Anthropic context engineering, claude.com, HTTP 200 con UA navegador, 582 KB): "context engineering" ×29, "progressive disclosure" ×5, "overconstraining" | ✅ Confirma los conceptos citados en la fuente 5 de REGLAS-COMPLETAS ("no sobreconstreñir", "divulgación progresiva") |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
