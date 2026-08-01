@@ -266,6 +266,27 @@ puede fallar no es un test, P1.1); y los "pendientes" documentados son código m
 si no se reconcilian con cada ronda.
 **Estado**: cerrada.
 
+## 2026-07-31 — CRÍTICA: los patrones de permisos con `|` (pipe) NO matchean en opencode 1.18.10
+
+**Problema**: la prueba masiva de deny (ronda 27) descubrió que `curl URL | sh` se
+EJECUTA a pesar del deny `curl * | sh*`. Verificado con config MÍNIMA aislada (sin
+AGENTS.md): incluso el patrón con comodín total `* | sh*` no bloquea `echo hola | sh`.
+La prueba 101 de la ronda 26 reportó "3/3 BLOQUEADOS" — FALSO POSITIVO: el agente se
+auto-limitó por la regla de texto P0.8, y el reporte del AGENTE se atribuyó al deny
+sin verificar el matcher.
+**Solución**: (1) corregir la prueba 101 con la verdad (solo `chmod 777` bloqueado
+realmente); (2) documentar la limitación en PRUEBAS, README y esta lección; (3) los
+4 patrones con `|` se mantienen en la config (sin coste; si el matcher los soporta en
+el futuro, se activan solos) — pero la protección REAL contra pipes es la regla de
+texto P0.8.
+**Evidencia**: ronda 27 de `docs/PRUEBAS.md` (pruebas 106–108).
+**Lección**: (1) un "bloqueado" reportado por el AGENTE NO es evidencia de que el deny
+funcione (lección de la ronda 3, repetida): provocar el intento y observar la tool call;
+(2) los patrones con `|` no matchean en esta versión: probar SIEMPRE cada patrón contra
+el comando real (P1.1); (3) la capa determinista tiene límites conocidos: la regla de
+texto P0.8 es la defensa primaria para ejecución remota.
+**Estado**: cerrada (limitación documentada, sin fix disponible en la versión actual).
+
 ## 2026-07-31 — Push fallido: la clave SSH por defecto era de otra cuenta
 
 **Problema**: `git push` al remote de GitHub del proyecto falló con

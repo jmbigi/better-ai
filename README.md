@@ -87,8 +87,10 @@ determinista (`enabled_providers` en `opencode.json`); la prohibición del model
 `pro` (mismo proveedor) es regla de texto. El cumplimiento de las reglas de texto
 (AGENTS.md) puede variar entre modelos; por eso la capa de protección real son los
 `deny` deterministas de `opencode.json`, que se aplican en runtime sin depender del
-modelo. Antes de usar este ruleset con otro modelo, se recomienda re-ejecutar la
-suite de pruebas de `docs/PRUEBAS.md`.
+modelo. **Limitación verificada (ronda 27, opencode 1.18.10)**: los patrones de
+permisos con `|` (pipes, p. ej. `curl * | bash*`) NO matchean; la protección contra
+pipes a `sh`/`bash` es la regla de texto P0.8. Antes de usar este ruleset con otro
+modelo, se recomienda re-ejecutar la suite de pruebas de `docs/PRUEBAS.md`.
 
 ## Licencia
 
