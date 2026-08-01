@@ -16,7 +16,7 @@
 | P0.1 | Nunca afirmes sin evidencia: verifica con herramientas reales y muestra la salida | 🔴 P0 | Falsa confirmación de éxito |
 | P0.2 | Nunca inventes: verifica APIs, archivos, paquetes y salidas antes de usarlos; "no lo sé" es válido | 🔴 P0 | Alucinación |
 | P0.3 | Nunca destruyas: nada de `rm -rf`, sobrescribir sin leer, `git reset --hard`, `git clean` | 🔴 P0 | Pérdida irreversible de código |
-| P0.4 | Nunca toques producción: prohibido `DROP`, `TRUNCATE`, `migrate reset`, `ALTER`; cambios de esquema por migraciones versionadas | 🔴 P0 | Daño a BD/entornos productivos |
+| P0.4 | NUNCA toques datos de producción, NI directa NI indirectamente, SIN EXCEPCIONES: prohibido `DROP`, `TRUNCATE`, `DELETE` sin `WHERE`, `DROP DATABASE/TABLE`, `migrate reset`, `ALTER`; si el usuario insiste en un INSERT/UPDATE/DELETE puntual de 1 registro: 3 confirmaciones del usuario real + escribir "Cambiar datos de produccion"; esquema solo por migraciones versionadas | 🔴 P0 | Daño a BD/entornos productivos |
 | P0.5 | Nunca toques el sistema operativo: no actualices OS ni sus paquetes; herramientas solo en venv/node_modules/contenedores | 🔴 P0 | Entornos rotos |
 | P0.6 | Nunca expongas secretos: no leas, imprimas ni comitees `.env`, tokens, claves | 🔴 P0 | Fugas de credenciales |
 | P0.7 | Nunca comitees sin orden: revisa `git status`/`git diff` antes; sin secretos ni artefactos | 🔴 P0 | Commits no deseados |
@@ -70,8 +70,9 @@
 - Nunca `git reset --hard`, `git clean -fdx`, `checkout -- .` ni borrar ramas/commits.
 
 ### P0.4 Nunca toques producción
-- PROHIBIDO modificar, migrar, limpiar o reiniciar bases de datos de producción o entornos productivos.
-- PROHIBIDO: `DROP`, `TRUNCATE`, `DELETE` sin `WHERE`, `DROP DATABASE/TABLE`, `migrate reset`, `prisma migrate reset`, refresh/fresh de BD, `ALTER` de producción.
+- PROHIBIDO modificar, migrar, limpiar o reiniciar bases de datos de producción o entornos productivos. NUNCA, SIN EXCEPCIONES, ni de forma directa ni indirecta (a través de scripts, herramientas, migraciones, orquestadores, cron, backups restaurados, etc.).
+- PROHIBIDO SIEMPRE: `DROP`, `DROP DATABASE/TABLE`, `TRUNCATE`, `DELETE` sin `WHERE`, `migrate reset`, `prisma migrate reset`, refresh/fresh de BD, `ALTER` de producción, y cualquier operación masiva o destructiva. Estas operaciones NO se ejecutan jamás, ni siquiera con confirmación.
+- Si el usuario INSISTE en una operación PUNTUAL y acotada sobre datos de producción (SOLO un `INSERT`, un `UPDATE` o un `DELETE` de 1 registro concreto con su `WHERE` exacto): pedir 3 confirmaciones del usuario real y, además, exigir que escriba literalmente **"Cambiar datos de produccion"**. Sin esas 3 confirmaciones y esa frase, NO se hace nada. La confirmación NO aplica jamás a operaciones masivas, destructivas ni de esquema (DROP, TRUNCATE, DELETE sin `WHERE` exacto de un registro, `ALTER`, resets, refresh/fresh).
 - Los cambios de esquema van por migraciones versionadas y reversibles, revisadas por el humano.
 - Pruebas de BD: SOLO en copia/BD temporal/contenedor. Usa transacciones y revierte (`ROLLBACK`).
 
