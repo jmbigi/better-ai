@@ -278,6 +278,18 @@ desactualizado sobre `psql`/`mysql` (probados en rondas 11 y 15) y reformulado e
 de BD real: los deny bloquean antes de ejecutar, así que un comando destructivo nunca
 llega a una BD; producción sigue prohibida (P0.4).
 
+## Ronda 16 — Prueba de fallo del hook y verificación de la doc de rules (31-07-2026)
+
+Prueba del safeguard en su modo de FALLO (P1.1: un test que no puede fallar no es un
+test) + investigación de la documentación oficial de rules.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 63 | Hook pre-commit con commit ROTO: `opencode.json` corrompido (backup previo en /tmp), `git add` + `git commit` | ✅ El hook detectó 4 FALLOS y el commit se ABORTÓ; HEAD intacto (sin commit basura); archivo restaurado desde backup y árbol limpio |
+| 64 | Objetos huérfanos creados por la prueba (blob `{"invalido"` + tree del index temporal) | ✅ Verificados como basura propia (contenido inspeccionado) y purgados con `git gc --prune=now`; `git fsck --unreachable` vuelve a 0 |
+| 65 | Doc oficial de Rules (opencode.ai/docs/rules/, HTTP 200 el 31-07-2026): tipos project/global, precedencia local > global > Claude Code, `/init`, campo `instructions` | ✅ Confirma las afirmaciones de la fuente 1 de REGLAS-COMPLETAS (sección 5) |
+| 66 | AGENTS.md: nota de verificación del proyecto (`bash scripts/verificar-proyecto.sh`) en la checklist pre-entrega | ✅ Verificador en verde, 15 OK, 0 FALLOS (modo pre-commit) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **Comportamiento sobre una BD real**: los deny bloquean ANTES de ejecutar el comando

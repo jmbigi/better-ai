@@ -243,6 +243,26 @@ demás; y la capa determinista de una herramienta NO protege a otra (bash bypase
 edit/read): los deny bash son defensa en profundidad, nunca cobertura completa.
 **Estado**: cerrada.
 
+## 2026-07-31 — El hook aborta commits rotos y los pendientes se quedan desactualizados
+
+**Problema**: (1) el "Pendiente de verificar" de PRUEBAS afirmaba que los patrones
+`psql * *TRUNCATE*`/`mysql` "no estaban probados con clientes reales", contradiciendo
+la ronda 11 (pruebas 35–38): los pendientes no se revisan al cerrar cada ronda.
+(2) No se había verificado que el hook pre-commit ABORTA commits con problemas (solo
+se sabía que se ejecutaba).
+**Solución**: (1) revisar la lista de pendientes en cada cierre de ronda; corregido en
+la ronda 15. (2) Prueba controlada y reversible: corromper `opencode.json`
+(backup previo en /tmp), `git add` + `git commit` → el hook detectó 4 FALLOS y el
+commit se ABORTÓ (HEAD intacto); se restauró el archivo y se purgaron los objetos
+huérfanos creados por la prueba (`git gc --prune=now`, verificados como basura propia
+antes de purgar). El check de fsck del verificador detectó incluso esa basura de la
+prueba, lo que confirma que el safeguard funciona.
+**Evidencia**: ronda 16 de `docs/PRUEBAS.md` (pruebas 63–66).
+**Lección**: los safeguards se prueban también en su modo de FALLO (un test que no
+puede fallar no es un test, P1.1); y los "pendientes" documentados son código muerto
+si no se reconcilian con cada ronda.
+**Estado**: cerrada.
+
 ## 2026-07-31 — Push fallido: la clave SSH por defecto era de otra cuenta
 
 **Problema**: `git push` al remote de GitHub del proyecto falló con
