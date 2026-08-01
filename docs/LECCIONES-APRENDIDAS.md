@@ -351,3 +351,16 @@ colocadas en AGENTS.md se cumplen (77–100% con recordatorios), pero las prohib
 fuera del agente (revisión humana, CI, bot). Coherente con la filosofía del proyecto:
 la capa determinista/externa manda sobre la regla de texto.
 **Estado**: cerrada.
+
+## Ronda 34: verificación "feedback de la realidad" con visión IA local y bug bound-method en unittest (2026-08-01)
+
+**Contexto**: en visorweb2 los tests e2e se complementan con visión IA local (PP-OCRv6 + PP-DocBee-2B, GPU 8 GB) — el LLM de texto recibe los resultados de visión (JSON) y razona sobre el estado real de la UI (AGENTS.md del proyecto, directiva better-ocr). La suite de tests del analizador detectó dos fallos de implementación.
+
+**Hallazgo 1 — bound-method en tearDown de unittest**: `self.original = <método de clase>` liga la función a la instancia de test vía descriptor (bound method); al restaurar en `tearDown`, el atributo de CLASE quedaba sustituido por la función ligada a la instancia anterior, contaminando el test siguiente (falsa "restauración"). Fix: `type(self).original` en los 6 tearDowns. La suite saltó de 31 a 46 tests y 46/46 OK.
+
+**Hallazgo 2 — SIGABRT in-process (cuDNN)**: cargar PaddleOCR y procesar capturas reales dentro del proceso de unittest aborta; los tests de screenshots reales se ejecutan en subproceso (CLI). También: `cu_seqlens` debe ser int32 y resize a 512 px para PP-DocBee-2B; resolver `libcudnn.so.8` → `.so.9` en el venv y propagar `LD_LIBRARY_PATH` (paddle/libs + nvidia/*/lib) a los subprocesos.
+
+**Solución**: 46/46 OK + e2e con contexto de captura por pantallazo (origen headless, frente/fondo, viewport, entorno: pantallas vía `xrandr`, escritorios virtuales vía `wmctrl -d` — sin hostnames por P0.9) y aislamiento en escritorio limpio si multi-desktop.
+
+**Lección**: la visión IA local materializa la regla P0.1 ("nunca afirmes sin evidencia") para UI: el agente razona sobre JSON de OCR/QA visual en vez de imaginar la pantalla; y la "restauración" en unittest debe usar la clase, no la instancia, para no contaminar tests.
+**Estado**: cerrada.
