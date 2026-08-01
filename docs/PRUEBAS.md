@@ -366,6 +366,14 @@ El programador cambió la rama por defecto del repo público a `main` en GitHub.
 | 84 | API pública de GitHub: `default_branch` del repo | ✅ `main`; `HEAD` remoto = `refs/heads/main` (`791b7e2`); la rama `master` ya NO existe en el remoto |
 | 85 | `verificar-proyecto.sh` con el check nuevo "HEAD remoto apunta a main" | ❌→✅ La 1ª versión comparaba el ref `HEAD` literal (el `ls-remote` no lo expande a `refs/heads/main`): fallaba. Corregido comparando los HASHES de `HEAD` y `refs/heads/main` → ✅ 22 OK, 0 FALLOS (modo pre-commit) |
 
+## Ronda 22 — Doc de Tools verificada y URL del repo documentada (01-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 86 | Doc oficial de Tools (opencode.ai/docs/tools/, HTTP 200): `write` y `apply_patch` están controlados por el permiso `edit`; "by default all tools are enabled"; `grep`/`glob` usan ripgrep respetando `.gitignore` | ✅ Confirma que la protección `.env` de nuestro `permission.edit` también cubre la CREACIÓN (`write`) y sobrescritura de `.env`, no solo la edición |
+| 87 | README: URL del repo público documentada en la portada | ✅ Añadida `<https://github.com/jmbigi/better-ai>` |
+| 88 | `verificar-proyecto.sh` | ✅ 21 OK, 0 FALLOS (modo pre-commit) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
