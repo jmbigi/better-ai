@@ -364,7 +364,7 @@ El programador cambió la rama por defecto del repo público a `main` en GitHub.
 | # | Prueba | Resultado |
 |---|---|---|
 | 84 | API pública de GitHub: `default_branch` del repo | ✅ `main`; `HEAD` remoto = `refs/heads/main` (`791b7e2`); la rama `master` ya NO existe en el remoto |
-| 85 | `verificar-proyecto.sh` con el check nuevo "HEAD remoto apunta a main" | ✅ 22 OK, 0 FALLOS (modo pre-commit) |
+| 85 | `verificar-proyecto.sh` con el check nuevo "HEAD remoto apunta a main" | ❌→✅ La 1ª versión comparaba el ref `HEAD` literal (el `ls-remote` no lo expande a `refs/heads/main`): fallaba. Corregido comparando los HASHES de `HEAD` y `refs/heads/main` → ✅ 22 OK, 0 FALLOS (modo pre-commit) |
 
 ## Pendiente de verificar (declaración honesta)
 

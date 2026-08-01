@@ -114,7 +114,7 @@ if [ "${1:-}" = "--pre-commit" ]; then
 else
     check "arbol de trabajo limpio" bash -c "test -z \"\$(git status --porcelain)\""
     check "rama main sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
-    check "HEAD remoto apunta a main" bash -c "git ls-remote origin | awk '/HEAD/{print \$2}' | grep -q '^refs/heads/main\$'"
+    check "HEAD remoto apunta a main" bash -c "test \"\$(git ls-remote origin HEAD | cut -f1)\" = \"\$(git ls-remote origin refs/heads/main | cut -f1)\""
 fi
 
 echo
