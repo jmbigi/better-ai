@@ -37,6 +37,11 @@ assert len(b) == 175, len(b)
 assert sum(1 for v in b.values() if v == 'deny') == 89
 assert sum(1 for v in b.values() if v == 'ask') == 85
 "
+check "enabled_providers restringe a opencode y opencode-go" python3 -c "
+import json
+c = json.load(open('opencode.json'))
+assert c.get('enabled_providers') == ['opencode', 'opencode-go'], c.get('enabled_providers')
+"
 check "edit/read bloquean .env y permiten .env.example" python3 -c "
 import json
 p = json.load(open('opencode.json'))['permission']

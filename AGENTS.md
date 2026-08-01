@@ -217,6 +217,10 @@
   **`opencode-go/deepseek-v4-flash`**.
 - PROHIBIDO usar cualquier otro modelo (incluidos `pro` y otros proveedores) sin
   permiso explícito del programador o presupuesto aprobado.
+- Refuerzo determinista: `opencode.json` declara `enabled_providers: ["opencode",
+  "opencode-go"]`; el resto de proveedores NO se cargan aunque haya credenciales.
+  Los modelos `pro` del mismo proveedor siguen visibles: su prohibición es regla de
+  texto (AGENTS.md) — no hay lista determinista por modelo en la config.
 - Las pruebas y verificaciones de este proyecto se ejecutan SOLO con los modelos
   permitidos.
 
