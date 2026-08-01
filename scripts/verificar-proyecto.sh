@@ -65,6 +65,15 @@ import json
 c = json.load(open('opencode.json'))
 assert c.get('enabled_providers') == ['opencode', 'opencode-go'], c.get('enabled_providers')
 "
+check "conteos de patrones en README coherentes con la config" python3 -c "
+import json, re
+b = json.load(open('opencode.json'))['permission']['bash']
+r = open('README.md').read()
+total, deny, ask = len(b), sum(1 for v in b.values() if v == 'deny'), sum(1 for v in b.values() if v == 'ask')
+assert f'{total} patrones' in r, 'README sin el total de patrones'
+assert f'{deny} \`deny\`' in r, 'README sin el conteo de deny'
+assert f'{ask} \`ask\`' in r, 'README sin el conteo de ask'
+"
 check "edit/read bloquean .env y permiten .env.example" python3 -c "
 import json
 p = json.load(open('opencode.json'))['permission']
