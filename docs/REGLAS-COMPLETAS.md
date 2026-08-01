@@ -83,10 +83,18 @@ documentación). "No lo sé" es una respuesta válida.
 de comandos destructivos.
 
 ### P0.4 Nunca toques producción
-**Error**: correr `DROP`, `TRUNCATE`, `migrate reset` o limpiar datos en BD productivas;
-migraciones destructivas no versionadas.
-**Prevención**: prohibición expresa, migraciones versionadas y reversibles, pruebas solo
-en copias/contenedores con transacciones.
+**Error**: correr `DROP`, `TRUNCATE`, `DELETE` sin `WHERE`, `DROP DATABASE/TABLE`,
+`migrate reset` o limpiar datos en BD productivas; migraciones destructivas no
+versionadas; cambios a producción hechos por vías indirectas (scripts, cron,
+orquestadores, backups restaurados).
+**Prevención**: prohibición expresa SIN EXCEPCIONES de tocar datos de producción,
+directa o indirectamente; `DROP`/`TRUNCATE`/`DELETE` sin `WHERE`/`migrate reset`/
+`ALTER` y operaciones masivas o destructivas nunca se ejecutan, ni siquiera con
+confirmación; la confirmación SOLO aplica a operaciones PUNTUALES y acotadas que el
+usuario insista (1 `INSERT`, 1 `UPDATE` o 1 `DELETE` de un registro concreto con su
+`WHERE` exacto), exigiendo 3 confirmaciones del usuario real más escribir
+literalmente **"Cambiar datos de produccion"**; migraciones versionadas y
+reversibles; pruebas solo en copias/contenedores con transacciones y `ROLLBACK`.
 
 ### P0.5 Nunca toques el sistema operativo
 **Error**: actualizar el OS o sus paquetes rompe el entorno de miles de personas.

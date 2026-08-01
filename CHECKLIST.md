@@ -31,7 +31,8 @@
 
 - [ ] ¿Leí los archivos antes de modificarlos?
 - [ ] ¿No ejecuté rm/borrados/resets destructivos sin orden y backup?
-- [ ] ¿No toqué producción ni BD productiva (DROP/TRUNCATE/migrate reset/ALTER)?
+- [ ] ¿No toqué producción ni BD productiva, ni directa ni indirectamente (DROP/TRUNCATE/DELETE sin WHERE/migrate reset/ALTER)?
+- [ ] ¿La confirmación solo se usó para INSERT/UPDATE o DELETE de 1 registro con WHERE exacto (3 confirmaciones + frase "Cambiar datos de produccion")?
 - [ ] ¿Las pruebas de BD usaron transacción/copia/contenedor?
 
 ## Anti-ejecución peligrosa (P0.8)
