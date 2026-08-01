@@ -307,10 +307,11 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
     https://www.technbrains.com/blog/ai-hallucinations-in-coding/
     - Medición empírica de alucinaciones de LLMs en código (webhooks, S3, tests).
 
-**Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en ronda 14)**: las 10
+**Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
-navegador real, ver nota de la fuente 9). Ninguna URL rota.
+navegador real, ver nota de la fuente 9). Ninguna URL rota. La re-verificación de la
+ronda 19 incluyó también la URL de la licencia CC (200) y la doc de Config (200).
 
 ## 6. Cómo extender este conjunto
 

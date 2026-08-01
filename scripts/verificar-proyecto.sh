@@ -27,6 +27,17 @@ check "26 limitaciones en REGLAS-COMPLETAS" bash -c "test \$(grep -cE '^\\| \\*\
 check "26 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 26"
 check "IDs citados en CHECKLIST existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' CHECKLIST.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
 check "IDs citados en README existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' README.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
+check "numeracion secuencial de pruebas en PRUEBAS" python3 -c "
+import re
+nums = [int(m) for m in re.findall(r'^\\| (\\d+) \\|', open('docs/PRUEBAS.md').read(), re.M)]
+assert nums == list(range(1, len(nums) + 1)), 'pruebas no secuenciales'
+"
+check "pruebas citadas en LECCIONES existen en PRUEBAS" python3 -c "
+import re
+citadas = set(int(m) for m in re.findall(r'pruebas? (\\d+)', open('docs/LECCIONES-APRENDIDAS.md').read()))
+existentes = set(int(m) for m in re.findall(r'^\\| (\\d+) \\|', open('docs/PRUEBAS.md').read(), re.M))
+assert citadas <= existentes, 'lecciones citan pruebas inexistentes: ' + str(citadas - existentes)
+"
 
 echo "== 2. Config =="
 check "opencode.json es JSON valido" python3 -c "import json; json.load(open('opencode.json'))"

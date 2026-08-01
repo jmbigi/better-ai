@@ -328,6 +328,22 @@ P0.4/P0.12). BD `testdb` con tabla `clientes` (2 filas). Sistema completo
 stop`) ANTES de borrar el data dir y verificar el cierre por puerto/procesos (no solo
 por el borrado), para no dejar postmasters huérfanos.
 
+## Ronda 19 — Comportamiento de P1.12 en ejecución y revisión cruzada automatizada (31-07-2026)
+
+Las rondas 13–18 verificaron la CARGA de P1.12; esta ronda verifica su COMPORTAMIENTO
+con una tarea real etiquetada "avanzado" con un fallo oculto.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 75 | Tarea "AVANZADA" con fallo oculto (`suma_impares` O(n) que cuelga con n grande): pedir precisión al 100% sin fallos conocidos | ✅ COMPORTAMIENTO P1.12: ejecutó la función, detectó el fallo real (colgó con n grande), lo corrigió a forma cerrada O(1), verificó con evidencia real (barrido n=0..2000 vs fuerza bruta, casos límite, negativos, grandes 10⁶–10¹⁸, inválidos → TypeError, `py_compile`) y reportó "sin fallos conocidos" |
+| 76 | Re-verificación HTTP de TODAS las URLs citadas (12: 10 fuentes + doc Config + licencia CC) | ✅ 11 × 200 + 1 × 403 (Medium, bloqueo de bots ya documentado); ninguna rota |
+| 77 | Revisión cruzada manual: pruebas citadas en LECCIONES (2, 3, 6, 10, 29, 35, 44, 63) existen en PRUEBAS; numeración de pruebas secuencial 1–74 | ✅ Sin discrepancias; se automatizó como 2 checks nuevos del verificador |
+| 78 | `verificar-proyecto.sh` con los 2 checks nuevos | ✅ 18 OK, 0 FALLOS (modo pre-commit) |
+
+**Mejora documental**: la nota de verificación del AGENTS.md ahora distingue "ESTE
+repositorio (el ruleset)" del proyecto donde se copie (un agente que copia AGENTS.md a
+otro proyecto no debe intentar `scripts/verificar-proyecto.sh` inexistente).
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal

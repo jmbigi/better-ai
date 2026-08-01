@@ -238,7 +238,8 @@
 - [ ] ¿Solo cambié lo necesario (alcance)?
 - [ ] ¿Reporté qué falta y qué no pude verificar?
 
-> Verificación de este proyecto (tests/lint/build del ruleset): `bash scripts/verificar-proyecto.sh`
+> Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
+> (si copiaste AGENTS.md a otro proyecto, usa los tests/lint/build de ESE proyecto).
 
 ---
 
