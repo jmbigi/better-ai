@@ -293,6 +293,25 @@ el comando real (P1.1); (3) la capa determinista tiene límites conocidos: la re
 texto P0.8 es la defensa primaria para ejecución remota.
 **Estado**: cerrada (limitación documentada, sin fix disponible en la versión actual).
 
+## 2026-08-01 — Issues abiertos de opencode verificados contra la config real
+
+**Problema**: la investigación de issues de anomalyco/opencode (ronda 30) encontró
+dos abiertos y sin fix: #39931 ("bash permission escape via `--`", 1.18.10: `git diff --`
+bypasea el ask global) y #39001 (patrones `ask` `rm *`/`mv *`/`cp *` NO deterministas,
+50–90% de bypass silencioso en 1.18.3).
+**Solución**: (1) el escape `--` se probó contra nuestra config REAL: `git checkout -- f`,
+`rm -rf -- f`, `git checkout -- .` → 3/3 BLOQUEADOS (el issue aplica al ask global, que
+no usamos); documentado. (2) El no-determinismo de los ask afecta a nuestros 85 patrones
+ask solo en modo interactivo (un ask no disparado = ejecución sin confirmar); en `--auto`
+todo ask se auto-aprueba igualmente (lección ronda 3). La protección determinista real
+son los deny (89). Recomendación documentada: endurecer a deny los patrones críticos si
+se desea determinismo máximo — decisión del programador, no aplicada.
+**Evidencia**: ronda 30 de `docs/PRUEBAS.md` (pruebas 114–116).
+**Lección**: los issues de la herramienta base se verifican contra la config REAL antes
+de asumir impacto; los deny específicos resisten mejor que los ask genéricos — para
+protección determinista, deny (con su tradeoff de bloqueo).
+**Estado**: cerrada (verificada y documentada; sin cambio de política sin orden).
+
 ## 2026-07-31 — Push fallido: la clave SSH por defecto era de otra cuenta
 
 **Problema**: `git push` al remote de GitHub del proyecto falló con
