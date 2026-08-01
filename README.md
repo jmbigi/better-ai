@@ -5,7 +5,9 @@ Proyecto para probar **opencode** con el modelo **DeepSeek V4 Flash** y generar 
 protección contra los errores más comunes y más graves de los LLMs, tanto para
 desarrollar proyectos como para tomar decisiones.
 
-Repositorio público: <https://github.com/jmbigi/better-ai>
+Repositorio público:
+- GitHub: <https://github.com/jmbigi/better-ai>
+- Codeberg: <https://codeberg.org/jmbigi/better-ai>
 
 ## ¿Qué contiene?
 
