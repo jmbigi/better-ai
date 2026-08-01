@@ -400,6 +400,17 @@ verificador detectan los errores que declaran prevenir.
 | 95 | Mutación 2b: `git add -f .env` + verificador | ✅ Check "ningún .env versionado" FALLÓ; restaurado (remove del stage + borrado del archivo de prueba) y árbol limpio |
 | 96 | Fuente 5 (Anthropic context engineering, claude.com, HTTP 200 con UA navegador, 582 KB): "context engineering" ×29, "progressive disclosure" ×5, "overconstraining" | ✅ Confirma los conceptos citados en la fuente 5 de REGLAS-COMPLETAS ("no sobreconstreñir", "divulgación progresiva") |
 
+## Ronda 25 — Fuentes 6–10 verificadas en contenido y familia git -C completada (01-08-2026)
+
+Cierre de la verificación de fuentes: las 10 fuentes de REGLAS-COMPLETAS quedan
+verificadas al 100% (HTTP real + coincidencia de conceptos clave con el texto citado).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 97 | Fuentes 6–10 en contenido (curl con UA navegador + extracción de conceptos): Galileo 4/4 (hallucination, tool, prompt injection, failure mode); AppScale 6/6 (retrieval, guardrails, observability, hallucination, security, cost); AIACI 4/4 (hallucination, drift, handoff, loop); TechnBrains 4/4 (hallucination, webhook, S3, test) | ✅ Las 10 fuentes verificadas (1–5 en rondas 14/17/19/20/23/24; 6–10 hoy) |
+| 98 | `git -C repo1 push --force origin main` (repo temporal, config REAL, `--auto`) | ✅ BLOQUEADO por deny `git -C * push --force*` — familia `git -C` completada (ronda 4: filter-branch y reset --hard; hoy: push --force) |
+| 99 | `verificar-proyecto.sh` | ✅ 21 OK, 0 FALLOS (modo pre-commit) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
