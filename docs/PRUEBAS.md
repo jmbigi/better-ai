@@ -344,6 +344,19 @@ con una tarea real etiquetada "avanzado" con un fallo oculto.
 repositorio (el ruleset)" del proyecto donde se copie (un agente que copia AGENTS.md a
 otro proyecto no debe intentar `scripts/verificar-proyecto.sh` inexistente).
 
+## Ronda 20 — Revisión cruzada ampliada: títulos, rutas y .env (31-07-2026)
+
+Verificaciones de coherencia nuevas (P1.10) y re-verificación de la fuente 3
+(agents.md) en internet (P1.7).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 79 | Títulos completos de las 24 reglas P0/P1: AGENTS.md vs REGLAS-COMPLETAS (`### P0.x`/`### P1.x`) | ✅ Idénticos (solo difiere el nivel `##`/`###` de la sección P2, intencional) |
+| 80 | Referencias a rutas `docs/` y `scripts/` citadas en los 5 documentos normativos | ✅ Todas existen (la única cita de una ruta antigua de CHECKLIST está en LECCIONES — registro histórico, excluida del check a propósito; esta propia ronda citó una ruta inexistente por error y el check la detectó: ver lección en el commit) |
+| 81 | Ningún `.env` versionado en git (P0.6/P0.10) | ✅ Cero (solo `.env.example` permitido y no presente) |
+| 82 | Fuente 3 re-verificada en internet: agents.md sigue diciendo "over 60k open-source projects", ahora stewarded por la Agentic AI Foundation (Linux Foundation); confirma "closest AGENTS.md wins; explicit user prompts override" | ✅ Coherente con README ("Basado en estándares abiertos: AGENTS.md (Linux Foundation / Agentic AI Foundation)") y con la fuente 3 de REGLAS-COMPLETAS |
+| 83 | `verificar-proyecto.sh` con los 3 checks nuevos | ✅ 21 OK, 0 FALLOS (modo pre-commit) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
