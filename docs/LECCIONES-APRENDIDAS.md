@@ -279,6 +279,12 @@ realmente); (2) documentar la limitación en PRUEBAS, README y esta lección; (3
 4 patrones con `|` se mantienen en la config (sin coste; si el matcher los soporta en
 el futuro, se activan solos) — pero la protección REAL contra pipes es la regla de
 texto P0.8.
+**Causa raíz (ronda 28, confirmada con evidencia)**: el matcher evalúa el PRIMER
+SEGMENTO del pipeline — con deny `curl *` (sin pipe), `curl URL | sh` SÍ queda
+bloqueado. Los patrones que contienen `|` nunca matchean porque el pipe no forma
+parte del segmento base. Tradeoff evaluado: bloquear `curl *`/`wget *` globalmente
+cubriría los pipes pero rompería el `curl` legítimo (verificación de URLs, P1.7);
+rechazado.
 **Evidencia**: ronda 27 de `docs/PRUEBAS.md` (pruebas 106–108).
 **Lección**: (1) un "bloqueado" reportado por el AGENTE NO es evidencia de que el deny
 funcione (lección de la ronda 3, repetida): provocar el intento y observar la tool call;
