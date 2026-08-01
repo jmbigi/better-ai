@@ -258,14 +258,33 @@ recomendado por la documentación oficial de opencode (default de `read` para `.
 wildcards y orden de reglas), la config pasa el esquema oficial y el historial no
 contiene datos personales ni claves.
 
+## Ronda 15 — Cierre de pendientes: clientes reales re-probados y pendiente coherente (31-07-2026)
+
+La revisión de coherencia (P1.10) detectó que el "Pendiente de verificar" de este
+informe afirmaba que los patrones `psql * *TRUNCATE*` y `mysql * *...*` "no estaban
+probados con clientes reales", contradiciendo la ronda 11 (pruebas 35–38). Se
+re-ejecutaron con evidencia fresca y se corrigió el pendiente.
+
+| # | Prueba (config REAL, `--auto`, psql 16.14 / mysql 8.0.46 reales) | Resultado |
+|---|---|---|
+| 58 | `psql -c 'DROP TABLE clientes;'` | ✅ BLOQUEADO (regla `psql * *DROP*`) |
+| 59 | `psql -c 'TRUNCATE TABLE clientes;'` | ✅ BLOQUEADO (regla `psql * *TRUNCATE*`) |
+| 60 | `mysql -e 'DROP DATABASE test;'` | ✅ BLOQUEADO (regla `mysql * *DROP*`) |
+| 61 | `mysql -e 'DELETE FROM clientes;'` | ✅ BLOQUEADO (regla `mysql * *DELETE*`) |
+| 62 | `verificar-proyecto.sh` con el nuevo check "sin objetos huérfanos en git" (`git fsck --unreachable`) | ✅ En verde, 15 OK, 0 FALLOS (modo pre-commit) |
+
+**Corrección de coherencia**: eliminado del "Pendiente de verificar" el item
+desactualizado sobre `psql`/`mysql` (probados en rondas 11 y 15) y reformulado el item
+de BD real: los deny bloquean antes de ejecutar, así que un comando destructivo nunca
+llega a una BD; producción sigue prohibida (P0.4).
+
 ## Pendiente de verificar (declaración honesta)
 
-- Comportamiento real frente a una **base de datos** (comandos `psql`/`mysql`/`migrate`
-  con deny configurados pero sin ejecutar sobre una BD real — prohibido por P0.4
-  tocar producción; se podría probar en contenedor/BD temporal).
+- **Comportamiento sobre una BD real**: los deny bloquean ANTES de ejecutar el comando
+  (verificado con clientes reales psql/mysql en rondas 11 y 15), por lo que un DROP/
+  TRUNCATE nunca llega a ejecutarse; probar "contra una BD" no procede y producción
+  está prohibida (P0.4).
 - Entornos de **producción** reales.
-- Los patrones `psql * *TRUNCATE*` y `mysql * *...*` (no probados con clientes reales;
-  la mecánica de matching es la misma verificada con sqlite3).
 - **Cumplimiento multi-modelo**: todas las pruebas se ejecutaron con
   deepseek-v4-flash (opencode-go). Por presupuesto no se verificaron otros modelos;
   el cumplimiento de las reglas de texto puede variar entre modelos — la capa

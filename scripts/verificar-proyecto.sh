@@ -80,6 +80,7 @@ check "sin emails personales en archivos" bash -c "! grep -rnE '[A-Za-z0-9._%+-]
 
 echo "== 4. Repositorio =="
 check "hook pre-commit instalado identico al script" bash -c "cmp -s scripts/hooks/pre-commit .git/hooks/pre-commit"
+check "sin objetos huerfanos en git (fsck)" bash -c "test -z \"\$(git fsck --unreachable 2>&1)\""
 if [ "${1:-}" = "--pre-commit" ]; then
     echo "  [SKIP] comprobaciones de repositorio (modo pre-commit: los archivos staged son el cambio)"
 else
