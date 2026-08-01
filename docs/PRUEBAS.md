@@ -186,7 +186,7 @@ contra el estado real.
 | 40 | Carga de reglas con `opencode-go/deepseek-v4-pro` | ✅ Correcta (PERO prohibido por coste — lección) |
 | 41 | Modelos free (`deepseek-v4-flash-free`, `mimo-v2.5-free`) | ❌ No responden dentro de 4–10 min; descartados para validación |
 | 42 | Hook pre-commit local (sin CI/GitHub) | ✅ Se ejecutó automáticamente antes del commit: 9 OK |
-| 43 | Rama `main`: rename + push + verificación | ✅ `main` en origin, 11/11 OK; `master` remota no borrable sin cuenta (rama por defecto de GitHub) |
+| 43 | Rama `main`: rename + push + verificación | ✅ `main` en origin, 11/11 OK; `master` remota no borrable sin cuenta (rama por defecto de GitHub). *CERRADO el 01-08-2026: el programador cambió la rama por defecto a `main` en GitHub y `master` fue eliminada del remoto (ver ronda 21)* |
 
 **Nota de coste**: modelos PERMITIDOS (precio bajo): `opencode/deepseek-v4-flash-free`
 u `opencode-go/deepseek-v4-flash`. Prohibido usar otros (incluido `deepseek-v4-pro`)
@@ -356,6 +356,15 @@ Verificaciones de coherencia nuevas (P1.10) y re-verificación de la fuente 3
 | 81 | Ningún `.env` versionado en git (P0.6/P0.10) | ✅ Cero (solo `.env.example` permitido y no presente) |
 | 82 | Fuente 3 re-verificada en internet: agents.md sigue diciendo "over 60k open-source projects", ahora stewarded por la Agentic AI Foundation (Linux Foundation); confirma "closest AGENTS.md wins; explicit user prompts override" | ✅ Coherente con README ("Basado en estándares abiertos: AGENTS.md (Linux Foundation / Agentic AI Foundation)") y con la fuente 3 de REGLAS-COMPLETAS |
 | 83 | `verificar-proyecto.sh` con los 3 checks nuevos | ✅ 21 OK, 0 FALLOS (modo pre-commit) |
+
+## Ronda 21 — Rama por defecto: master → main (01-08-2026)
+
+El programador cambió la rama por defecto del repo público a `main` en GitHub.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 84 | API pública de GitHub: `default_branch` del repo | ✅ `main`; `HEAD` remoto = `refs/heads/main` (`791b7e2`); la rama `master` ya NO existe en el remoto |
+| 85 | `verificar-proyecto.sh` con el check nuevo "HEAD remoto apunta a main" | ✅ 22 OK, 0 FALLOS (modo pre-commit) |
 
 ## Pendiente de verificar (declaración honesta)
 

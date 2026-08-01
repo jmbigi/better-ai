@@ -181,6 +181,9 @@ repo; cambiarla requiere la interfaz web o API de GitHub (cuenta), lo cual el
 programador decidió no usar. `main` queda como rama de trabajo; `master` remota
 sigue existiendo como rama por defecto. `git merge-base --is-ancestor` confirmó que
 `master` es ancestro de `main` (sin pérdida de historial).
+**Cierre (01-08-2026)**: el programador cambió la rama por defecto a `main` en
+GitHub; `master` fue eliminada del remoto (verificado vía API: `default_branch =
+main`, `HEAD` remoto = `main`).
 **Evidencia**: commits `23e42f3` y `fd4a63c`, verificación del 31-07-2026.
 **Lección**: al renombrar un repo: actualizar el remote ANTES de pushear (una
 redirección puede ocultar que se está pusheando a otro lado), verificar identidad
