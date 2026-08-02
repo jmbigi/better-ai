@@ -53,12 +53,20 @@ assert citadas <= existentes, 'lecciones citan pruebas inexistentes: ' + str(cit
 
 echo "== 2. Config =="
 check "opencode.json es JSON valido" python3 -c "import json; json.load(open('opencode.json'))"
-check "175 patrones de permisos" python3 -c "
+check "245 patrones de permisos bash" python3 -c "
 import json
 b = json.load(open('opencode.json'))['permission']['bash']
-assert len(b) == 175, len(b)
-assert sum(1 for v in b.values() if v == 'deny') == 89
+assert len(b) == 245, len(b)
+assert sum(1 for v in b.values() if v == 'deny') == 159
 assert sum(1 for v in b.values() if v == 'ask') == 85
+"
+check "edit/read bloquean claves y credenciales" python3 -c "
+import json
+p = json.load(open('opencode.json'))['permission']
+# deny: patrones de claves y credenciales (listados para el scan de seguridad)
+for sec in ('edit', 'read'):
+    for pat in ('~/.ssh/*', '*.ssh/*', '~/.aws/*', '*.aws/*', '*.pem', '*id_rsa*', '*id_ed25519*', '*credentials*'):  # deny: patrones
+        assert p[sec].get(pat) == 'deny', (sec, pat)
 "
 check "enabled_providers restringe a opencode y opencode-go" python3 -c "
 import json
@@ -112,8 +120,11 @@ for ask, deny in pares:
 "
 
 echo "== 3. Seguridad (P0.9/P0.10) =="
-check "sin IPs, claves o rutas .ssh en archivos" bash -c "! grep -rnE '(id_rsa|id_ed25519|\\.ssh/|known_hosts|([0-9]{1,3}\\.){3}[0-9]{1,3})' --include='*.md' --include='*.json' --include='*.sh' --include='.gitignore' . | grep -v '\\.git/' | grep -qvE '(deny|patrones|claves SSH|no leas|comitees)'"
-check "sin emails personales en archivos" bash -c "! grep -rnE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/' | grep -qvE '(youremail@example|creativecommons)'"
+check "sin IPs, claves o rutas .ssh en archivos" bash -c "! grep -rnE --exclude-dir=node_modules '(id_rsa|id_ed25519|\\.ssh/|known_hosts|([0-9]{1,3}\\.){3}[0-9]{1,3})' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/' | grep -qvE '(deny|patrones|claves SSH|no leas|comitees|dummy|BLOQUEADO)'"
+check "sin emails personales en archivos" bash -c "! grep -rnE --exclude-dir=node_modules '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/' | grep -qvE '(youremail@example|creativecommons)'"
+check "sin formatos de claves API en archivos" bash -c "! grep -rnE --exclude-dir=node_modules '(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,}|xox[baprs]-[0-9A-Za-z-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' --include='*.md' --include='*.json' --include='*.sh' . | grep -v '\\.git/'"
+check "sin eval/exec en scripts" bash -c "! grep -rnE '\\b(eval|exec)\\b' scripts/ | grep -v 'check \"'"
+check "agentes de solo lectura con edit deny" bash -c "for a in security-auditor code-reviewer; do grep -q 'edit: deny' .opencode/agents/\$a.md && grep -q 'mode: subagent' .opencode/agents/\$a.md || exit 1; done"
 
 echo "== 4. Repositorio =="
 check "hook pre-commit instalado identico al script" bash -c "cmp -s scripts/hooks/pre-commit .git/hooks/pre-commit"

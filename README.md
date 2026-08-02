@@ -14,7 +14,8 @@ Repositorio público:
 | Archivo | Qué es |
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode (y otros agentes) lo cargan automáticamente en cada sesión. |
-| `opencode.json` | **Guardarraíles deterministas** para opencode: 175 patrones (89 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env` por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `enabled_providers` solo carga los proveedores de modelos permitidos (decisión de coste). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `opencode.json` | **Guardarraíles deterministas** para opencode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `read`/`edit` deniegan también rutas de claves y credenciales; `enabled_providers` solo carga los proveedores de modelos permitidos (decisión de coste). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.18). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
@@ -61,9 +62,12 @@ Repositorio público:
 ## Cómo usar
 
 ### En este proyecto (o cualquiera)
-1. Copia `AGENTS.md` y `opencode.json` a la raíz del proyecto.
+1. Copia `AGENTS.md`, `opencode.json` y el directorio `.opencode/` a la raíz del proyecto.
 2. Abre opencode en ese proyecto: las reglas se cargan automáticamente.
 3. Al terminar cada tarea, el agente debe completar el checklist pre-entrega.
+4. Para una segunda capa de revisión antes de entregar, invoca `@security-auditor`
+   (auditoría de secretos/datos personales) y `@code-reviewer` (revisión de alcance
+   y coherencia): son de solo lectura y no pueden modificar archivos.
 
 ### Reglas propias del proyecto
 Añade al `AGENTS.md` solo lo que evita errores: comandos de build/test, convenciones,
