@@ -480,6 +480,31 @@ la capa de permisos, verificados contra NUESTRA config real.
 | 118 | Release notes de opencode: v1.18.10 es la última release publicada (30-07-2026, API de GitHub) | ✅ Sin versiones posteriores con fixes de permisos (pipes ronda 27, `--` ronda 30) |
 | 119 | Auditoría del repo público: `git ls-remote origin` + API (rama única `main`, HEAD = último commit local) | ✅ `main` = `eda7c46` en origin, sincronizado; sin ramas extra; sin secretos (checks automáticos: fsck, .env, historial) |
 
+## Ronda 35 — Guardarraíles de claves (`.ssh`/`.aws`), subagentes de revisión y scan de API keys (02-08-2026)
+
+Implementación de la hoja de ruta acordada con el programador (3 puntos: denies de
+claves, subagentes `security-auditor`/`code-reviewer` en `.opencode/agents/`, y scan
+de formatos de API keys en el verificador). Metodología de las rondas 27-28: los
+denies se probaron primero con config MÍNIMA aislada (sin AGENTS.md, para que el
+rechazo solo pueda venir del matcher) y después con la config REAL.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 120 | Config MÍNIMA aislada (solo 4 deny bash + 3 deny read, sin AGENTS.md): `cat dummy-id_rsa-test.txt` vs deny `cat *id_rsa*` | ✅ BLOQUEADO por el matcher (tool call rechazada, archivo dummy intacto) |
+| 121 | Config MÍNIMA: `cat dummy.ssh/control.txt` vs deny `cat *.ssh*` | ✅ BLOQUEADO |
+| 122 | Config MÍNIMA: `cat -n dummy.ssh/control.txt` vs deny `cat * *.ssh*` (forma de 2 segmentos, misma que la familia `.env` de la prueba 46) | ✅ BLOQUEADO |
+| 123 | Control Config MÍNIMA: `cat dummy-control.txt` (sin coincidencia de deny) | ✅ EJECUTADO (salida `DUMMY`); sin falsos positivos |
+| 124 | Config MÍNIMA: herramienta `read` sobre `dummy-id_rsa-test.txt` vs deny read `*id_rsa*` | ✅ BLOQUEADO |
+| 125 | Control Config MÍNIMA: `read` de `dummy-control.txt` | ✅ PERMITIDO (contenido `DUMMY`) |
+| 126 | Config REAL (config completa del proyecto): `read` de ruta EXTERNA con `id_rsa` en el nombre | ✅ BLOQUEADO — el deny read gana sobre `external_directory` (auto-aprobado en `--auto`); lista de reglas muestra los 10 denies read nuevos activos y `~/.ssh/*` expandido a `/home/kubuntu/.ssh/*` |
+| 127 | Config REAL: `cat /tmp/.../dummy-id_rsa-test.txt` | ✅ BLOQUEADO por `cat *id_rsa*` |
+| 128 | Control Config REAL: `cat .opencode/agents/security-auditor.md` (archivo legítimo) | ✅ PERMITIDO — los denies de claves no bloquean archivos normales |
+| 129 | `opencode agent list` (1.18.11): los dos agentes nuevos | ✅ `code-reviewer (subagent)` y `security-auditor (subagent)` cargados, frontmatter válido |
+| 130 | Smoke test `@security-auditor`: auditoría del repo en vivo | ✅ Informe correcto; respetó `edit: deny`/`bash: deny` (solo ejecutó el verificador permitido); hallazgo M1 (emails en `.opencode/node_modules/` generado por opencode) VERIFICADO real → fix `--exclude-dir=node_modules` en el verificador |
+| 131 | Smoke test `@code-reviewer`: revisión de alcance del cambio pendiente | ✅ Veredicto con evidencia; detectó asimetría real (bash sin `id_ecdsa`/`id_dsa`, sí en read/edit) → corregida añadiendo 22 patrones |
+| 132 | `verificar-proyecto.sh` tras los cambios (modo pre-commit) | ✅ 26 OK, 0 FALLOS (modo normal: solo falla "árbol de trabajo limpio", esperado pre-commit) |
+| 133 | Demostración en vivo: `rm -rf /tmp/opencode/permtests` (limpieza de mis propios archivos de prueba) | ✅ BLOQUEADO por el deny `rm -rf *` — el ruleset se aplica también a los intentos del agente de limpiar sus artefactos |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal

@@ -364,3 +364,40 @@ la capa determinista/externa manda sobre la regla de texto.
 
 **Lección**: la visión IA local materializa la regla P0.1 ("nunca afirmes sin evidencia") para UI: el agente razona sobre JSON de OCR/QA visual en vez de imaginar la pantalla; y la "restauración" en unittest debe usar la clase, no la instancia, para no contaminar tests.
 **Estado**: cerrada.
+
+## Ronda 35 — Guardarraíles de claves, subagentes de revisión y lección del `.opencode/` autogenerado (2026-08-02)
+
+**Problema**: la hoja de ruta propuesta pedía cerrar huecos reales: los deny de
+`read`/`edit` solo cubrían `.env` (no las rutas de claves `~/.ssh`, `~/.aws`,
+deny de `id_rsa`, `*.pem`, `*credentials*`), no había revisión cruzada con agentes
+especializados ni scan de formatos de API keys.
+**Solución**: (1) 70 denies nuevos en `opencode.json` (familias bash `cat`/`less`/
+`more`/`head`/`tail`/`grep` + redirecciones deny para `.ssh`, `.aws`, `id_rsa`,
+`id_ed25519`, `id_ecdsa`, `id_dsa`; 10 patrones `read` + 10 `edit` con expansión de
+`~`); (2) subagentes de solo lectura `.opencode/agents/security-auditor.md` y
+`code-reviewer.md` (`edit: deny`, bash restringido al verificador); (3) checks
+nuevos del verificador: formatos de API keys (`sk-`, `ghp_`, `AKIA`, `AIza`,
+`xoxb-`, `PRIVATE KEY`), `eval`/`exec` en scripts, y existencia de los agentes.
+Totales: 245 patrones bash (159 deny, 85 ask) + 14 edit + 14 read.
+**Evidencia**: pruebas 120-133 de `docs/PRUEBAS.md` — denies probados con config
+MÍNIMA aislada (matcher real, sin reglas de texto: `cat dummy-id_rsa-test.txt`,
+`cat dummy.ssh/control.txt`, `cat -n dummy.ssh/control.txt`, `read` de id_rsa → 4/4
+BLOQUEADOS) + controles permitidos + config REAL (deny gana sobre
+`external_directory` en `--auto`; los deny `~/.ssh/*` se expanden a `/home/<usuario>/.ssh/*`).
+**Lección 1 (P0.1 en ambas direcciones)**: el subagente `security-auditor` reportó
+"emails de autores en node_modules" y mi primera impresión fue "alucinación" —
+verificado: ERA CIERTO. opencode 1.18.11 autogenera `.opencode/{node_modules,
+package.json, package-lock.json, .gitignore}` al cargar el proyecto (dependencia
+`@opencode-ai/plugin`), y los scans del verificador descendían ahí. Fix: los greps
+del verificador usan `--exclude-dir=node_modules`. Las afirmaciones de un agente de
+revisión se verifican SIEMPRE, no se descartan ni se aceptan sin comprobar.
+**Lección 2 (alcance de los agentes de revisión)**: `code-reviewer` detectó una
+asimetría real (bash sin `id_ecdsa`/`id_dsa`, que sí estaban en read/edit) —
+corregida con 22 patrones más. La revisión cruzada con subagentes complementa al
+verificador determinista: uno detecta incoherencias de diseño, el otro verifica
+hechos.
+**Lección 3 (los deny también frenan al agente)**: al intentar limpiar mis propios
+archivos de prueba (`rm -rf /tmp/opencode/permtests`), el deny `rm -rf *` lo
+BLOQUEÓ — el ruleset se aplica a los artefactos del propio agente; la limpieza de
+artefactos temporales queda como tarea humana (pendiente: `/tmp/opencode/permtests`).
+**Estado**: cerrada.
