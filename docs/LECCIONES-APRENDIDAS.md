@@ -401,3 +401,31 @@ archivos de prueba (`rm -rf /tmp/opencode/permtests`), el deny `rm -rf *` lo
 BLOQUEÓ — el ruleset se aplica a los artefactos del propio agente; la limpieza de
 artefactos temporales queda como tarea humana (pendiente: `/tmp/opencode/permtests`).
 **Estado**: cerrada.
+
+## 2026-08-10 — Regla P1.19: evitar fallbacks que enmascaran errores
+
+**Problema**: los LLM proponen con frecuencia código (Python o cualquier lenguaje)
+con fallbacks silenciosos: `try/except` que devuelven valores por defecto,
+`except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar, o
+sustituciones de una API/librería por otra "equivalente" sin declararlo. El
+resultado es una app que "funciona" pero con comportamiento indefinido o datos
+incorrectos que nadie detecta: el peor modo de fallo, porque es invisible.
+**Solución**: regla nueva P1.19 en AGENTS.md ("Evita fallbacks: falla explícito, no
+enmascares errores"): el error se ELEVA, no se traga; fallback solo si el
+programador lo pide explícitamente y, si se propone, se declara (qué falla, qué se
+usa en su lugar, cómo se observa) y se espera aprobación. Sincronizada en README
+(33 errores), CHECKLIST (sección Fallbacks), code-reviewer, REGLAS-COMPLETAS
+(limitación + detalle + 3 fuentes nuevas) y verificador (19 P1, 33 limitaciones,
+33 errores). De paso se corrigió una inconsistencia preexistente del README
+(smoke test decía "12 P0 y 12 P1" cuando ya había 18 reglas P1; ahora "12 P0 y 19 P1").
+**Evidencia**: prueba 134 de `docs/PRUEBAS.md`; fuentes verificadas con webfetch
+(Microsoft Learn best practices de excepciones: "a crashed app is more reliable
+and diagnosable than an app with undefined behavior"; Google SRE book cap. 6
+observabilidad; Python docs: capturar excepciones específicas y dejar que las
+inesperadas se propaguen); `verificar-proyecto.sh --pre-commit` en verde.
+**Lección**: la norma de sistemas empresariales (fail fast + observabilidad) es
+más exigente que el manejo de errores "amable" que suele sugerir el LLM: un error
+visible y reportado vale más que una ejecución "exitosa" con resultado incorrecto.
+P1.19 refuerza P0.1 (evidencia) y P1.6 (honestidad): no se puede reportar un fallo
+que el código tragó en silencio.
+**Estado**: cerrada.

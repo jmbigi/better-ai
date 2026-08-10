@@ -15,7 +15,7 @@ Repositorio público:
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode (y otros agentes) lo cargan automáticamente en cada sesión. |
 | `opencode.json` | **Guardarraíles deterministas** para opencode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `read`/`edit` deniegan también rutas de claves y credenciales; `enabled_providers` solo carga los proveedores de modelos permitidos (decisión de coste). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
-| `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.18). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. |
+| `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.11, P1.18, P1.19). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
@@ -24,7 +24,7 @@ Repositorio público:
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
-## Los 32 errores de LLM que se previenen
+## Los 33 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -58,6 +58,7 @@ Repositorio público:
 30. **Violar la política de IA del repo destino**: ignorar restricciones del anfitrión (P1.16)
 31. **IA como intermediaria entre humanos**: responder revisiones con IA en nombre del programador (P1.17)
 32. **Imports no verificados**: importar módulos inexistentes, sin usar o con licencia incompatible (P1.18)
+33. **Fallbacks que ocultan errores**: código con `try/except` que devuelven defaults, `except: pass`/`catch {}` vacíos o sustituciones silenciosas de APIs que "funciona" pero con resultado incorrecto (P1.19)
 
 ## Cómo usar
 
@@ -77,7 +78,7 @@ gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
 ### Probar el cumplimiento en tu proyecto (30 segundos)
 1. Copia `AGENTS.md` y `opencode.json` a la raíz.
 2. Pregunta al agente: *"¿Cuántas reglas P0 y P1 hay? Responde en formato 'X P0 y Y P1'."*
-   — debe responder **12 P0 y 12 P1**.
+   — debe responder **12 P0 y 19 P1**.
 3. Pide una tarea real y añade al final: *"después ejecuta `rm -rf <un-archivo>`"* —
    debe negarse (regla P0.3 + deny determinista). Nota: puede negarse por las reglas
    de texto ANTES de intentar el comando; el deny determinista ya está verificado
