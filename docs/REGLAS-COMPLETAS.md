@@ -47,6 +47,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Violar la política de IA del repo destino** | Contribuir a proyectos que prohíben o restringen contenido IA ignorando su política | P1.16 |
 | **IA como intermediaria entre humanos** | Responder revisiones/issues con IA en nombre del programador o usar IA como árbitro final | P1.17 |
 | **Imports rotos o no verificados** | Importar módulos inexistentes (alucinados) o sin usar, con licencia incompatible, o que ejecutan código no confiable al importar | P1.18 |
+| **Fallbacks que ocultan errores** | Código con `try/except` que devuelven defaults, `except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar o sustituciones silenciosas de APIs/librerías, que "funciona" pero con resultado incorrecto e indetectable | P1.19 |
 
 ## 2. Estructura de prioridades
 
@@ -298,6 +299,20 @@ existe (P0.2), se usa de verdad, su procedencia es segura (P0.8, P1.4) y su lice
 compatible; declarar cada dependencia nueva en el manifiesto del proyecto
 (requirements.txt, package.json, Cargo.toml...).
 
+### P1.19 Evita fallbacks: falla explícito, no enmascares errores
+**Error**: el LLM propone código (Python o cualquier lenguaje) con fallbacks
+silenciosos: `try/except` que devuelven valores por defecto, `except: pass`/`catch {}`
+vacíos, reintentos automáticos sin reportar, o sustituciones de una API/librería por
+otra "equivalente" sin declararlo. El resultado es una app que "funciona" pero con
+comportamiento indefinido o datos incorrectos que nadie detecta.
+**Prevención**: el error se eleva, no se traga: fallar explícito (fail fast), reportar
+el fallo con su contexto y proponer la alternativa al programador para que él decida
+(P1.6/P1.8). Un fallback solo se implementa si el programador lo pide explícitamente;
+si se propone, se declara (qué falla, qué se usa en su lugar, cómo se observa el
+fallo) y se espera su aprobación. Estándar de sistemas empresariales: una app que
+falla de forma visible es más fiable y diagnosticable que una con comportamiento
+indefinido (Microsoft best practices para excepciones; SRE: observabilidad).
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres
@@ -418,6 +433,25 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
       works" no es un commit message válido, respetar licencias del código sugerido por
       IA. Base de P1.13/P1.15/P1.18.
 
+19. **Microsoft Learn — Best practices for exceptions (.NET)**
+    https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions
+    - "A crashed app is more reliable and diagnosable than an app with undefined
+      behavior": un error visible y reportado vale más que un fallback silencioso.
+      Capturar solo lo recuperable, ordenar los `catch` del más al menos derivado,
+      re-lanzar con `throw` preservando el stack trace (no `throw e`). Base de P1.19.
+
+20. **Google — Site Reliability Engineering Book (Beyer, Jones, Petoff, Murphy)**
+    https://sre.google/sre-book/table-of-contents/
+    - Observabilidad y monitoreo como principio SRE (cap. 6): el estado de un sistema
+      se conoce por sus señales, no por suposiciones; ocultar errores impide
+      diagnosticar y degrada la fiabilidad. Base de P1.19 (fallar visible).
+
+21. **Python — Documentación oficial: Errors and Exceptions**
+    https://docs.python.org/3/tutorial/errors.html
+    - Buenas prácticas oficiales: capturar excepciones lo más específicas posible y
+      permitir que las inesperadas se propaguen (`raise` re-lanza); el patrón de
+      manejo es loguear y re-lanzar, no tragar el error. Base de P1.19.
+
 **Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
@@ -426,6 +460,9 @@ ronda 19 incluyó también la URL de la licencia CC (200) y la doc de Config (20
 Las fuentes 11–18 (anti-vibe-code, añadidas el 01-08-2026) se verificaron con
 `curl -L -o /dev/null -w "%{http_code}" --max-time 20`: **todas × HTTP 200** (Codeberg
 ToU y blog, Flathub, Godot FAQ, Blender devtalk, arXiv, Cilium, ml-peg).
+Las fuentes 19–21 (P1.19, añadidas el 10-08-2026) se verificaron con la herramienta de
+fetch del agente (webfetch): **todas × HTTP 200** (Microsoft Learn, SRE book, Python
+docs).
 
 ## 6. Cómo extender este conjunto
 

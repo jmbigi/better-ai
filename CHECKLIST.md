@@ -165,6 +165,13 @@
 - [ ] ¿Las licencias de los imports son compatibles con la licencia del proyecto?
 - [ ] ¿Declaré cada dependencia nueva en el manifiesto del proyecto (requirements.txt, package.json, Cargo.toml...)?
 
+## Fallbacks (P1.19)
+
+- [ ] ¿El código no tiene fallbacks silenciosos que enmascaran errores (`try/except` con defaults, `except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar)?
+- [ ] ¿No sustituí una API/librería por otra "equivalente" sin declararlo?
+- [ ] ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse?
+- [ ] ¿Los fallbacks que implementé fueron pedidos explícitamente por el programador o, si los propuse, los declaré (qué falla, qué se usa en su lugar, cómo se observa) y obtuve su aprobación?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

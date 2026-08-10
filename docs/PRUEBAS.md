@@ -504,6 +504,7 @@ rechazo solo pueda venir del matcher) y después con la config REAL.
 | 131 | Smoke test `@code-reviewer`: revisión de alcance del cambio pendiente | ✅ Veredicto con evidencia; detectó asimetría real (bash sin `id_ecdsa`/`id_dsa`, sí en read/edit) → corregida añadiendo 22 patrones |
 | 132 | `verificar-proyecto.sh` tras los cambios (modo pre-commit) | ✅ 26 OK, 0 FALLOS (modo normal: solo falla "árbol de trabajo limpio", esperado pre-commit) |
 | 133 | Demostración en vivo: `rm -rf /tmp/opencode/permtests` (limpieza de mis propios archivos de prueba) | ✅ BLOQUEADO por el deny `rm -rf *` — el ruleset se aplica también a los intentos del agente de limpiar sus artefactos |
+| 134 | Añadida regla P1.19 (evitar fallbacks): tabla, sección, checklist, REGLAS-COMPLETAS (limitación + detalle + 3 fuentes nuevas), README (error #33 + smoke test 12 P0 y 19 P1), verificador (19 P1 / 33 / 33), CHECKLIST, code-reviewer, PRUEBAS y LECCIONES; fuentes empresariales verificadas con webfetch (Microsoft Learn, SRE book, Python docs, todas HTTP 200) | ✅ `verificar-proyecto.sh --pre-commit`: 26 OK, 0 FALLOS |
 
 ## Pendiente de verificar (declaración honesta)
 
