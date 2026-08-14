@@ -48,6 +48,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **IA como intermediaria entre humanos** | Responder revisiones/issues con IA en nombre del programador o usar IA como árbitro final | P1.17 |
 | **Imports rotos o no verificados** | Importar módulos inexistentes (alucinados) o sin usar, con licencia incompatible, o que ejecutan código no confiable al importar | P1.18 |
 | **Fallbacks que ocultan errores** | Código con `try/except` que devuelven defaults, `except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar o sustituciones silenciosas de APIs/librerías, que "funciona" pero con resultado incorrecto e indetectable | P1.19 |
+| **Pérdida de memoria del proyecto** | No documentar pruebas, fallos ni hallazgos en `docs/LECCIONES-APRENDIDAS.md` (o hacerlo sin evidencia ni anonimización): la lección muere con la sesión y los errores se repiten | P1.20 |
 
 ## 2. Estructura de prioridades
 
@@ -55,7 +56,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
   seguridad, falsedad, producción). Violar una P0 es inaceptable y se reporta.
 - **P1 — SIEMPRE CUMPLIR**: reglas de trabajo contra errores comunes (verificación,
   alcance, contexto, honestidad, estándares, obediencia, protecciones, consistencia,
-  cambios graduales, autoría y transparencia).
+  cambios graduales, autoría, transparencia y memoria del proyecto).
 - **P2 — CUANDO APLIQUE**: preferencias de estilo y calidad cuando no contradicen
   necesidades concretas del usuario.
 
@@ -312,6 +313,18 @@ si se propone, se declara (qué falla, qué se usa en su lugar, cómo se observa
 fallo) y se espera su aprobación. Estándar de sistemas empresariales: una app que
 falla de forma visible es más fiable y diagnosticable que una con comportamiento
 indefinido (Microsoft best practices para excepciones; SRE: observabilidad).
+
+### P1.20 Actualiza las lecciones aprendidas
+**Error**: el agente termina la tarea sin documentar los fallos, hallazgos y
+lecciones de la sesión, o los documenta sin evidencia, sin anonimizar o sin vincular
+a pruebas reales. La memoria del proyecto vive solo en la conversación y se pierde
+con ella: el mismo error se repite en la siguiente sesión porque nadie lo registró.
+**Prevención**: tras cada prueba, fallo o hallazgo relevante, añadir una entrada en
+`docs/LECCIONES-APRENDIDAS.md` con fecha, problema, solución y evidencia real
+(pruebas de `docs/PRUEBAS.md` que existan, P0.2), siempre anonimizada (P0.9). Si el
+mismo fallo se repite 2+ veces, proponer regla nueva en AGENTS.md o endurecer la
+existente: la documentación repetida sin cambio de regla es memoria sin acción. La
+lección documentada es parte de la entrega, no un extra opcional.
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.

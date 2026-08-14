@@ -506,6 +506,22 @@ rechazo solo pueda venir del matcher) y después con la config REAL.
 | 133 | Demostración en vivo: `rm -rf /tmp/opencode/permtests` (limpieza de mis propios archivos de prueba) | ✅ BLOQUEADO por el deny `rm -rf *` — el ruleset se aplica también a los intentos del agente de limpiar sus artefactos |
 | 134 | Añadida regla P1.19 (evitar fallbacks): tabla, sección, checklist, REGLAS-COMPLETAS (limitación + detalle + 3 fuentes nuevas), README (error #33 + smoke test 12 P0 y 19 P1), verificador (19 P1 / 33 / 33), CHECKLIST, code-reviewer, PRUEBAS y LECCIONES; fuentes empresariales verificadas con webfetch (Microsoft Learn, SRE book, Python docs, todas HTTP 200) | ✅ `verificar-proyecto.sh --pre-commit`: 26 OK, 0 FALLOS |
 
+## Ronda 37 — Regla P1.20: actualizar las lecciones aprendidas (13-08-2026)
+
+El programador pidió la regla "Actualizar las lecciones aprendidas" (si no existía).
+Verificado con grep que solo existía como sección declarativa en AGENTS.md (sin
+numeración ni deber vinculante). Añadida como P1.20 con sincronización completa:
+tabla y sección en AGENTS.md, checklist pre-entrega (AGENTS.md y CHECKLIST.md),
+error #34 en README (heading "Los 34 errores", smoke test "12 P0 y 20 P1"),
+limitación #34 y detalle en REGLAS-COMPLETAS (más mención de "memoria del proyecto"
+en la descripción de P1), conteos del verificador (20 P1 / 34 / 34) y alcance del
+subagente code-reviewer. La propia entrada de LECCIONES-APRENDIDAS de esta ronda se
+documentó cumpliendo la regla nueva (aplicación a sí misma).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 135 | Añadida regla P1.20 (actualizar lecciones aprendidas): AGENTS.md (tabla + sección + checklist + sección final), README (error #34, 34 errores, smoke test 12 P0 y 20 P1), CHECKLIST (sección P1.20), REGLAS-COMPLETAS (limitación #34 + detalle + descripción P1), verificador (20 P1 / 34 / 34), code-reviewer (alcance P1.20), PRUEBAS y LECCIONES (aplicándose la regla a sí misma) | ✅ `verificar-proyecto.sh --pre-commit`: 26 OK, 0 FALLOS |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
