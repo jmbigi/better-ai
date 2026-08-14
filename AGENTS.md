@@ -44,6 +44,7 @@
 | P1.17 | Humanos se comunican con humanos: sin respuestas IA en revisiones ni árbitros automáticos | 🟠 P1 | IA como intermediaria engañosa |
 | P1.18 | Revisa los imports antes de commitear/pushear: existen, usados, seguros y con licencia compatible | 🟠 P1 | Imports rotos, muertos o maliciosos |
 | P1.19 | Evita fallbacks: no enmascares errores con defaults, `except: pass` ni sustituciones de APIs/librerías; falla explícito y deja la decisión al programador | 🟠 P1 | Fallbacks que ocultan errores y flujos no controlados |
+| P1.20 | Actualiza las lecciones aprendidas: documenta cada prueba, fallo o hallazgo relevante en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia); si algo falló 2+ veces, propón regla o endurece la existente | 🟠 P1 | Memoria del proyecto perdida, errores repetidos |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -246,6 +247,12 @@
 - Un fallback SOLO se implementa si el programador lo pide explícitamente; si se propone, se DECLARA (qué falla, qué se usa en su lugar, cómo se observa el fallo) y se espera su aprobación.
 - Estándar de referencia de sistemas empresariales: una app que falla de forma visible es más fiable y diagnosticable que una que "funciona" con comportamiento indefinido (Microsoft best practices; SRE: observabilidad). Un error visible y reportado vale más que una ejecución "exitosa" con resultado incorrecto.
 
+### P1.20 Actualiza las lecciones aprendidas
+- Tras cada prueba, fallo o hallazgo relevante: documenta la lección en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia). El archivo es la memoria del proyecto: si no se escribe, la memoria se pierde con la sesión.
+- Si el mismo fallo se repite 2+ veces: propón una regla nueva en `AGENTS.md` o endurece la existente; no basta con documentarlo otra vez.
+- Anonimiza siempre las lecciones (sin rutas de claves, nombres de cuentas, identidades ni datos de terceros, P0.9) y cita solo evidencia real (pruebas de `docs/PRUEBAS.md` que existan, P0.2).
+- Al terminar una tarea con hallazgos, la documentación de la lección es parte de la entrega, no un extra opcional.
+
 ---
 
 ## P2 — Preferencias (cuando aplique)
@@ -285,6 +292,7 @@
 - [ ] ¿Declaré el uso de IA en commits/PRs significativos (trailer `Assisted-by:`) y todo lo generado fue revisado y entendido por el humano? (P1.13–P1.15)
 - [ ] ¿Revisé los imports/dependencias antes de commitear (existen, usados, seguros, licencias compatibles)? (P1.18)
 - [ ] ¿Evité fallbacks silenciosos en el código (defaults, `except: pass`, sustituciones de APIs sin declarar)? ¿Los errores se elevan y reportan? (P1.19)
+- [ ] ¿Documenté las lecciones del trabajo en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia) y, si algo falló 2+ veces, propuse regla o endurecer la existente? (P1.20)
 
 > Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
 > (si copiaste AGENTS.md a otro proyecto, usa los tests/lint/build de ESE proyecto).
@@ -293,7 +301,7 @@
 
 ## Lecciones aprendidas
 
-Se actualizan en `docs/LECCIONES-APRENDIDAS.md` tras cada prueba, fallo o hallazgo relevante. Este archivo es memoria del proyecto: si algo falló 2+ veces, la lección se documenta aquí con su solución.
+Regla **P1.20**: se actualizan en `docs/LECCIONES-APRENDIDAS.md` tras cada prueba, fallo o hallazgo relevante. Este archivo es memoria del proyecto: si algo falló 2+ veces, la lección se documenta aquí con su solución y se propone regla nueva o endurecimiento.
 
 ---
 

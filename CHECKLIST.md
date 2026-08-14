@@ -172,6 +172,13 @@
 - [ ] ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse?
 - [ ] ¿Los fallbacks que implementé fueron pedidos explícitamente por el programador o, si los propuse, los declaré (qué falla, qué se usa en su lugar, cómo se observa) y obtuve su aprobación?
 
+## Lecciones aprendidas (P1.20)
+
+- [ ] ¿Documenté en `docs/LECCIONES-APRENDIDAS.md` cada prueba, fallo o hallazgo relevante (fecha, problema, solución, evidencia real)?
+- [ ] ¿Si algo falló 2+ veces, propuse regla nueva en AGENTS.md o endurecer la existente (no solo documentarlo otra vez)?
+- [ ] ¿Las lecciones están anonimizadas (sin rutas de claves, cuentas, identidades ni datos de terceros, P0.9) y citan solo pruebas reales de `docs/PRUEBAS.md` (P0.2)?
+- [ ] ¿La documentación de la lección forma parte de la entrega si hubo hallazgos, no un extra opcional?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

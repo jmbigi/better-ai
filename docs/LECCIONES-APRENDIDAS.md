@@ -429,3 +429,28 @@ visible y reportado vale más que una ejecución "exitosa" con resultado incorre
 P1.19 refuerza P0.1 (evidencia) y P1.6 (honestidad): no se puede reportar un fallo
 que el código tragó en silencio.
 **Estado**: cerrada.
+
+## 2026-08-13 — Regla P1.20: "Actualizar las lecciones aprendidas" (antes solo era una sección declarativa)
+
+**Problema**: el programador pidió crear la regla "Actualizar las lecciones
+aprendidas" si no existía. La verificación con grep mostró que el concepto solo
+vivía como sección declarativa al final de AGENTS.md ("Se actualizan en
+docs/LECCIONES-APRENDIDAS.md...") sin numeración, sin deber vinculante ni entrada
+en la tabla de reglas: nada obligaba al agente a documentar la lección como parte
+de la entrega, y la memoria del proyecto dependía de la buena voluntad de la sesión.
+**Solución**: regla nueva P1.20 en AGENTS.md ("Actualiza las lecciones aprendidas"):
+documentar cada prueba/fallo/hallazgo en `docs/LECCIONES-APRENDIDAS.md` (fecha,
+problema, solución, evidencia), anonimizado (P0.9) y citando solo pruebas reales
+(P0.2); si algo falla 2+ veces, proponer regla nueva o endurecer la existente; la
+lección documentada es parte de la entrega. Sincronizada en README (error #34 y
+smoke test "12 P0 y 20 P1"), CHECKLIST (sección Lecciones aprendidas), REGLAS-
+COMPLETAS (limitación #34 + detalle + "memoria del proyecto" en la descripción de
+P1), verificador (20 P1 / 34 / 34), code-reviewer (alcance) y PRUEBAS (ronda 37).
+Esta entrada se escribe cumpliendo la regla que documenta.
+**Evidencia**: prueba 135 de `docs/PRUEBAS.md`; `verificar-proyecto.sh --pre-commit`
+en verde (26 OK, 0 FALLOS).
+**Lección**: la memoria del proyecto es una regla de trabajo P1, no un anexo: si la
+documentación de lecciones no es un deber con checklist, la sesión la omite y el
+error se repite. Las reglas de memoria se aplican a sí mismas (esta ronda lo
+demuestra: la lección se documentó como parte de la entrega).
+**Estado**: cerrada.

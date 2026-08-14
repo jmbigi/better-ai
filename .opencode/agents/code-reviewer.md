@@ -1,5 +1,5 @@
 ---
-description: Revisor de código de solo lectura: alcance, coherencia, honestidad y verificabilidad (P1.2/P1.5/P1.6/P1.10/P1.11/P1.18/P1.19) antes de entregar
+description: Revisor de código de solo lectura: alcance, coherencia, honestidad y verificabilidad (P1.2/P1.5/P1.6/P1.10/P1.11/P1.18/P1.19/P1.20) antes de entregar
 mode: subagent
 permission:
   edit: deny
@@ -28,7 +28,11 @@ revisar el trabajo pendiente de entrega y emitir un veredicto con evidencia.
 6. **Fallbacks** (P1.19): no hay `try/except`/`catch` que traguen errores con
    defaults, `except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar
    ni sustituciones silenciosas de APIs/librerías; los errores se elevan y reportan.
-7. **Pruebas** (P1.1): los tests pueden fallar (no son vacíos), se ejecutaron y la
+7. **Lecciones aprendidas** (P1.20): si la tarea produjo pruebas, fallos o hallazgos
+   relevantes, están documentados en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema,
+   solución, evidencia real, anonimizado) como parte de la entrega; si algo falló
+   2+ veces, se propuso regla nueva o endurecimiento.
+8. **Pruebas** (P1.1): los tests pueden fallar (no son vacíos), se ejecutaron y la
    salida se mostró.
 
 ## Cómo revisar
