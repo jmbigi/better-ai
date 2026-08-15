@@ -49,13 +49,19 @@ if [ -f "$HOME/.gitconfig" ]; then
     CONFIG_OPTS+=(--ro-bind "$HOME/.gitconfig" "$HOME/.gitconfig")
 fi
 
-# Rutas de credenciales: se montan VACIAS (--tmpfs) para que el kernel no las
-# exponga ni en lectura dentro del sandbox (refuerzo determinista de P0.6/P0.9,
-# por encima de los denies de opencode.json: el agente no puede leerlas).
+# Rutas de credenciales: los directorios EXISTENTES se montan VACIOS (--tmpfs) para
+# que el kernel no los exponga ni en lectura dentro del sandbox (refuerzo
+# determinista de P0.6/P0.9, por encima de los denies de opencode.json). Si la ruta
+# no existe en el host no hay nada que proteger (bwrap no puede crear el mount point
+# sobre un arbol de solo lectura). ~/.netrc (archivo) se sustituye por uno vacio.
 SECRET_OPTS=()
-for ruta in "$HOME/.ssh" "$HOME/.aws" "$HOME/.gnupg" "$HOME/.netrc"; do
-    SECRET_OPTS+=(--tmpfs "$ruta")
+for ruta in "$HOME/.ssh" "$HOME/.aws" "$HOME/.gnupg"; do
+    [ -d "$ruta" ] && SECRET_OPTS+=(--tmpfs "$ruta")
 done
+if [ -f "$HOME/.netrc" ]; then
+    NETRC_DUMMY="$(mktemp)"
+    SECRET_OPTS+=(--ro-bind "$NETRC_DUMMY" "$HOME/.netrc")
+fi
 
 exec bwrap \
     --die-with-parent \
