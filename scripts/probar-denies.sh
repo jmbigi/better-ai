@@ -319,20 +319,23 @@ for linea in open(salida):
         continue
     st = part.get('state', {})
     cmd = str(st.get('input', {}).get('command', '')).strip()
-    reales[cmd] = st.get('status')
+    # estado -> (status, error): el rechazo REAL del matcher es 'error' con el
+    # mensaje "prevents you from using this specific tool call"; cualquier otro
+    # error (comando no encontrado, etc.) NO es un bloqueo por permiso.
+    reales[cmd] = (st.get('status'), str(st.get('error', '')))
 f = open(reporte, 'a')
 inconclusos = []
 for cmd, denies in esperados.items():
     for deny in denies:
-        status = reales.get(cmd)
-        if status == 'error':
+        estado, err = reales.get(cmd, (None, ''))
+        if estado == 'error' and 'prevents you' in err:
             f.write('OK   %s <- %s\n' % (deny, cmd))
             print('  [BLOQUEADO]', deny)
-        elif status == 'completed':
+        elif estado == 'completed':
             f.write('FALLO %s <- %s (se ejecuto)\n' % (deny, cmd))
             print('  [NO BLOQUEADO]', deny, '<-', cmd)
         else:
-            f.write('INCONCLUSO %s <- %s (sin tool call)\n' % (deny, cmd))
+            f.write('INCONCLUSO %s <- %s (sin tool call o error no-relacionado: %s)\n' % (deny, cmd, err[:80]))
             print('  [INCONCLUSO]', deny, '<-', cmd)
             inconclusos.append((deny, cmd))
 f.close()
