@@ -575,6 +575,29 @@ LECCIONES (2 entradas).
 | 143 | Carga de la regla nueva: preguntar al modelo por el título y los bullets de P1.21 | ✅ Citó íntegra la regla: título "Divide y vencerás: prototipo aislado antes de integrar" + los 7 bullets (divide el problema grande; aísla dependencias con mocks/stubs citando Fowler/NASA y fuentes 29–32; casos límite; solo tras superar las pruebas se integra; beneficios; verificar el conjunto tras integrar) — verificador 27 OK, 0 FALLOS (pre-commit, commit 608e692) |
 | 144 | Auditoría del commit 8bbd121 (P1.19 reforzada con herramientas antifallback, otra sesión) + carga de la regla: preguntar al modelo por el título de P1.19 y sus herramientas operativas | ✅ Auditoría: AGENTS.md (fila + sección con criterio de especificidad y plantilla `[EXCEPCIÓN CONTROLADA]` + checklist), REGLAS-COMPLETAS (detalle) y LECCIONES (revisión PCE v2.0) coherentes; se corrigió la sincronización faltante en CHECKLIST (sección Fallbacks: 2 casillas nuevas) y README (error #33 con test de intercambiabilidad); notas obsoletas "pendiente de re-ejecutar" de las 2 lecciones del 16-08 corregidas con la evidencia real. Carga: el modelo citó íntegra la P1.19 reforzada (criterio de especificidad + plantilla con Motivo/Acción aplicada) — verificador 27 OK, 0 FALLOS |
 
+## Ronda 41 — Purga de historial: filtración de nombre de proyecto privado eliminada (16-08-2026)
+
+Auditoría de seguridad (P0.11): una lección de la ronda 34 (2026-08-01) citaba el
+nombre de un proyecto privado del programador y sus detalles técnicos (modelos,
+hardware, directivas internas). El repo es público (GitHub + Codeberg), por lo que
+la filtración estaba en el estado actual Y en el historial completo (commit de la
+ronda 34). Política dictada por el programador: **solo se referencian proyectos
+públicos y populares; los privados nunca** — incorporada a P0.9 (refuerzo, no regla
+nueva).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 145 | Purga completa: (1) estado actual anonimizado con términos genéricos; (2) `git filter-repo --replace-text` + `--prune-empty always` sobre el historial completo (59 commits reescritos); (3) verificación local: 0 commits con cualquiera de los 12 términos en `--all`, `git fsck` sin huérfanos, verificador 30 OK; (4) force-push coordinado por el programador a GitHub y Codeberg (`+ 67ba169...fd9bd25`, `+ f99d8f5...fd9bd25`); (5) verificación post-push con 2 clones frescos (GitHub y Codeberg): `git log -S <término> --all` vacío en ambos, HEAD = `fd9bd25` | ✅ Historial y remotos limpios; backup completo en `/tmp/opencode/backup-better-ai-20260816.bundle` (restauración posible); P0.9 reforzada |
+
+**Lección operativa**: la purga requirió (a) backup completo (bundle) ANTES de
+reescribir, (b) reemplazos literales con `literal==>texto` en `/tmp` (nunca en el
+repo), (c) `--prune-empty always` (la sintaxis `auto` es la que exige argumento en
+`always`), (d) el deny `git push --force*` de `opencode.json` BLOQUEÓ el force-push
+del agente — el programador lo ejecutó manualmente (el guardarraíl cumplió su
+función, P1.9: no se evadió). Los force-push reescriben historia pública: cualquier
+clon previo queda divergente (los remotos del proyecto se re-clonan con el
+historial limpio).
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal

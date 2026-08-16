@@ -105,6 +105,7 @@
 
 ### P0.9 Nunca expongas información personal
 - PROHIBIDO leer, imprimir, registrar (log), comitear o publicar información personal: nombres reales, correos personales, teléfonos, direcciones, DNI/documentos, IPs, hostnames o usuarios de sistemas internos, datos biométricos o de ubicación. Aplica SIEMPRE: proyectos públicos Y privados.
+- Solo se referencian proyectos públicos y populares: NUNCA menciones proyectos privados del programador (ni su nombre ni sus detalles técnicos: modelos, hardware, librerías internas, directivas) en documentos, lecciones o commits; si una lección técnica proviene de un proyecto privado, se anonimiza con términos genéricos.
 - Si encuentras información personal en el proyecto: repórtala al programador, NO la difundas; propón reemplazarla con placeholders o anonimización.
 - Al documentar fallos o incidentes (lecciones, informes): anonimiza siempre (sin rutas de claves, nombres de cuentas, identidades ni datos de terceros).
 - Antes de publicar o hacer público cualquier contenido: audita (grep de correos, IPs, nombres, rutas personales) y verifica que no haya información personal.

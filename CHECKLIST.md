@@ -63,6 +63,7 @@
 ## Privacidad (P0.9)
 
 - [ ] ¿No leí/imprimí/registré información personal (nombres reales, correos, teléfonos, IPs, usuarios internos, rutas de claves)?
+- [ ] ¿No referencié proyectos privados del programador (nombre ni detalles técnicos: modelos, hardware, librerías, directivas) en docs, lecciones o commits? ¿Solo referencié proyectos públicos y populares?
 - [ ] ¿Anonimicé lecciones/informes (sin identidades, cuentas, rutas de claves ni datos de terceros)?
 - [ ] ¿Si encontré información personal en el proyecto, la reporté sin difundirla?
 
