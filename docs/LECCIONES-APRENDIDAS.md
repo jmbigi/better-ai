@@ -510,8 +510,8 @@ detalle + fuentes 25–28), README (error #36, smoke test "13 P0 y 21 P1"), CHEC
 (sección Divide y vencerás) y verificador (21 P1 / 36 / 36).
 **Evidencia**: códigos HTTP reales por `curl -L -w "%{http_code}"` (200 × 4:
 Wikipedia D&C, GeeksforGeeks, Wikipedia user story, Agile Alliance); contenido de
-las fuentes fetcheado (webfetch + DuckDuckGo); `verificar-proyecto.sh` en verde tras
-los cambios (pendiente de re-ejecutar en esta sesión).
+las fuentes fetcheado (webfetch + DuckDuckGo); `verificar-proyecto.sh` re-ejecutado
+tras la entrega: 27 OK, 0 FALLOS (commit 608e692, 16-08-2026).
 **Lección**: la descomposición de problemas no es solo un truco de algoritmos: es
 la estrategia de integración de código para agentes de IA (prototipo aislado →
 pruebas preliminares → integración → verificación del conjunto). La investigación
@@ -543,8 +543,8 @@ testing e integration testing) y NASA NTRS (análisis de unit testing del Core
 Flight Software de GSFC). Nota de verificación HTTP actualizada en REGLAS-COMPLETAS
 (fuentes 29–32).
 **Evidencia**: códigos HTTP 200 × 4 (16-08-2026) y contenido fetcheado de las 4
-fuentes (webfetch); `verificar-proyecto.sh` en verde tras los cambios (pendiente de
-re-ejecutar en esta sesión).
+fuentes (webfetch); `verificar-proyecto.sh` re-ejecutado tras la entrega: 27 OK, 0
+FALLOS (commit 608e692, 16-08-2026).
 **Lección**: una regla sobre prácticas de ingeniería gana fuerza normativa cuando
 cita evidencia de la industria verificada y deja el detalle en el documento de
 referencia (divulgación progresiva, fuente 5): el AGENTS.md queda corto y la
@@ -581,4 +581,32 @@ Cambios: AGENTS.md (P1.19 ampliada, fila resumen y checklist), REGLAS-COMPLETAS.
 mecanismos de auto-privilegio (cláusulas de anulación, umbrales inverificables,
 prohibición de reportes); evaluarlas siempre contra P0.13/P1.8 y extraer solo lo
 operativamente útil y comprobable (P0.1, P1.12).
+**Estado**: cerrada.
+
+## 2026-08-16 — Auditoría del commit de otra sesión (P1.19 reforzada): sincronización incompleta
+
+**Problema**: el programador pidió auditar el commit `8bbd121` (P1.19 reforzada con
+criterio de especificidad y plantilla de excepción controlada, de otra sesión) y
+completar lo pendiente. La auditoría (P1.10) encontró que el commit actualizó
+AGENTS.md, REGLAS-COMPLETAS.md y LECCIONES-APRENDIDAS.md, pero dejó fuera de
+sincronía CHECKLIST.md (sección Fallbacks sin las herramientas nuevas) y README.md
+(error #33 sin el test de intercambiabilidad). Además, las dos lecciones del 16-08
+sobre P1.21 quedaron con la nota "pendiente de re-ejecutar en esta sesión" cuando el
+verificador ya se había re-ejecutado (27 OK, 0 FALLOS).
+**Solución**: (1) CHECKLIST.md: 2 casillas nuevas en Fallbacks (criterio de
+especificidad / test de intercambiabilidad y plantilla `[EXCEPCIÓN CONTROLADA]`,
+sin suprimir los reportes obligatorios P0.11/P1.3/P1.6); (2) README.md: error #33
+ampliado con el test de intercambiabilidad; (3) LECCIONES: notas obsoletas
+corregidas con la evidencia real; (4) PRUEBAS: prueba 144 con la auditoría y la
+carga de la P1.19 reforzada (el modelo la citó íntegra). Aplicada la regla P1.21 a
+sí misma: cada archivo se editó y verificó de forma aislada, y el conjunto se
+verificó al final (verificador en verde).
+**Evidencia**: prueba 144 de `docs/PRUEBAS.md` (carga de P1.19 reforzada citada
+íntegra por el modelo); `verificar-proyecto.sh` 27 OK, 0 FALLOS tras la
+sincronización.
+**Lección**: al auditar commits de otras sesiones no basta revisar el diff: hay que
+comprobar la sincronización CRUZADA del ruleset (AGENTS ↔ CHECKLIST ↔ README ↔
+REGLAS ↔ PRUEBAS ↔ LECCIONES), porque cada sesión actualiza subconjuntos distintos;
+y las notas de "pendiente" en documentos de memoria se reconcilian al cierre, no se
+dejan caducar (P1.6/P1.20).
 **Estado**: cerrada.
