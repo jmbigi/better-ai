@@ -179,6 +179,8 @@
 - [ ] ¿No sustituí una API/librería por otra "equivalente" sin declararlo?
 - [ ] ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse?
 - [ ] ¿Los fallbacks que implementé fueron pedidos explícitamente por el programador o, si los propuse, los declaré (qué falla, qué se usa en su lugar, cómo se observa) y obtuve su aprobación?
+- [ ] ¿Mis respuestas pasan el criterio de especificidad (test de intercambiabilidad): si sustituyo la entidad principal de la consulta por un término aleatorio y la respuesta seguiría siendo válida, es genérica — la deseché y rehice con enfoque granular?
+- [ ] ¿Al detenerme por parámetros faltantes, contradicciones o ambigüedad insalvable usé la plantilla de excepción controlada (`[EXCEPCIÓN CONTROLADA]` con Motivo y Acción aplicada), sin suprimir los reportes obligatorios de seguridad (P0.11), supuestos (P1.3) ni fallos (P1.6)?
 
 ## Lecciones aprendidas (P1.20)
 

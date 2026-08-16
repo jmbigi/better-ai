@@ -573,6 +573,7 @@ LECCIONES (2 entradas).
 | # | Prueba | Resultado |
 |---|---|---|
 | 143 | Carga de la regla nueva: preguntar al modelo por el título y los bullets de P1.21 | ✅ Citó íntegra la regla: título "Divide y vencerás: prototipo aislado antes de integrar" + los 7 bullets (divide el problema grande; aísla dependencias con mocks/stubs citando Fowler/NASA y fuentes 29–32; casos límite; solo tras superar las pruebas se integra; beneficios; verificar el conjunto tras integrar) — verificador 27 OK, 0 FALLOS (pre-commit, commit 608e692) |
+| 144 | Auditoría del commit 8bbd121 (P1.19 reforzada con herramientas antifallback, otra sesión) + carga de la regla: preguntar al modelo por el título de P1.19 y sus herramientas operativas | ✅ Auditoría: AGENTS.md (fila + sección con criterio de especificidad y plantilla `[EXCEPCIÓN CONTROLADA]` + checklist), REGLAS-COMPLETAS (detalle) y LECCIONES (revisión PCE v2.0) coherentes; se corrigió la sincronización faltante en CHECKLIST (sección Fallbacks: 2 casillas nuevas) y README (error #33 con test de intercambiabilidad); notas obsoletas "pendiente de re-ejecutar" de las 2 lecciones del 16-08 corregidas con la evidencia real. Carga: el modelo citó íntegra la P1.19 reforzada (criterio de especificidad + plantilla con Motivo/Acción aplicada) — verificador 27 OK, 0 FALLOS |
 
 ## Pendiente de verificar (declaración honesta)
 
