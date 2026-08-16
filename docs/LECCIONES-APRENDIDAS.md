@@ -354,11 +354,11 @@ la capa determinista/externa manda sobre la regla de texto.
 
 ## Ronda 34: verificación "feedback de la realidad" con visión IA local y bug bound-method en unittest (2026-08-01)
 
-**Contexto**: en el proyecto privado de vision del programador los tests e2e se complementan con visión IA local (motor de OCR local + modelo de vision local, hardware local) — el LLM de texto recibe los resultados de visión (JSON) y razona sobre el estado real de la UI (AGENTS.md del proyecto, directiva la directiva interna del proyecto privado). La suite de tests del analizador detectó dos fallos de implementación.
+**Contexto**: en un proyecto de visión del programador (privado), los tests e2e se complementan con visión IA local — el LLM de texto recibe los resultados de visión (JSON) y razona sobre el estado real de la UI. La suite de tests del analizador detectó dos fallos de implementación.
 
 **Hallazgo 1 — bound-method en tearDown de unittest**: `self.original = <método de clase>` liga la función a la instancia de test vía descriptor (bound method); al restaurar en `tearDown`, el atributo de CLASE quedaba sustituido por la función ligada a la instancia anterior, contaminando el test siguiente (falsa "restauración"). Fix: `type(self).original` en los 6 tearDowns. La suite saltó de 31 a 46 tests y 46/46 OK.
 
-**Hallazgo 2 — SIGABRT in-process (cuDNN)**: cargar motor de OCR local y procesar capturas reales dentro del proceso de unittest aborta; los tests de screenshots reales se ejecutan en subproceso (CLI). También: `los tensores del modelo` debe ser int32 y resize a 512 px para modelo de vision local; resolver `libreria nativa de computo` → `.so.9` en el venv y propagar `las rutas de librerias nativas` (librerias del motor + librerias nativas de computo) a los subprocesos.
+**Hallazgo 2 — SIGABRT in-process**: cargar el motor de OCR local y procesar capturas reales dentro del proceso de unittest aborta (fallo de la librería nativa); los tests de screenshots reales se ejecutan en subproceso (CLI). También: los tensores del modelo deben usar los tipos/forma esperados por la librería (int32, resize), resolver la versión de la librería de cómputo en el venv y propagar las rutas de librerías nativas a los subprocesos.
 
 **Solución**: 46/46 OK + e2e con contexto de captura por pantallazo (origen headless, frente/fondo, viewport, entorno: pantallas vía `xrandr`, escritorios virtuales vía `wmctrl -d` — sin hostnames por P0.9) y aislamiento en escritorio limpio si multi-desktop.
 
