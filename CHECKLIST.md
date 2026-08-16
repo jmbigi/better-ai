@@ -187,6 +187,14 @@
 - [ ] ¿Las lecciones están anonimizadas (sin rutas de claves, cuentas, identidades ni datos de terceros, P0.9) y citan solo pruebas reales de `docs/PRUEBAS.md` (P0.2)?
 - [ ] ¿La documentación de la lección forma parte de la entrega si hubo hallazgos, no un extra opcional?
 
+## Divide y vencerás: prototipo aislado antes de integrar (P1.21)
+
+- [ ] ¿Dividí el problema grande en problemas pequeños (divide y vencerás) antes de implementar?
+- [ ] ¿Construí y probé cada módulo/componente de forma aislada, en un entorno mínimo y controlado (script/archivo temporal, rama aislada, venv, sandbox), ANTES de integrarlo al código base?
+- [ ] ¿Aislé sus dependencias externas (bases de datos, APIs, servicios) con simulaciones (mocks o stubs) para verificar la lógica interna con precisión, sin depender del entorno?
+- [ ] ¿Verifiqué su lógica y sus salidas con casos límite (entradas vacías, valores extremos, errores esperados) mediante pruebas unitarias preliminares que pueden fallar de verdad (P1.1)?
+- [ ] ¿Solo integré la pieza tras superar esas pruebas preliminares y verifiqué también el conjunto después de integrar (P1.1, P1.11)?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

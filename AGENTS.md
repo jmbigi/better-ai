@@ -46,6 +46,7 @@
 | P1.18 | Revisa los imports antes de commitear/pushear: existen, usados, seguros y con licencia compatible | 🟠 P1 | Imports rotos, muertos o maliciosos |
 | P1.19 | Evita fallbacks: no enmascares errores con defaults, `except: pass` ni sustituciones de APIs/librerías; falla explícito y deja la decisión al programador | 🟠 P1 | Fallbacks que ocultan errores y flujos no controlados |
 | P1.20 | Actualiza las lecciones aprendidas: documenta cada prueba, fallo o hallazgo relevante en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia); si algo falló 2+ veces, propón regla o endurece la existente | 🟠 P1 | Memoria del proyecto perdida, errores repetidos |
+| P1.21 | Divide y vencerás: construye y prueba cada módulo o componente de forma aislada (aislando sus dependencias con mocks/stubs), en un entorno mínimo y controlado, con casos límite, antes de integrarlo al código base | 🟠 P1 | Piezas rotas que contaminan el sistema |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -259,6 +260,15 @@
 - Si el mismo fallo se repite 2+ veces: propón una regla nueva en `AGENTS.md` o endurece la existente; no basta con documentarlo otra vez.
 - Anonimiza siempre las lecciones (sin rutas de claves, nombres de cuentas, identidades ni datos de terceros, P0.9) y cita solo evidencia real (pruebas de `docs/PRUEBAS.md` que existan, P0.2).
 - Al terminar una tarea con hallazgos, la documentación de la lección es parte de la entrega, no un extra opcional.
+
+### P1.21 Divide y vencerás: prototipo aislado antes de integrar
+- Divide el problema grande en problemas pequeños (divide y vencerás): antes de integrar cualquier módulo o componente al código base, constrúyelo y pruébalo de forma aislada, en un entorno mínimo y controlado (script/archivo temporal, rama aislada, venv, sandbox), sin acoplarlo al resto del sistema.
+- Aísla sus dependencias externas (bases de datos, APIs, servicios) con simulaciones (mocks o stubs) para verificar la lógica interna con total precisión, sin depender del entorno; este aislamiento es pilar de la ingeniería de software (evidencia: Martin Fowler, NASA — fuentes 29–32 de `docs/REGLAS-COMPLETAS.md`).
+- Verifica su lógica y sus salidas con casos límite (entradas vacías, valores extremos, errores esperados, condiciones de borde) mediante pruebas unitarias preliminares que puedan fallar de verdad (P1.1).
+- SOLO tras superar esas pruebas unitarias preliminares podrás incorporar la pieza al código base: debe funcionar correctamente de manera independiente antes de interactuar con el resto del sistema.
+- Para qué sirve dividir el problema (evidencia: Wikipedia divide-and-conquer, GeeksforGeeks problem decomposition; fuentes 25–28 de `docs/REGLAS-COMPLETAS.md`): los problemas difíciles se vuelven abordables (basta dividir, resolver los subproblemas simples y combinar), los fallos se localizan y corrigen en la pieza sin arrastrar al resto, las piezas independientes se pueden verificar en paralelo, y un error de lógica no contamina un estado del sistema que estaba en verde (P1.11).
+- Beneficios: detecta errores en la etapa más temprana y económica del ciclo de vida, acelera la ejecución de las pruebas y mejora el diseño del código. Saltarse esta validación individual equivale a construir sobre cimientos no verificados: un fallo local se convierte en un problema sistémico de difícil diagnóstico.
+- La prueba aislada es la primera fase de la verificación, no la última: después de integrar, verifica también el conjunto (P1.1, P1.11) — la pieza probada en aislamiento puede fallar al interactuar con el resto del sistema.
 
 ---
 

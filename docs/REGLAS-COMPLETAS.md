@@ -50,6 +50,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Fallbacks que ocultan errores** | Código con `try/except` que devuelven defaults, `except: pass`/`catch {}` vacíos, reintentos automáticos sin reportar o sustituciones silenciosas de APIs/librerías, que "funciona" pero con resultado incorrecto e indetectable | P1.19 |
 | **Pérdida de memoria del proyecto** | No documentar pruebas, fallos ni hallazgos en `docs/LECCIONES-APRENDIDAS.md` (o hacerlo sin evidencia ni anonimización): la lección muere con la sesión y los errores se repiten | P1.20 |
 | **Secuestro del agente (prompt injection)** | Instrucciones maliciosas incrustadas en contenido que el agente procesa (webs, documentos, correos, salidas de herramientas, archivos) que el agente obedece como si fueran órdenes del programador (OWASP LLM01; Anthropic: "hidden context" — LLM08) | P0.13 |
+| **Piezas rotas que contaminan el sistema** | Integrar módulos o componentes al código base sin construirlos y probarlos antes de forma aislada: un fallo local se mezcla con el resto del sistema, rompe un estado que estaba en verde y es difícil de localizar (divide y vencerás) | P1.21 |
 
 ## 2. Estructura de prioridades
 
@@ -57,7 +58,8 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
   seguridad, falsedad, producción). Violar una P0 es inaceptable y se reporta.
 - **P1 — SIEMPRE CUMPLIR**: reglas de trabajo contra errores comunes (verificación,
   alcance, contexto, honestidad, estándares, obediencia, protecciones, consistencia,
-  cambios graduales, autoría, transparencia y memoria del proyecto).
+  cambios graduales, divide y vencerás, autoría, transparencia y memoria del
+  proyecto).
 - **P2 — CUANDO APLIQUE**: preferencias de estilo y calidad cuando no contradicen
   necesidades concretas del usuario.
 
@@ -347,6 +349,50 @@ mismo fallo se repite 2+ veces, proponer regla nueva en AGENTS.md o endurecer la
 existente: la documentación repetida sin cambio de regla es memoria sin acción. La
 lección documentada es parte de la entrega, no un extra opcional.
 
+### P1.21 Divide y vencerás: prototipo aislado antes de integrar
+**Error**: el LLM integra directamente en el código base un módulo o componente sin
+probarlo de forma aislada. Un fallo de lógica local se mezcla con el resto del
+sistema, rompe un estado que estaba en verde (P1.11) y es difícil de localizar; el
+"big bang" de integración sin dividir el problema en piezas pequeñas es la misma
+falla de P1.11 pero a nivel de componente.
+**Prevención**: dividir el problema grande en problemas pequeños (divide y
+vencerás). Antes de integrar cualquier módulo o componente, construir y probar su
+prototipo de forma aislada, en un entorno mínimo y controlado (script/archivo
+temporal, rama aislada, venv, sandbox), sin acoplarlo al resto del sistema: aislar
+el componente reemplazando sus dependencias externas (bases de datos, APIs,
+servicios) con simulaciones (mocks o stubs) para verificar su lógica interna con
+total precisión, sin depender del entorno; verificar su lógica y sus salidas con
+casos límite (entradas vacías, valores extremos, errores esperados, condiciones de
+borde) mediante pruebas unitarias preliminares que puedan fallar de verdad (P1.1);
+SOLO tras superarlas se incorpora la pieza al código base.
+**Evidencia de la industria (fuentes 29–32)**: probar un módulo de forma aislada
+antes de integrarlo no es una recomendación menor, sino un pilar fundamental
+respaldado por décadas de práctica y estudio. Martin Fowler (test doubles, mocks y
+stubs) documenta el aislamiento del sistema bajo prueba de sus colaboradores
+(dependencias) como práctica estándar de unit testing, incluyendo sus límites
+(acoplar los tests a la implementación) y la necesidad de combinar pruebas aisladas
+con pruebas de aceptación del conjunto. En entornos críticos como la NASA, el
+unit testing es un requisito de ingeniería de software (Software Engineering
+Handbook SWE-062: los resultados de unit tests son clave para las revisiones de
+software safety-critical; F Prime de JPL divide el testing en unit testing e
+integration testing; NTRS documenta el análisis de unit testing del Core Flight
+Software de GSFC). Los beneficios: detecta errores en la etapa más temprana y
+económica del ciclo de vida, acelera la ejecución de las pruebas, mejora el diseño
+del código (favorece unidades pequeñas y desacopladas) y garantiza que cada pieza
+funcione por sí misma antes de enfrentarse a la complejidad del sistema completo.
+Saltarse esta validación individual equivale a construir sobre cimientos no
+verificados: un fallo local se convierte en un problema sistémico de difícil
+diagnóstico.
+**Para qué sirve dividir (fuentes 25–28)**: los problemas difíciles se vuelven
+abordables — basta dividir, resolver los subproblemas simples y combinar (Wikipedia
+divide-and-conquer); la descomposición en subproblemas manejables permite
+resolverlos de forma independiente y en paralelo (GeeksforGeeks problem
+decomposition); en metodologías ágiles el trabajo se divide en unidades pequeñas
+entregables y verificables (Wikipedia/Agile Alliance user story). La prueba aislada
+es la primera fase de la verificación, no la última: tras integrar, verificar
+también el conjunto (P1.1, P1.11) — la pieza probada en aislamiento puede fallar al
+interactuar con el resto del sistema.
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres
@@ -508,6 +554,61 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
       datos ML...). Referencia de la sección 7 para el mapeo de cobertura de
       amenazas; el proyecto se alinea con sus tácticas de ejecución/impacto.
 
+25. **Wikipedia — Divide-and-conquer algorithm**
+    https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm
+    - Paradigma de diseño de algoritmos: divide el problema en subproblemas del
+      mismo tipo hasta que son simples de resolver directamente, y combina sus
+      soluciones. Ventajas: resolver problemas conceptualmente difíciles, eficiencia
+      algorítmica (quicksort, mergesort, Karatsuba, FFT), paralelismo y uso eficiente
+      de la memoria. Base conceptual de P1.21 (divide y vencerás).
+
+26. **GeeksforGeeks — What is Problem Decomposition?**
+    https://www.geeksforgeeks.org/operating-systems/what-is-problem-decomposition/
+    - La descomposición de problemas divide un problema complejo en subproblemas
+      más pequeños y manejables que se resuelven de forma independiente antes de
+      combinar sus soluciones (principio "divide and conquer"). Base de P1.21.
+
+27. **Wikipedia — User story**
+    https://en.wikipedia.org/wiki/User_story
+    - En metodologías ágiles el trabajo se descompone en historias pequeñas
+      (splitting) para entregas incrementales, verificables y con feedback temprano.
+      Base de P1.21 (dividir el trabajo en piezas pequeñas verificables).
+
+28. **Agile Alliance — User Stories**
+    https://www.agilealliance.org/glossary/user-stories/
+    - Glosario ágil: historias de usuario como unidades de trabajo pequeñas,
+      independientes y entregables; el dividir y repartir el trabajo en piezas
+      pequeñas es práctica estándar de la industria. Base de P1.21.
+
+29. **Martin Fowler — Mocks Aren't Stubs**
+    https://martinfowler.com/articles/mocksArentStubs.html
+    - Artículo canónico sobre test doubles (dummy, fake, stub, spy, mock) y el
+      aislamiento del sistema bajo prueba (SUT) de sus colaboradores en unit
+      testing; documenta la verificación por estado vs. comportamiento, el
+      trade-off de acoplar los tests a la implementación y la necesidad de
+      combinar pruebas aisladas con pruebas de aceptación del conjunto. Base de
+      P1.21 (aislar dependencias con mocks/stubs).
+
+30. **NASA — Software Engineering Handbook: SWE-062 Unit Test**
+    https://swehb.nasa.gov/spaces/7150/pages/16450289/SWE-062%2B-%2BUnit%2BTest
+    - La NASA exige unit testing como requisito de ingeniería de software (NPR
+      7150.2): los resultados de unit tests son clave en las revisiones de
+      software safety-critical. Evidencia de que el aislamiento de módulos es
+      práctica en entornos críticos. Base de P1.21.
+
+31. **NASA JPL — F Prime (F´): Unit Testing**
+    https://fprime.jpl.nasa.gov/latest/docs/user-manual/overview/unit-testing/
+    - El framework de vuelo de JPL divide el testing en dos fases: unit testing
+      (prueba los componentes individuales) e integration testing (prueba el
+      sistema integrado); cada unidad se prueba sola antes de integrarse. Base
+      de P1.21.
+
+32. **NASA GSFC — An Analysis of the Core Flight Software Unit Testing (NTRS)**
+    https://ntrs.nasa.gov/api/citations/20100031199/downloads/20100031199.pdf
+    - Análisis del enfoque de unit testing del Core Flight Software de Goddard:
+      lecciones aprendidas y best practices de la infraestructura de unit tests
+      de una línea de productos de software de vuelo. Base de P1.21.
+
 **Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
@@ -523,6 +624,14 @@ Las fuentes 22–24 (P0.13 y mapeo, añadidas el 15-08-2026, ronda 38) se verifi
 `curl -L -o /dev/null -w "%{http_code}" --max-time 20 -A <UA navegador>`: **todas ×
 HTTP 200** (GitHub GenAI-Security-Project, anthropic.com, atlas.mitre.org; verificado
 15-08-2026).
+Las fuentes 25–28 (P1.21 divide y vencerás, añadidas el 16-08-2026) se verificaron con
+`curl -L -o /dev/null -w "%{http_code}" --max-time 20 -A <UA navegador>`: **todas ×
+HTTP 200** (Wikipedia divide-and-conquer, GeeksforGeeks problem decomposition,
+Wikipedia user story, Agile Alliance; verificado 16-08-2026).
+Las fuentes 29–32 (P1.21 mocks/stubs y evidencia, añadidas el 16-08-2026) se verificaron
+con `curl -L -o /dev/null -w "%{http_code}" --max-time 20 -A <UA navegador>`: **todas ×
+HTTP 200** (Martin Fowler Mocks Aren't Stubs, NASA SWEHB SWE-062, NASA JPL F Prime,
+NASA NTRS; verificado 16-08-2026).
 
 ## 6. Cómo extender este conjunto
 

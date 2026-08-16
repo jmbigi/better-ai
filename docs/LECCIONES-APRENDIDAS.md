@@ -486,3 +486,68 @@ documentación de lecciones no es un deber con checklist, la sesión la omite y 
 error se repite. Las reglas de memoria se aplican a sí mismas (esta ronda lo
 demuestra: la lección se documentó como parte de la entrega).
 **Estado**: cerrada.
+
+## 2026-08-16 — Regla P1.21: "Divide y vencerás: prototipo aislado antes de integrar"
+
+**Problema**: el programador pidió una regla nueva: antes de integrar cualquier
+módulo o componente al código base, construir y probar exclusivamente su prototipo
+de forma aislada, en un entorno mínimo y controlado, verificando lógica y salidas
+con casos límite; solo tras superar las pruebas unitarias preliminares incorporarlo.
+El concepto rector es "divide y vencerás", y el programador pidió investigar en
+internet para qué sirve dividir un problema grande en problemas pequeños.
+**Solución**: regla nueva P1.21 en AGENTS.md (título "Divide y vencerás: prototipo
+aislado antes de integrar"): dividir el problema grande en problemas pequeños;
+cada módulo/componente se construye y prueba aislado (script/archivo temporal, rama
+aislada, venv, sandbox) con casos límite y pruebas unitarias que puedan fallar
+(P1.1); solo tras superarlas se integra, y después se verifica el conjunto (P1.1,
+P1.11). Investigación (P1.7) con 4 fuentes verificadas por HTTP (todas 200):
+Wikipedia divide-and-conquer (los problemas difíciles se vuelven abordables:
+dividir, resolver subproblemas simples, combinar; eficiencia, paralelismo), GeeksforGeeks
+problem decomposition (subproblemas manejables e independientes), Wikipedia user
+story y Agile Alliance (descomposición ágil del trabajo en piezas pequeñas
+entregables y verificables). Sincronizada en REGLAS-COMPLETAS (limitación #36 +
+detalle + fuentes 25–28), README (error #36, smoke test "13 P0 y 21 P1"), CHECKLIST
+(sección Divide y vencerás) y verificador (21 P1 / 36 / 36).
+**Evidencia**: códigos HTTP reales por `curl -L -w "%{http_code}"` (200 × 4:
+Wikipedia D&C, GeeksforGeeks, Wikipedia user story, Agile Alliance); contenido de
+las fuentes fetcheado (webfetch + DuckDuckGo); `verificar-proyecto.sh` en verde tras
+los cambios (pendiente de re-ejecutar en esta sesión).
+**Lección**: la descomposición de problemas no es solo un truco de algoritmos: es
+la estrategia de integración de código para agentes de IA (prototipo aislado →
+pruebas preliminares → integración → verificación del conjunto). La investigación
+de fuentes de la industria (P1.7) se integra en la propia regla citando las fuentes
+en `docs/REGLAS-COMPLETAS.md`, de modo que la regla no es una afirmación sin base
+(P0.1/P0.2).
+**Estado**: cerrada.
+
+## 2026-08-16 — P1.21 ampliada con la evidencia de ingeniería de software (mocks/stubs, Fowler, NASA)
+
+**Problema**: el programador reforzó el concepto de la regla: el aislamiento del
+módulo debe incluir el reemplazo de sus dependencias externas (bases de datos,
+APIs, servicios) con simulaciones (mocks o stubs), y la regla debe citar la
+evidencia de la ingeniería de software (Martin Fowler, NASA) y los beneficios
+(errores en la etapa más temprana y económica, pruebas más rápidas, mejor diseño;
+saltarse la validación individual = construir sobre cimientos no verificados).
+**Solución**: ampliada la sección P1.21 de AGENTS.md (bullet de mocks/stubs con
+referencia a las fuentes 29–32, bullet de beneficios con la metáfora de los
+cimientos), la fila resumen de la tabla (mocks/stubs), el detalle de REGLAS-
+COMPLETAS (nueva subsección "Evidencia de la industria" + "Para qué sirve dividir"),
+README (error #36 con mocks/stubs) y CHECKLIST (casilla de aislamiento de
+dependencias con mocks/stubs). Investigación verificada (P1.7/P0.2): 4 URLs nuevas
+con `curl -L -w "%{http_code}"` → todas HTTP 200: Martin Fowler "Mocks Aren't
+Stubs" (test doubles: dummy/fake/stub/spy/mock, verificación por estado vs.
+comportamiento, trade-off de acoplar tests a la implementación, combinar unit tests
+con pruebas de aceptación), NASA SWEHB SWE-062 Unit Test (unit tests clave en
+revisiones de software safety-critical), NASA JPL F Prime (testing dividido en unit
+testing e integration testing) y NASA NTRS (análisis de unit testing del Core
+Flight Software de GSFC). Nota de verificación HTTP actualizada en REGLAS-COMPLETAS
+(fuentes 29–32).
+**Evidencia**: códigos HTTP 200 × 4 (16-08-2026) y contenido fetcheado de las 4
+fuentes (webfetch); `verificar-proyecto.sh` en verde tras los cambios (pendiente de
+re-ejecutar en esta sesión).
+**Lección**: una regla sobre prácticas de ingeniería gana fuerza normativa cuando
+cita evidencia de la industria verificada y deja el detalle en el documento de
+referencia (divulgación progresiva, fuente 5): el AGENTS.md queda corto y la
+justificación es auditable. El propio trabajo obedeció P1.21: cada archivo se editó
+de forma aislada y verificada, y al final se verificó el conjunto (P1.11).
+**Estado**: cerrada.
