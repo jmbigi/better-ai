@@ -610,3 +610,36 @@ REGLAS ↔ PRUEBAS ↔ LECCIONES), porque cada sesión actualiza subconjuntos di
 y las notas de "pendiente" en documentos de memoria se reconcilian al cierre, no se
 dejan caducar (P1.6/P1.20).
 **Estado**: cerrada.
+
+## 2026-08-16 — CRÍTICA: filtración de un proyecto privado en un repo público y purga del historial (ronda 41)
+
+**Problema**: la lección de la ronda 34 (2026-08-01) citaba por su nombre un proyecto
+privado del programador y sus detalles técnicos (modelos de visión, hardware,
+directivas internas del proyecto). Este repo es PÚBLICO (GitHub + Codeberg): la
+filtración estaba tanto en el estado actual como en el historial completo (commit de
+la ronda 34). Se detectó al auditar la propia sesión (P0.11): el nombre del proyecto
+privado salió en una respuesta de la IA y el programador señaló que era privado.
+**Solución**: (1) estado actual anonimizado en LECCIONES con términos genéricos
+("un proyecto de visión del programador (privado)"), preservando la lección técnica
+(la ronda 34 quedó como "un proyecto de visión del programador (privado)"); (2) purga
+del HISTORIAL completo con `git filter-repo --replace-text` (reemplazos literales en
+archivo fuera del repo, `/tmp`) + `--prune-empty always` — 59 commits reescritos; (3)
+verificación local: 0 commits con cualquiera de los 12 términos en `git log --all
+-S`, `git fsck` sin huérfanos, verificador 30 OK; (4) el deny `git push --force*` de
+`opencode.json` BLOQUEÓ el force-push del agente (el guardarraíl cumplió su función):
+el programador lo ejecutó manualmente en GitHub y Codeberg; (5) verificación
+post-push con 2 clones frescos (uno por remoto): `git log -S <término> --all` vacío,
+HEAD = commit limpio en ambos. Política dictada: SOLO se referencian proyectos
+públicos y populares — reforzada P0.9 (nuevo bullet) + PRUEBAS ronda 41 (prueba 145).
+Backup completo previo: `/tmp/opencode/backup-better-ai-20260816.bundle` (restauración
+posible, P1.9).
+**Evidencia**: prueba 145 de `docs/PRUEBAS.md`; salidas de `git filter-repo`, los 2
+force-push del programador y los 2 clones frescos verificados (16-08-2026).
+**Lección**: (1) antes de publicar/hacer público un repo, auditar el historial
+COMPLETO, no solo el estado actual (P0.10/P0.11) — la filtración llevaba 15 días
+pública; (2) al documentar lecciones técnicas de proyectos privados, anonimizar
+SIEMPRE con términos genéricos (política nueva: solo proyectos públicos y populares
+se referencian); (3) la purga con herramienta de filtrado es viable y verificable,
+pero requiere backup, ejecución manual coordinada del force-push (deny determinista)
+y re-clonado de los remotos para verificar.
+**Estado**: cerrada.

@@ -128,9 +128,14 @@ confirmación explícita.
 **Error**: leer, imprimir, registrar o publicar información personal (nombres reales,
 correos, teléfonos, IPs, hostnames o usuarios internos, datos biométricos, rutas de
 claves) — en proyectos públicos Y privados, porque lo privado puede volverse público.
+Incluye también referenciar proyectos privados del programador (nombre o detalles
+técnicos: modelos, hardware, librerías internas, directivas) en documentos,
+lecciones o commits de repos públicos.
 **Prevención**: prohibición total de lectura/impresión/registro/commit; al documentar
 fallos, anonimizar (placeholders); ante hallazgos, reportar sin difundir; auditar con
-grep antes de publicar.
+grep antes de publicar. Solo se referencian proyectos públicos y populares: si una
+lección técnica proviene de un proyecto privado, se anonimiza con términos genéricos
+(política añadida el 16-08-2026 tras la purga de historial de la ronda 41).
 
 ### P0.10 En los repos nunca incluyas claves ni datos personales
 **Error**: commitear API keys, tokens, claves SSH, `.env`, certificados o datos
