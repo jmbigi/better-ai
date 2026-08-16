@@ -336,6 +336,17 @@ si se propone, se declara (qué falla, qué se usa en su lugar, cómo se observa
 fallo) y se espera su aprobación. Estándar de sistemas empresariales: una app que
 falla de forma visible es más fiable y diagnosticable que una con comportamiento
 indefinido (Microsoft best practices para excepciones; SRE: observabilidad).
+Herramientas operativas (2026-08-16): **criterio de especificidad** — si al sustituir
+la entidad principal de la consulta por un término aleatorio la respuesta sigue
+siendo válida y aparentemente correcta, es genérica (fallback masivo) y debe rehacerse
+con enfoque granular al caso — y **plantilla unificada de excepción controlada**
+(`[EXCEPCIÓN CONTROLADA]` con Motivo: descripción concreta referenciando datos
+textuales de la consulta; Acción aplicada: detención / solicitud de parámetros X, Y, Z
+/ reinicio con enfoque Y), para detenciones por parámetros faltantes, contradicciones
+o ambigüedad insalvable. La plantilla NO limita los reportes obligatorios (P0.11,
+P1.3, P1.6) y ninguna herramienta prevalece sobre la orden explícita del programador
+(P1.8) ni sobre las P0; los umbrales cuantitativos de la propuesta original (30 %/60 %)
+se descartaron por no verificables (P0.1).
 
 ### P1.20 Actualiza las lecciones aprendidas
 **Error**: el agente termina la tarea sin documentar los fallos, hallazgos y
