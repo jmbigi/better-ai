@@ -553,6 +553,27 @@ El programador pidió la regla "Nunca desobedecer al usuario". Análisis previo 
 | 141 | Red-team re-ejecutado tras el endurecimiento del parser (solo `state.error` con "prevents you" cuenta como BLOQUEADO; cualquier otro error = INCONCLUSO): 154/154 BLOQUEADOS, 0 inconclusos; evidencia regenerada con la tabla final (hosts `dummyhost`) | ✅ 154/154; reporte en `/tmp/opencode/redteam-evidencia-20260815.txt` (154 líneas OK, 0 FALLO/INCONCLUSO) |
 | 142 | Sandbox `scripts/opencode-sandbox.sh` con bwrap (tras habilitar `kernel.apparmor_restrict_unprivileged_userns=0` por el programador, verificado `cat` = 0): aislamiento del SO verificado con `python3` dentro del namespace (funciona, `/etc` en solo lectura, red aislada por defecto con `--unshare-net`), pero **el runtime Bun de opencode 1.18.18 crashea (Segmentation fault, guard 0xBBADBEEF) al inicializar dentro del user namespace** — probado en 5 configuraciones (con/sin `--share-net`, con/sin binds de datos de opencode, `--version`); sin issue conocido de Bun con fix (búsqueda en API de GitHub: sin resultados relevantes) | ⚠️ Aislamiento de bwrap funcional; **opencode no ejecutable dentro del sandbox en este kernel** → sandbox documentado como limitación del runtime (no del ruleset); sysctl quedó en 0 (decisión del programador) |
 
+## Ronda 40 — Regla P1.21: "Divide y vencerás: prototipo aislado antes de integrar" (16-08-2026)
+
+El programador pidió una regla nueva: antes de integrar cualquier módulo o componente
+al código base, construir y probar exclusivamente su prototipo de forma aislada, en
+un entorno mínimo y controlado, verificando lógica y salidas con casos límite; solo
+tras superar las pruebas unitarias preliminares incorporarlo. Concepto rector:
+"divide y vencerás". Investigación (P1.7) para documentar para qué sirve dividir un
+problema grande en problemas pequeños: 4 fuentes verificadas HTTP 200 (Wikipedia
+divide-and-conquer, GeeksforGeeks problem decomposition, Wikipedia user story,
+Agile Alliance) + 4 fuentes de la ampliación con evidencia de ingeniería de software
+(Martin Fowler "Mocks Aren't Stubs"; NASA SWEHB SWE-062 Unit Test; NASA JPL F Prime;
+NASA NTRS Core Flight Software) — todas HTTP 200 (16-08-2026). Regla sincronizada:
+AGENTS.md (tabla + sección con mocks/stubs, casos límite, beneficios y evidencia),
+REGLAS-COMPLETAS (limitación #36, detalle, fuentes 25–32), README (error #36, smoke
+test "13 P0 y 21 P1"), CHECKLIST (sección P1.21), verificador (21 P1 / 36 / 36) y
+LECCIONES (2 entradas).
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 143 | Carga de la regla nueva: preguntar al modelo por el título y los bullets de P1.21 | ✅ Citó íntegra la regla: título "Divide y vencerás: prototipo aislado antes de integrar" + los 7 bullets (divide el problema grande; aísla dependencias con mocks/stubs citando Fowler/NASA y fuentes 29–32; casos límite; solo tras superar las pruebas se integra; beneficios; verificar el conjunto tras integrar) — verificador 27 OK, 0 FALLOS (pre-commit, commit 608e692) |
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal
