@@ -44,7 +44,7 @@
 | P1.16 | Respeta la política de IA del proyecto anfitrión (ToU, CONTRIBUTING, AI_POLICY, AGENTS.md) | 🟠 P1 | Violar restricciones del repo destino |
 | P1.17 | Humanos se comunican con humanos: sin respuestas IA en revisiones ni árbitros automáticos | 🟠 P1 | IA como intermediaria engañosa |
 | P1.18 | Revisa los imports antes de commitear/pushear: existen, usados, seguros y con licencia compatible | 🟠 P1 | Imports rotos, muertos o maliciosos |
-| P1.19 | Evita fallbacks: no enmascares errores con defaults, `except: pass` ni sustituciones de APIs/librerías; falla explícito y deja la decisión al programador | 🟠 P1 | Fallbacks que ocultan errores y flujos no controlados |
+| P1.19 | Evita fallbacks: no enmascares errores con defaults, `except: pass` ni sustituciones de APIs/librerías; falla explícito (plantilla de excepción controlada), rechaza respuestas genéricas y deja la decisión al programador | 🟠 P1 | Fallbacks que ocultan errores y flujos no controlados |
 | P1.20 | Actualiza las lecciones aprendidas: documenta cada prueba, fallo o hallazgo relevante en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia); si algo falló 2+ veces, propón regla o endurece la existente | 🟠 P1 | Memoria del proyecto perdida, errores repetidos |
 | P1.21 | Divide y vencerás: construye y prueba cada módulo o componente de forma aislada (aislando sus dependencias con mocks/stubs), en un entorno mínimo y controlado, con casos límite, antes de integrarlo al código base | 🟠 P1 | Piezas rotas que contaminan el sistema |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
@@ -254,6 +254,16 @@
 - El error se ELEVA, no se traga: si la vía principal puede fallar, falla explícito (fail fast), reporta el fallo con su contexto y propón la alternativa al programador para que él decida (refuerza P1.6/P1.8).
 - Un fallback SOLO se implementa si el programador lo pide explícitamente; si se propone, se DECLARA (qué falla, qué se usa en su lugar, cómo se observa el fallo) y se espera su aprobación.
 - Estándar de referencia de sistemas empresariales: una app que falla de forma visible es más fiable y diagnosticable que una que "funciona" con comportamiento indefinido (Microsoft best practices; SRE: observabilidad). Un error visible y reportado vale más que una ejecución "exitosa" con resultado incorrecto.
+- Herramientas operativas contra el fallback genérico en respuestas (añadidas 2026-08-16, a partir de la propuesta "PCE v2.0" revisada y filtrada):
+  - **Criterio de especificidad (test de intercambiabilidad)**: si al sustituir la entidad principal de la consulta por un término aleatorio la respuesta seguiría siendo válida y aparentemente correcta, es una respuesta genérica (fallback masivo): deséchala y rehazla con un enfoque granular al caso.
+  - **Plantilla de excepción controlada**: al detenerte por parámetros faltantes, contradicciones o ambigüedad insalvable, usa este formato único:
+    ```
+    [EXCEPCIÓN CONTROLADA]
+    Motivo: [descripción concreta, referenciando datos textuales de la consulta]
+    Acción aplicada: [detención | solicitud de parámetros X, Y, Z | reinicio con enfoque Y]
+    ```
+  - La plantilla NO limita los reportes obligatorios: advertencias de seguridad (P0.11), supuestos (P1.3) y reportes de fallo (P1.6) van siempre por delante y fuera de la plantilla.
+  - Ninguna herramienta de esta regla prevalece sobre la orden explícita del programador (P1.8) ni sobre las P0; los umbrales cuantitativos de la propuesta original (30 %/60 %) se descartaron por no ser verificables (P0.1).
 
 ### P1.20 Actualiza las lecciones aprendidas
 - Tras cada prueba, fallo o hallazgo relevante: documenta la lección en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia). El archivo es la memoria del proyecto: si no se escribe, la memoria se pierde con la sesión.
@@ -309,7 +319,7 @@
 - [ ] ¿Reporté qué falta y qué no pude verificar?
 - [ ] ¿Declaré el uso de IA en commits/PRs significativos (trailer `Assisted-by:`) y todo lo generado fue revisado y entendido por el humano? (P1.13–P1.15)
 - [ ] ¿Revisé los imports/dependencias antes de commitear (existen, usados, seguros, licencias compatibles)? (P1.18)
-- [ ] ¿Evité fallbacks silenciosos en el código (defaults, `except: pass`, sustituciones de APIs sin declarar)? ¿Los errores se elevan y reportan? (P1.19)
+- [ ] ¿Evité fallbacks silenciosos en el código (defaults, `except: pass`, sustituciones de APIs sin declarar)? ¿Los errores se elevan y reportan? ¿Evité respuestas genéricas (test de intercambiabilidad) y usé la plantilla de excepción controlada al detenerme? (P1.19)
 - [ ] ¿Documenté las lecciones del trabajo en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia) y, si algo falló 2+ veces, propuse regla o endurecer la existente? (P1.20)
 
 > Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
