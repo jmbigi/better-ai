@@ -643,3 +643,63 @@ se referencian); (3) la purga con herramienta de filtrado es viable y verificabl
 pero requiere backup, ejecución manual coordinada del force-push (deny determinista)
 y re-clonado de los remotos para verificar.
 **Estado**: cerrada.
+
+## 2026-08-16 — Doble codificación base64 en URLs cifradas: PHP `openssl_decrypt` re-decodifica internamente (auditoría de enlaces)
+
+**Problema**: en una auditoría de enlaces de un sitio PHP, la URL real de cada enlace estaba
+ofuscada en un parámetro `u` (AES-256-ECB). El descifrado funcionaba en PHP
+(`openssl_decrypt(base64_decode($u), ...)`) pero fallaba en Node.js con
+`ERR_OSSL_WRONG_FINAL_BLOCK_LENGTH` (ciphertext de 172 bytes, no múltiplo de 16), y hasta el
+decifrado por bloques de 16 bytes daba `false` en PHP. Truncar el buffer (128/144/160 bytes)
+también fallaba; solo el buffer COMPLETO descifraba bien en PHP.
+**Solución**: `openssl_decrypt` SIN `OPENSSL_RAW_DATA` re-decodifica base64 internamente antes
+de descifrar (comportamiento del API PHP). El valor almacenado era
+`u = base64(base64(AES(url)))`: PHP hacía base64_decode + el re-decode interno; en Node hay
+que decodificar base64 DOS veces antes del AES. Además, PHP rellena con ceros las claves
+AES-256 cortas (16→32 bytes); Node exige los 32 bytes explícitos
+(`Buffer.concat([key, Buffer.alloc(32 - len)])`).
+**Evidencia**: tras el fix, 51/51 enlaces decodificados correctamente en Node; prueba manual
+en PHP: `OPENSSL_ZERO_PADDING` sobre el buffer completo devolvía exactamente 128 bytes
+(plaintext + PKCS7), confirmando el re-decode interno.
+**Lección**: al portar descifrado de PHP a Node, no asumir que el valor está codificado UNA
+vez: verificar el comportamiento real de `openssl_decrypt` (re-decode base64 sin
+`OPENSSL_RAW_DATA`) y el padding de claves AES.
+**Estado**: cerrada.
+
+## 2026-08-16 — "Página en blanco" en el primer intento no es concluyente; y `ERR_NETWORK_CHANGED` local tumba runs largos
+
+**Problema**: en la auditoría de enlaces, un destino cargó en blanco (OCR sin texto) en el
+intento 1 y salió correcto en el intento 2 (página JS lenta, no página rota). Además, la red
+local dio `ERR_NETWORK_CHANGED` esporádico en la carga inicial y en navegaciones, abortando
+el test completo (Playwright reintenta el test entero).
+**Solución**: (1) la clase "blanco" (OCR vacío) se reintenta una vez antes de declararla
+definitiva; (2) la carga inicial de la página principal se protegió con 3 reintentos
+(helper `gotoBase`), convirtiendo un error transitorio en espera y retry en vez de abandono.
+**Evidencia**: el destino lento pasó de "blanco" a OK con OCR en el intento 2 (screenshot del
+mismo run); el test completo sobrevivió a los `ERR_NETWORK_CHANGED` tras el fix.
+**Lección**: en auditorías automatizadas, un estado anómalo del PRIMER intento (blanco, error
+de red transitorio) no es veredicto: reintentar antes de clasificar; proteger SIEMPRE la
+navegación inicial de un run largo.
+**Estado**: cerrada.
+
+## 2026-08-16 — ⚠️ ADVERTENCIA DE SEGURIDAD (P0.11): mini-admin de BD y credenciales hardcodeadas en un repositorio de sitio web
+
+**Problema**: al buscar cómo modificar un registro puntual de producción se encontró que el
+repositorio del sitio contiene: (1) credenciales de BD de producción hardcodeadas en su
+config; y (2) un mini-admin de BD (phpMiniAdmin) con contraseña de acceso y credenciales de
+BD hardcodeadas en el propio archivo. El mini-admin está DESPLEGADO y responde públicamente
+(HTTP 200 con su página de login, verificado con `curl`). No se verificó si la contraseña
+desplegada coincide con la del repo (el login no se completó): el riesgo existe aunque no
+esté confirmado el acceso.
+**Solución/acción aplicada**: se ADVIERTE al programador (esta entrada). Nada más se tocó.
+**Recomendación al programador**: (1) comprobar en el servidor si la contraseña del
+mini-admin es la del repo y, en ese caso, ROTARLA o eliminar el archivo del despliegue
+público; (2) mover las credenciales de BD a variables de entorno fuera del repositorio
+(P0.6/P0.10); (3) auditar el historial del repo por credenciales antiguas (P0.10); (4) si la
+contraseña estuvo en un repo con remoto público, rotar la credencial de BD.
+**Evidencia**: `curl` al mini-admin devolvió 200 con página de login; contenido del repo con
+las credenciales hardcodeadas (no se reproducen aquí, P0.9).
+**Estado**: abierta → **POSPUESTA por decisión del programador (2026-08-16)**: "ignorar
+hardcodeo por el momento". Advertencia emitida y registrada; se retoma cuando él lo decida
+(rotar contraseña del mini-admin o retirar el archivo del despliegue; mover credenciales a
+variables de entorno; auditar historial si el repo llega a ser público).
