@@ -5,6 +5,11 @@
     "deepseek",
     "openrouter"
   ],
+  "provider": {
+    "kilo": {
+      "whitelist": ["kilo-auto/free", "kilo-auto/efficient"]
+    }
+  },
   "permission": {
     "bash": {
       "*": "allow",
