@@ -5,7 +5,7 @@
 
 ## Cómo se actualiza
 
-- Tras cada prueba de las reglas o de opencode, añadir una entrada con fecha.
+- Tras cada prueba de las reglas o de opencode/kilocode, añadir una entrada con fecha.
 - Formato: **Fecha — Título** → Problema / Solución / Evidencia.
 - Si el mismo fallo se repite 2+ veces: proponer una regla nueva o endurecer una existente.
 
@@ -703,3 +703,26 @@ las credenciales hardcodeadas (no se reproducen aquí, P0.9).
 hardcodeo por el momento". Advertencia emitida y registrada; se retoma cuando él lo decida
 (rotar contraseña del mini-admin o retirar el archivo del despliegue; mover credenciales a
 variables de entorno; auditar historial si el repo llega a ser público).
+
+---
+
+## 2026-08-21 — Agregada kilocode como opción de IA de programación
+
+**Problema**: el ruleset better-ai estaba documentado solo para opencode. La config
+`kilo.json` (para kilocode) fue creada con los mismos 245 guardarraíles de permisos
+(159 `deny`, 85 `ask`, 1 `allow`) que `opencode.json`, pero con `enabled_providers:
+["kilo", "deepseek", "openrouter"]` y `$schema: https://app.kilo.ai/config.json`.
+La documentación (AGENTS.md, README, verificador) no reflejaba kilocode.
+
+**Solución**: (1) verificado que `kilo.json` y `opencode.json` tienen los mismos
+76 patrones de permisos bash (assert de igualdad en el verificador); (2) AGENTS.md
+documenta ambas herramientas en la sección "Entorno del proyecto" con sus providers
+y modelos permitidos (precio bajo); (3) README agrega fila `kilo.json` y actualiza
+instrucciones de uso para ambas herramientas; (4) `scripts/verificar-proyecto.sh`
+verifica `kilo.json` (245 patrones, providers, edit/read deny) y comprueba que
+`opencode.json` tiene los mismos permisos bash; (5) `.kilo/agents/` enlaza a
+`.opencode/agents/` (misma configuración de agentes subagente de solo lectura); (6)
+`.kilo/package.json` con `@kilocode/plugin` y `@kilocode/cli` v7.4.23.
+
+**Evidencia**: `python3 -c "import json; a=json.load(open('kilo.json'))['permission']['bash']; b=json.load(open('opencode.json'))['permission']['bash']; assert a==b"` → exit 0; `bash scripts/verificar-proyecto.sh` → 32/33 OK (el único fallo es "árbol de trabajo limpio" por cambios sin commitear, esperado). Modelos low-cost verificados en kilocode docs: `deepseek/deepseek-chat` (provider DeepSeek), `kilo-auto/free` / `kilo-auto/efficient` (Kilo Gateway). Profundidades de agentes verificadas en `docs/customize/custom-subagents` (kilo.ai/docs).
+**Estado**: cerrada.
