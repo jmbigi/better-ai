@@ -608,3 +608,17 @@ historial limpio).
   Todas las pruebas de este informe se ejecutaron con `opencode-go/deepseek-v4-flash`.
 - Entornos de **producción** reales (prohibido por P0.4; solo se prueban entornos
   temporales aislados).
+
+## Compatibilidad kilocode (agregado 2026-08-21)
+
+- `kilo.json` (config para kilocode) tiene **los mismos 245 patrones de permisos
+  bash** (159 `deny`, 85 `ask`, 1 `allow`) que `opencode.json` — verificado con
+  `python3 -c "import json; a=json.load(open('kilo.json'))['permission']['bash']; b=json.load(open('opencode.json'))['permission']['bash']; assert a==b"` (exit 0).
+- Los `deny` de `kilo.json` son idénticos a los de `opencode.json`; por tanto, el
+  **red-team de `scripts/probar-denies.sh` (154/154 verificados)** aplica a kilocode
+  con el mismo alcance.
+- `enabled_providers` en `kilo.json` es `["kilo", "deepseek", "openrouter"]`; los
+  modelos low-cost compatibles son `deepseek/deepseek-chat` (provider DeepSeek) y
+  `kilo-auto/free` / `kilo-auto/efficient` (Kilo Gateway auto-routing).
+- El verificador (`scripts/verificar-proyecto.sh`) ahora verifica `kilo.json` y
+  comprueba que `opencode.json` tiene los mismos permisos bash.

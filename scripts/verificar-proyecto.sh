@@ -52,30 +52,42 @@ assert citadas <= existentes, 'lecciones citan pruebas inexistentes: ' + str(cit
 "
 
 echo "== 2. Config =="
-check "opencode.json es JSON valido" python3 -c "import json; json.load(open('opencode.json'))"
+check "kilo.json es JSON valido" python3 -c "import json; json.load(open('kilo.json'))"
+check "opencode.json es JSON valido (compatibilidad)" python3 -c "import json; json.load(open('opencode.json'))"
 check "245 patrones de permisos bash" python3 -c "
 import json
-b = json.load(open('opencode.json'))['permission']['bash']
+b = json.load(open('kilo.json'))['permission']['bash']
 assert len(b) == 245, len(b)
 assert sum(1 for v in b.values() if v == 'deny') == 159
 assert sum(1 for v in b.values() if v == 'ask') == 85
 "
+check "kilo.json y opencode.json tienen los mismos permisos bash" python3 -c "
+import json
+a = json.load(open('kilo.json'))['permission']['bash']
+b = json.load(open('opencode.json'))['permission']['bash']
+assert a == b, 'permisos bash difieren entre kilo.json y opencode.json'
+"
 check "edit/read bloquean claves y credenciales" python3 -c "
 import json
-p = json.load(open('opencode.json'))['permission']
+p = json.load(open('kilo.json'))['permission']
 # deny: patrones de claves y credenciales (listados para el scan de seguridad)
 for sec in ('edit', 'read'):
     for pat in ('~/.ssh/*', '*.ssh/*', '~/.aws/*', '*.aws/*', '*.pem', '*id_rsa*', '*id_ed25519*', '*credentials*'):  # deny: patrones
         assert p[sec].get(pat) == 'deny', (sec, pat)
 "
-check "enabled_providers restringe a opencode y opencode-go" python3 -c "
+check "enabled_providers en kilo.json: kilo, deepseek, openrouter" python3 -c "
+import json
+c = json.load(open('kilo.json'))
+assert c.get('enabled_providers') == ['kilo', 'deepseek', 'openrouter'], c.get('enabled_providers')
+"
+check "enabled_providers en opencode.json: opencode, opencode-go" python3 -c "
 import json
 c = json.load(open('opencode.json'))
 assert c.get('enabled_providers') == ['opencode', 'opencode-go'], c.get('enabled_providers')
 "
 check "conteos de patrones en README coherentes con la config" python3 -c "
 import json, re
-b = json.load(open('opencode.json'))['permission']['bash']
+b = json.load(open('kilo.json'))['permission']['bash']
 r = open('README.md').read()
 total, deny, ask = len(b), sum(1 for v in b.values() if v == 'deny'), sum(1 for v in b.values() if v == 'ask')
 assert f'{total} patrones' in r, 'README sin el total de patrones'
@@ -84,7 +96,7 @@ assert f'{ask} \`ask\`' in r, 'README sin el conteo de ask'
 "
 check "edit/read bloquean .env y permiten .env.example" python3 -c "
 import json
-p = json.load(open('opencode.json'))['permission']
+p = json.load(open('kilo.json'))['permission']
 assert p['edit'].get('*.env') == 'deny'
 assert p['edit'].get('*.env.*') == 'deny'
 assert p['edit'].get('*.env.example') == 'allow'
@@ -94,7 +106,7 @@ assert p['read'].get('*.env.example') == 'allow'
 "
 check "pares criticos deny presentes" python3 -c "
 import json
-k = list(json.load(open('opencode.json'))['permission']['bash'])
+k = list(json.load(open('kilo.json'))['permission']['bash'])
 pares = [
     ('rm *', 'rm -rf *'), ('rm *', 'rm -r *'), ('rm *', 'rm -f *'),
     ('git reset *', 'git reset --hard*'),
@@ -127,7 +139,7 @@ def matchea(patron, comando):
     segmento = comando.split('|')[0]
     regex = '^' + re.escape(patron).replace('\\\\*', '.*') + '$'
     return re.match(regex, segmento) is not None
-_cfg = json.load(open('opencode.json'))['permission']['bash']
+_cfg = json.load(open('kilo.json'))['permission']['bash']
 k = list(_cfg)
 rellenos = ['X', '-C', '--', 'x']
 fallos = []
@@ -199,7 +211,7 @@ for f in sorted(os.listdir('scripts')):
             continue
         assert not pat.search(linea), (f, i, linea)
 "
-check "agentes de solo lectura con edit deny" bash -c "for a in security-auditor code-reviewer; do grep -q 'edit: deny' .opencode/agents/\$a.md && grep -q 'mode: subagent' .opencode/agents/\$a.md || exit 1; done"
+check "agentes de solo lectura con edit deny" bash -c "for a in security-auditor code-reviewer; do grep -q 'edit: deny' .opencode/agents/\$a.md && grep -q 'mode: subagent' .opencode/agents/\$a.md && [ -L .kilo/agents ] || exit 1; done"
 
 echo "== 4. Repositorio =="
 check "hook pre-commit instalado identico al script" bash -c "cmp -s scripts/hooks/pre-commit .git/hooks/pre-commit"

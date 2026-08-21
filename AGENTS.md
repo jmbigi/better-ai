@@ -293,14 +293,24 @@
 
 ## Entorno del proyecto (modelo de IA)
 
-- Modelos permitidos (precio bajo): **`opencode/deepseek-v4-flash-free`** o
+Herramientas de programación soportadas: **opencode** y **kilocode** (Kilo Code).
+Ambas cargan AGENTS.md automáticamente y aplican los mismos 245 guardarraíles de
+permisos (159 `deny`, 85 `ask`, 1 `allow` por defecto). La config determinista
+varía por herramienta:
+
+- **opencode**: `opencode.json` con `enabled_providers: ["opencode", "opencode-go"]`
+  y modelos permitidos (precio bajo): **`opencode/deepseek-v4-flash-free`** o
   **`opencode-go/deepseek-v4-flash`**.
+- **kilocode**: `kilo.json` con `enabled_providers: ["kilo", "deepseek", "openrouter"]`
+  y modelos permitidos (precio bajo): **`deepseek/deepseek-chat`** (provider DeepSeek)
+  o **`kilo-auto/free`** / **`kilo-auto/efficient`** (Kilo Gateway auto-routing).
+
 - PROHIBIDO usar cualquier otro modelo (incluidos `pro` y otros proveedores) sin
   permiso explícito del programador o presupuesto aprobado.
-- Refuerzo determinista: `opencode.json` declara `enabled_providers: ["opencode",
-  "opencode-go"]`; el resto de proveedores NO se cargan aunque haya credenciales.
-  Los modelos `pro` del mismo proveedor siguen visibles: su prohibición es regla de
-  texto (AGENTS.md) — no hay lista determinista por modelo en la config.
+- Refuerzo determinista: `enabled_providers` en la config solo carga los proveedores
+  de modelos permitidos (decisión de coste); el resto NO se cargan aunque haya
+  credenciales. Los modelos `pro` del mismo proveedor siguen visibles: su prohibición
+  es regla de texto (AGENTS.md) — no hay lista determinista por modelo en la config.
 - Las pruebas y verificaciones de este proyecto se ejecutan SOLO con los modelos
   permitidos.
 

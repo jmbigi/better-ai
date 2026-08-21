@@ -18,7 +18,7 @@ auditar el repositorio antes de que el trabajo se entregue o se comitee.
    `ghp_...`, `AKIA...`, `AIza...`, `xoxb-...`, `-----BEGIN ... PRIVATE KEY-----`),
    archivos `.env`/`.env.*` versionados, claves SSH (`id_rsa`, `id_ed25519`,
    `*.pem`, rutas `~/.ssh/`), ficheros `*credentials*`. Estos patrones son
-   exactamente los que el proyecto bloquea en `opencode.json`; si un archivo
+    exactamente los que el proyecto bloquea en `opencode.json` / `kilo.json`; si un archivo
    versionado coincide con uno de ellos, es un hallazgo.
 2. **Datos personales** (P0.9): emails, IPs, DNI, números de teléfono, nombres
    reales o rutas de usuario (`/home/<usuario>/`) en archivos versionados.
