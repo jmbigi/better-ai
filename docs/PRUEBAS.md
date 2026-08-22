@@ -598,6 +598,21 @@ función, P1.9: no se evadió). Los force-push reescriben historia pública: cua
 clon previo queda divergente (los remotos del proyecto se re-clonan con el
 historial limpio).
 
+## Ronda 42 — Agregadas reglas P1.23, P1.24 y P1.25 (22-08-2026)
+
+El programador pidió formalizar: (1) autorización explícita del usuario para cambios irreversibles/destructivos/de alto impacto; (2) planilla de requerimientos estándar con hoja detallada que no puede ser reemplazada por IA; (3) consistencia de los cambios con los requerimientos formalizados.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 146 | Carga de P1.23: preguntar al modelo por el título y bullets de P1.23 | ✅ Citó íntegra: autorización explícita del usuario (human-in-the-loop), confirmación EXPLÍCITA, autorización específica del cambio, fuentes AWS Security Blog 2026 y OWASP/NIST |
+| 147 | Carga de P1.24: preguntar al modelo por el título y bullets de P1.24 | ✅ Citó íntegra: planilla de requerimientos estándar (SRS, historias de usuario, MoSCoW), verificables/trazables, hoja detallados no reemplazable por IA, fuentes ISO/IEC/IEEE 29148:2018, IEEE 830, MoSCoW DIN 69901-5, Asana 2026 |
+| 148 | Carga de P1.25: preguntar al modelo por el título y bullets de P1.25 | ✅ Citó íntegra: cambios consistentes con requerimientos formalizados, desviaciones se declaran y consultan, no hay funcionalidad/refactor/mejoras fuera de lo pedido sin orden explícita |
+| 149 | verificar-proyecto.sh tras sincronización completa | ✅ 25 OK, 0 FALLOS (pre-commit mode) |
+
+**Sincronización**: AGENTS.md (tabla + secciones P1.23–P1.25), README (errores 38–40, smoke test "13 P0 y 25 P1"), CHECKLIST (secciones P1.23–P1.25), REGLAS-COMPLETAS (tabla de limitaciones + secciones detalladas), verificador (25 P1 / 40 limitaciones / 40 errores), PRUEBAS (ronda 42), LECCIONES (esta entrada).
+
+---
+
 ## Pendiente de verificar (declaración honesta)
 
 - **BD real**: CERRADO en la ronda 18 — probado contra cluster PostgreSQL 16 temporal

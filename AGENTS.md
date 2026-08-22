@@ -48,6 +48,9 @@
 | P1.20 | Actualiza las lecciones aprendidas: documenta cada prueba, fallo o hallazgo relevante en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia); si algo falló 2+ veces, propón regla o endurece la existente | 🟠 P1 | Memoria del proyecto perdida, errores repetidos |
 | P1.21 | Divide y vencerás: construye y prueba cada módulo o componente de forma aislada (aislando sus dependencias con mocks/stubs), en un entorno mínimo y controlado, con casos límite, antes de integrarlo al código base | 🟠 P1 | Piezas rotas que contaminan el sistema |
 | P1.22 | Autorización gráfica de cambios: cada cambio al código o interfaces se presenta al programador con diagrama visual y opciones Sí/No/Cancelar; las opciones múltiples incluyen representación ASCII o Python/Qt | 🟠 P1 | Cambios ejecutados sin consentimiento visual |
+| P1.23 | Autorización explícita del usuario: ningún cambio irreversible, destructivo o de alto impacto se ejecuta sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo | 🟠 P1 | Cambios ejecutados sin consentimiento del usuario |
+| P1.24 | Planilla de requerimientos: antes de implementar, seguir una plantilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables | 🟠 P1 | Implementación sin especificación verificable |
+| P1.25 | Consistencia con requerimientos: los cambios realizados en la ronda, commit o sesión deben ser consistentes con los requerimientos definidos por el usuario y formalizados en la planilla de requerimientos | 🟠 P1 | Cambios fuera de especificación |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -287,6 +290,23 @@
 - El programador responde con opciones explícitas: **Sí** (a), **No** (b), **Cancelar cambios** (c).
 - Cuando se presenten opciones múltiples, se incluye una representación visual: ASCII art o gráfico Python/Qt según corresponda al dominio del cambio.
 - Ningún cambio se ejecuta sin la confirmación gráfica y explícita del programador.
+
+### P1.23 Autorización explícita del usuario (human-in-the-loop)
+- PROHIBIDO ejecutar cambios sin la confirmación EXPLÍCITA del programador. El juicio humano se reserva para decisiones que lo necesitan: cambios irreversibles, de seguridad, de autenticación, de esquema o de alto impacto.
+- No se debe generar consentimiento por defecto ni asumir que una orden ambigua autoriza todo lo relacionado: ante la menor duda, preguntar y esperar la confirmación explícita.
+- La autorización debe ser específica del cambio: un "sí" para una parte no autoriza el resto sin consultar.
+- Fuente: AWS Security Blog (2026) — "Require human approval for irreversible actions"; OWASP/NIST — revisión humana obligatoria para cambios en autenticación, autorización y secretos.
+
+### P1.24 Planilla de requerimientos estándar
+- Antes de implementar cualquier funcionalidad, módulo o cambio significativo, seguir una planilla de requerimientos estándar (de cualquier formato y tipo: SRS según IEEE 830 / ISO/IEC/IEEE 29148, historias de usuario, MoSCoW, etc.).
+- Cada requisito debe ser verificable, trazable y con criterios de aceptación medibles. La ausencia de especificación se declara explícitamente y se consulta al programador antes de codificar.
+- La planilla incluye una hoja de requerimientos detallados que no puede ser reemplazada por IA: el juicio humano es obligatorio para aprobar/ajustar/priorizar los requisitos antes de que el agente genere código. La hoja de requerimientos/especificaciones aprobada por el programador es la autoridad de especificación; el agente no puede sustituirla, ignorarla ni reescribirla.
+- Fuente: ISO/IEC/IEEE 29148:2018 (Requirements Engineering); IEEE 830 (SRS); MoSCoW prioritization (DIN 69901-5); Asana SRS template (2026).
+
+### P1.25 Consistencia con requerimientos
+- Los cambios realizados en la ronda, commit o sesión deben ser consistentes con los requerimientos definidos por el usuario y formalizados en la planilla de requerimientos.
+- Si una implementación se desvía de lo especificado, la desviación se declara explícitamente y se consulta al programador antes de continuar.
+- No se agrega funcionalidad, refactor ni "mejoras" fuera de lo pedido en la planilla sin orden explícita.
 
 ---
 

@@ -205,6 +205,26 @@
 - [ ] ¿Cuando hay opciones múltiples, se incluye una representación visual: ASCII art o gráfico Python/Qt según corresponda al dominio del cambio?
 - [ ] ¿Ningún cambio se ejecuta sin la confirmación gráfica y explícita del programador?
 
+## Autorización explícita del usuario (P1.23)
+
+- [ ] ¿Ningún cambio irreversible, destructivo o de alto impacto se ejecutó sin confirmación EXPLÍCITA del programador?
+- [ ] ¿Ante ambigüedad o riesgo, pregunté y esperé la confirmación explícita sin generar consentimiento por defecto?
+- [ ] ¿La autorización fue específica del cambio (un "sí" para una parte no autoriza el resto sin consultar)?
+- [ ] ¿Las decisiones de seguridad, autenticación, esquema o alto impacto tuvieron juicio humano explícito?
+
+## Planilla de requerimientos (P1.24)
+
+- [ ] ¿Antes de implementar, seguí una planilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.)?
+- [ ] ¿Cada requisito es verificable, trazable y con criterios de aceptación medibles?
+- [ ] ¿La hoja de requerimientos detallados fue aprobada por el programador (no reemplazada por IA)?
+- [ ] ¿La ausencia de especificación se declaró explícitamente y se consultó antes de codificar?
+
+## Consistencia con requerimientos (P1.25)
+
+- [ ] ¿Los cambios de la ronda/commit/sesión son consistentes con los requerimientos formalizados en la planilla?
+- [ ] ¿Si hubo desviaciones, se declararon explícitamente y se consultó al programador antes de continuar?
+- [ ] ¿No se agregó funcionalidad, refactor ni "mejoras" fuera de lo pedido en la planilla sin orden explícita?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.
