@@ -80,10 +80,10 @@ import json
 c = json.load(open('kilo.json'))
 assert c.get('enabled_providers') == ['kilo', 'deepseek', 'openrouter'], c.get('enabled_providers')
 "
-check "enabled_providers en opencode.json: opencode, opencode-go" python3 -c "
+check "enabled_providers en opencode.json: opencode, opencode-go, kilo" python3 -c "
 import json
 c = json.load(open('opencode.json'))
-assert c.get('enabled_providers') == ['opencode', 'opencode-go'], c.get('enabled_providers')
+assert c.get('enabled_providers') == ['opencode', 'opencode-go', 'kilo'], c.get('enabled_providers')
 "
 check "conteos de patrones en README coherentes con la config" python3 -c "
 import json, re
