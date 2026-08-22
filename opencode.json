@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "enabled_providers": ["opencode", "opencode-go"],
+  "enabled_providers": ["opencode", "opencode-go", "kilo"],
   "permission": {
     "bash": {
       "*": "allow",
