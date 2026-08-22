@@ -52,6 +52,9 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Secuestro del agente (prompt injection)** | Instrucciones maliciosas incrustadas en contenido que el agente procesa (webs, documentos, correos, salidas de herramientas, archivos) que el agente obedece como si fueran órdenes del programador (OWASP LLM01; Anthropic: "hidden context" — LLM08) | P0.13 |
 | **Piezas rotas que contaminan el sistema** | Integrar módulos o componentes al código base sin construirlos y probarlos antes de forma aislada: un fallo local se mezcla con el resto del sistema, rompe un estado que estaba en verde y es difícil de localizar (divide y vencerás) | P1.21 |
 | **Cambios ejecutados sin consentimiento visual** | El agente ejecuta cambios sin presentar un diagrama visual al programador ni solicitar autorización explícita, o no acompaña las opciones múltiples con representaciones gráficas (ASCII/Python-Qt) | P1.22 |
+| **Cambios ejecutados sin autorización explícita** | El agente ejecuta cambios irreversibles, destructivos o de alto impacto sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo (AWS Security Blog 2026: "Require human approval for irreversible actions"; OWASP/NIST: revisión humana obligatoria para cambios en autenticación, autorización y secretos) | P1.23 |
+| **Implementación sin planilla de requerimientos** | No seguir una plantilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables; la hoja de requerimientos detallados no puede ser reemplazada por IA porque el juicio humano es obligatorio para aprobar/ajustar/priorizar los requisitos (ISO/IEC/IEEE 29148:2018; IEEE 830; MoSCoW DIN 69901-5; Asana SRS template 2026) | P1.24 |
+| **Cambios fuera de especificación** | Desviarse de los requerimientos formalizados en la planilla sin declararlo explícitamente ni consultar al programador; se agrega funcionalidad, refactor o "mejoras" fuera de lo pedido sin orden explícita | P1.25 |
 
 ## 2. Estructura de prioridades
 
@@ -418,6 +421,41 @@ acompañantes, generando modificaciones no autorizadas o decisiones a ciegas.
 visual del cambio propuesto (ASCII art o gráfico Python/Qt según el dominio) y solicitar
 autorización explícita con opciones: **Sí** (a), **No** (b), **Cancelar cambios** (c).
 Ningún cambio se ejecuta sin confirmación gráfica y explícita del programador.
+
+### P1.23 Autorización explícita del usuario (human-in-the-loop)
+**Error**: el agente ejecuta cambios irreversibles, destructivos o de alto impacto sin
+confirmación previa del programador, asumiendo que una orden ambigua autoriza todo lo
+relacionado o generando consentimiento por defecto.
+**Prevención**: ningún cambio irreversible, destructivo o de alto impacto se ejecuta sin
+confirmación EXPLÍCITA del programador. Ante ambigüedad o riesgo, preguntar y esperar la
+confirmación explícita. La autorización es específica del cambio: un "sí" para una parte
+no autoriza el resto. Fuentes: AWS Security Blog (2026) "Require human approval for
+irreversible actions"; OWASP/NIST — revisión humana obligatoria para cambios en
+autenticación, autorización y secretos.
+
+### P1.24 Planilla de requerimientos estándar
+**Error**: el agente implementa funcionalidades, módulos o cambios significativos sin
+especificación formal, generando código que puede no resolver lo que el usuario necesita
+o que carece de criterios de aceptación medibles.
+**Prevención**: antes de implementar, seguir una planilla de requerimientos estándar
+(SRS IEEE 830 / ISO/IEC/IEEE 29148, historias de usuario, MoSCoW, etc.). Cada requisito
+debe ser verificable, trazable y con criterios de aceptación medibles. La planilla incluye
+una hoja de requerimientos detallados que no puede ser reemplazada por IA: el juicio humano
+es obligatorio para aprobar/ajustar/priorizar los requisitos antes de que el agente genere
+código. La hoja de requerimientos/especificaciones aprobada por el programador es la
+autoridad de especificación; el agente no puede sustituirla, ignorarla ni reescribirla.
+Fuentes: ISO/IEC/IEEE 29148:2018 (Requirements Engineering); IEEE 830 (SRS); MoSCoW
+prioritization (DIN 69901-5); Asana SRS template (2026).
+
+### P1.25 Consistencia con requerimientos
+**Error**: el agente se desvía de la planilla aprobada, agregando funcionalidad, refactor
+o "mejoras" no pedidas, generando cambios fuera de especificación que pueden introducir
+riesgos no evaluados.
+**Prevención**: los cambios realizados en la ronda, commit o sesión deben ser consistentes
+con los requerimientos definidos por el usuario y formalizados en la planilla. Si una
+implementación se desvía de lo especificado, la desviación se declara explícitamente y se
+consulta al programador antes de continuar. No se agrega funcionalidad, refactor ni
+"mejoras" fuera de lo pedido en la planilla sin orden explícita.
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.

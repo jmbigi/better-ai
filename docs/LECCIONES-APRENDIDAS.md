@@ -745,3 +745,15 @@ tras agregar la regla.
 REGLAS ↔ verificador en el MISMO commit, porque el verificador valida conteos y
 contenido cruzado (P1.21 aplicada a sí misma).
 **Estado**: cerrada.
+
+## 2026-08-22 — Agregadas reglas P1.23 (autorización explícita del usuario), P1.24 (planilla de requerimientos) y P1.25 (consistencia con requerimientos)
+
+**Problema**: el programador pidió formalizar en el ruleset dos principios: (1) ningún cambio irreversible/destructivo/de alto impacto se ejecuta sin confirmación explícita del usuario; (2) antes de implementar debe seguirse una planilla de requerimientos estándar con hoja detallada que no puede ser reemplazada por IA; y (3) los cambios deben ser consistentes con esos requerimientos.
+
+**Solución**: (1) P1.23 Autorización explícita del usuario: ningún cambio irreversible, destructivo o de alto impacto se ejecuta sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo. (2) P1.24 Planilla de requerimientos estándar: antes de implementar, seguir una planilla de requerimientos estándar (SRS IEEE 830 / ISO/IEC/IEEE 29148, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables; la hoja de requerimientos detallados no puede ser reemplazada por IA. (3) P1.25 Consistencia con requerimientos: los cambios deben ser consistentes con los requerimientos formalizados; las desviaciones se declaran explícitamente y se consultan. Sincronizado en AGENTS.md (tabla + secciones), README (errores 38–40, smoke test "13 P0 y 25 P1"), CHECKLIST (secciones P1.23–P1.25), REGLAS-COMPLETAS (tabla de limitaciones + secciones detalladas) y verificador (25 P1 / 40 limitaciones / 40 errores).
+
+**Evidencia**: `bash scripts/verificar-proyecto.sh` en verde tras la sincronización completa.
+
+**Lección**: la autoridad de especificación reside en la planilla aprobada por el programador, no en la generación del modelo; el agente puede proponer, pero no sustituir el juicio humano sobre requisitos.
+
+**Estado**: cerrada.
