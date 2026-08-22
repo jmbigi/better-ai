@@ -47,6 +47,7 @@
 | P1.19 | Evita fallbacks: no enmascares errores con defaults, `except: pass` ni sustituciones de APIs/librerías; falla explícito (plantilla de excepción controlada), rechaza respuestas genéricas y deja la decisión al programador | 🟠 P1 | Fallbacks que ocultan errores y flujos no controlados |
 | P1.20 | Actualiza las lecciones aprendidas: documenta cada prueba, fallo o hallazgo relevante en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia); si algo falló 2+ veces, propón regla o endurece la existente | 🟠 P1 | Memoria del proyecto perdida, errores repetidos |
 | P1.21 | Divide y vencerás: construye y prueba cada módulo o componente de forma aislada (aislando sus dependencias con mocks/stubs), en un entorno mínimo y controlado, con casos límite, antes de integrarlo al código base | 🟠 P1 | Piezas rotas que contaminan el sistema |
+| P1.22 | Autorización gráfica de cambios: cada cambio al código o interfaces se presenta al programador con diagrama visual y opciones Sí/No/Cancelar; las opciones múltiples incluyen representación ASCII o Python/Qt | 🟠 P1 | Cambios ejecutados sin consentimiento visual |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -280,6 +281,12 @@
 - Para qué sirve dividir el problema (evidencia: Wikipedia divide-and-conquer, GeeksforGeeks problem decomposition; fuentes 25–28 de `docs/REGLAS-COMPLETAS.md`): los problemas difíciles se vuelven abordables (basta dividir, resolver los subproblemas simples y combinar), los fallos se localizan y corrigen en la pieza sin arrastrar al resto, las piezas independientes se pueden verificar en paralelo, y un error de lógica no contamina un estado del sistema que estaba en verde (P1.11).
 - Beneficios: detecta errores en la etapa más temprana y económica del ciclo de vida, acelera la ejecución de las pruebas y mejora el diseño del código. Saltarse esta validación individual equivale a construir sobre cimientos no verificados: un fallo local se convierte en un problema sistémico de difícil diagnóstico.
 - La prueba aislada es la primera fase de la verificación, no la última: después de integrar, verifica también el conjunto (P1.1, P1.11) — la pieza probada en aislamiento puede fallar al interactuar con el resto del sistema.
+
+### P1.22 Autorización gráfica de cambios
+- Cada cambio al código o interfaces se presenta al programador antes de ejecutarlo, con un diagrama visual del cambio propuesto.
+- El programador responde con opciones explícitas: **Sí** (a), **No** (b), **Cancelar cambios** (c).
+- Cuando se presenten opciones múltiples, se incluye una representación visual: ASCII art o gráfico Python/Qt según corresponda al dominio del cambio.
+- Ningún cambio se ejecuta sin la confirmación gráfica y explícita del programador.
 
 ---
 

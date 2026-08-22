@@ -51,6 +51,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Pérdida de memoria del proyecto** | No documentar pruebas, fallos ni hallazgos en `docs/LECCIONES-APRENDIDAS.md` (o hacerlo sin evidencia ni anonimización): la lección muere con la sesión y los errores se repiten | P1.20 |
 | **Secuestro del agente (prompt injection)** | Instrucciones maliciosas incrustadas en contenido que el agente procesa (webs, documentos, correos, salidas de herramientas, archivos) que el agente obedece como si fueran órdenes del programador (OWASP LLM01; Anthropic: "hidden context" — LLM08) | P0.13 |
 | **Piezas rotas que contaminan el sistema** | Integrar módulos o componentes al código base sin construirlos y probarlos antes de forma aislada: un fallo local se mezcla con el resto del sistema, rompe un estado que estaba en verde y es difícil de localizar (divide y vencerás) | P1.21 |
+| **Cambios ejecutados sin consentimiento visual** | El agente ejecuta cambios sin presentar un diagrama visual al programador ni solicitar autorización explícita, o no acompaña las opciones múltiples con representaciones gráficas (ASCII/Python-Qt) | P1.22 |
 
 ## 2. Estructura de prioridades
 
@@ -408,6 +409,15 @@ entregables y verificables (Wikipedia/Agile Alliance user story). La prueba aisl
 es la primera fase de la verificación, no la última: tras integrar, verificar
 también el conjunto (P1.1, P1.11) — la pieza probada en aislamiento puede fallar al
 interactuar con el resto del sistema.
+
+### P1.22 Autorización gráfica de cambios
+**Error**: el LLM ejecuta cambios en código o interfaces sin consentimiento visual
+explícito del programador, o presenta opciones múltiples sin representaciones gráficas
+acompañantes, generando modificaciones no autorizadas o decisiones a ciegas.
+**Prevención**: antes de ejecutar cualquier cambio, presentar al programador un diagrama
+visual del cambio propuesto (ASCII art o gráfico Python/Qt según el dominio) y solicitar
+autorización explícita con opciones: **Sí** (a), **No** (b), **Cancelar cambios** (c).
+Ningún cambio se ejecuta sin confirmación gráfica y explícita del programador.
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
