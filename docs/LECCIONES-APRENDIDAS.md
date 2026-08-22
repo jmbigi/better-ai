@@ -726,3 +726,22 @@ verifica `kilo.json` (245 patrones, providers, edit/read deny) y comprueba que
 
 **Evidencia**: `python3 -c "import json; a=json.load(open('kilo.json'))['permission']['bash']; b=json.load(open('opencode.json'))['permission']['bash']; assert a==b"` → exit 0; `bash scripts/verificar-proyecto.sh` → 32/33 OK (el único fallo es "árbol de trabajo limpio" por cambios sin commitear, esperado). Modelos low-cost verificados en kilocode docs: `deepseek/deepseek-chat` (provider DeepSeek), `kilo-auto/free` / `kilo-auto/efficient` (Kilo Gateway). Profundidades de agentes verificadas en `docs/customize/custom-subagents` (kilo.ai/docs).
 **Estado**: cerrada.
+
+## 2026-08-21 — Agregada regla P1.22: autorización gráfica de cambios
+
+**Problema**: el programador solicitó agregar una regla que obligue al agente a presentar
+un diagrama visual de cada cambio antes de ejecutarlo, con opciones Sí/No/Cancelar y
+representaciones gráficas (ASCII art o Python/Qt) para opciones múltiples.
+
+**Solución**: (1) AGENTS.md: tabla resumen (P1.22) + sección detallada con bullets
+(4 bullets: diagrama visual antes de ejecutar; opciones Sí/No/Cancelar; ASCII/Python-Qt
+para opciones múltiples; ningún cambio sin confirmación gráfica); (2)
+REGLAS-COMPLETAS.md: fila en tabla de limitaciones + sección P1.22 con Error/Prevención;
+(3) CHECKLIST.md: 4 casillas de verificación para P1.22; (4)
+scripts/verificar-proyecto.sh: actualizado conteo a 22 P1 y 37 limitaciones.
+**Evidencia**: `bash scripts/verificar-proyecto.sh` → 30 OK, 0 FALLOS (pre-commit mode)
+tras agregar la regla.
+**Lección**: al añadir una regla nueva, sincronizar SIEMPRE AGENTS ↔ CHECKLIST ↔
+REGLAS ↔ verificador en el MISMO commit, porque el verificador valida conteos y
+contenido cruzado (P1.21 aplicada a sí misma).
+**Estado**: cerrada.
