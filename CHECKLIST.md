@@ -198,6 +198,13 @@
 - [ ] ¿Verifiqué su lógica y sus salidas con casos límite (entradas vacías, valores extremos, errores esperados) mediante pruebas unitarias preliminares que pueden fallar de verdad (P1.1)?
 - [ ] ¿Solo integré la pieza tras superar esas pruebas preliminares y verifiqué también el conjunto después de integrar (P1.1, P1.11)?
 
+## Autorización gráfica de cambios (P1.22)
+
+- [ ] ¿Cada cambio al código o interfaces se presenta al programador con un diagrama visual del cambio propuesto antes de ejecutarlo?
+- [ ] ¿Las opciones de respuesta son explícitas: **Sí** (a), **No** (b), **Cancelar cambios** (c)?
+- [ ] ¿Cuando hay opciones múltiples, se incluye una representación visual: ASCII art o gráfico Python/Qt según corresponda al dominio del cambio?
+- [ ] ¿Ningún cambio se ejecuta sin la confirmación gráfica y explícita del programador?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.
