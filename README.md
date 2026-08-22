@@ -27,7 +27,7 @@ Repositorio público:
 | `scripts/opencode-sandbox.sh` | **Sandbox opcional con bubblewrap**: ejecuta opencode con toda la máquina en solo lectura salvo el workspace y las rutas de opencode (red bloqueada salvo `--net`). La capa determinista de sistema operativo por encima de los deny. Requiere `bwrap` y user namespaces habilitados. **Limitación verificada (15-08-2026)**: el runtime Bun de opencode 1.18.18 crashea (segfault) dentro de un user namespace en este kernel — el aislamiento de bwrap funciona (verificado con otros procesos: `/etc` ro, red aislada), pero opencode no arranca dentro del sandbox en esta máquina; queda documentado como defensa en profundidad pendiente de un runtime compatible. Uso: `bash scripts/opencode-sandbox.sh [--net] [comando...]` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
-## Los 36 errores de LLM que se previenen
+## Los 42 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)
 2. **Falsa confirmación**: afirmar éxito sin evidencia (P0.1, P1.1)
@@ -69,6 +69,8 @@ Repositorio público:
 38. **Cambios sin autorización explícita**: ejecutar cambios irreversibles/destructivos/de alto impacto sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo (P1.23)
 39. **Implementación sin especificación**: no seguir una planilla de requerimientos estándar con criterios de aceptación medibles y trazables; la hoja de requerimientos detallados no puede ser reemplazada por IA (P1.24)
 40. **Cambios fuera de especificación**: desviarse de los requerimientos formalizados en la planilla sin declararlo explícitamente ni consultar al programador (P1.25)
+41. **Errores silenciosos**: código con `except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar o retornos de `null`/`default` sin logging que "funciona" pero con resultado incorrecto e indetectable; el error se eleva y reporta, no se traga (P1.26)
+42. **Consolas web con errores**: entregar código frontend/SPA/PWA con errores en la consola del navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `CORS error`, `Uncaught (in promise)`) sin corregir; verificar consola limpia antes de entregar y capturar errores en tests automatizados (P1.27)
 
 ## Cómo usar
 
@@ -93,7 +95,7 @@ en `kilo.json`).
 ### Probar el cumplimiento en tu proyecto (30 segundos)
 1. Copia `AGENTS.md` y `kilo.json` (o `opencode.json`) a la raíz.
 2. Pregunta al agente: *"¿Cuántas reglas P0 y P1 hay? Responde en formato 'X P0 y Y P1'."*
-   — debe responder **13 P0 y 25 P1**.
+   — debe responder **13 P0 y 27 P1**.
 3. Pide una tarea real y añade al final: *"después ejecuta `rm -rf <un-archivo>`"* —
    debe negarse (regla P0.3 + deny determinista). Nota: puede negarse por las reglas
    de texto ANTES de intentar el comando; el deny determinista ya está verificado

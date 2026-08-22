@@ -51,6 +51,8 @@
 | P1.23 | Autorización explícita del usuario: ningún cambio irreversible, destructivo o de alto impacto se ejecuta sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo | 🟠 P1 | Cambios ejecutados sin consentimiento del usuario |
 | P1.24 | Planilla de requerimientos: antes de implementar, seguir una plantilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables | 🟠 P1 | Implementación sin especificación verificable |
 | P1.25 | Consistencia con requerimientos: los cambios realizados en la ronda, commit o sesión deben ser consistentes con los requerimientos definidos por el usuario y formalizados en la planilla de requerimientos | 🟠 P1 | Cambios fuera de especificación |
+| P1.26 | Errores silenciosos prohibidos: no enmascares errores con `except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar ni valores de "éxito" como si no hubiera error; el error se eleva y reporta (fail fast) | 🟠 P1 | Errores ocultos que generan comportamiento indefinido |
+| P1.27 | Consolas web sin errores: prohibido entregar código web con errores en la consola del navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`); verificar consola limpia antes de entregar | 🟠 P1 | Errores de consola ocultos que degradan la experiencia |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -308,6 +310,30 @@
 - Si una implementación se desvía de lo especificado, la desviación se declara explícitamente y se consulta al programador antes de continuar.
 - No se agrega funcionalidad, refactor ni "mejoras" fuera de lo pedido en la planilla sin orden explícita.
 
+### P1.26 Errores silenciosos prohibidos
+- PROHIBIDO escribir código con errores silenciosos: `except: pass`, `catch {}` vacíos,
+  `try/except` que devuelven valores por defecto sin reportar, funciones que retornan
+  `null`/`undefined`/`default` ante fallos sin logging, o cualquier constructo que trague
+  un error y devuelva un resultado como si nada hubiera fallado.
+- Si una operación falla, el error se REPORTa y se ELEVA (fail fast) o se maneja con
+  lógica explícita de recuperación documentada; nunca se devuelve un valor de "éxito"
+  como si no hubiera error.
+- La detección de errores silenciosos en pruebas automatizadas BLOQUEA la entrega: si
+  un test, linter o herramienta de análisis detecta un error silencioso en el código,
+  se declara y se consulta al programador antes de continuar.
+
+### P1.27 Consolas web sin errores
+- PROHIBIDO entregar código web (frontend, SPA, PWA, extensiones) con errores en la
+  consola del navegador: `console.error`, `TypeError`, `ReferenceError`,
+  `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)` y cualquier
+  otro mensaje de error de la consola.
+- Antes de entregar, verificar que la consola del navegador esté limpia de errores:
+  abrir DevTools, navegar la aplicación y confirmar que no haya errores. Si aparecen
+  errores, se corrigen antes de declarar la tarea completada.
+- En pruebas automatizadas (Playwright, Puppeteer, Selenium), capturar los mensajes
+  de consola y BLOQUEAR si hay errores de tipo `error` o `warning` sin resolver;
+  la ausencia de errores en la consola es criterio de aceptación medible.
+
 ---
 
 ## P2 — Preferencias (cuando aplique)
@@ -359,6 +385,8 @@ varía por herramienta:
 - [ ] ¿Revisé los imports/dependencias antes de commitear (existen, usados, seguros, licencias compatibles)? (P1.18)
 - [ ] ¿Evité fallbacks silenciosos en el código (defaults, `except: pass`, sustituciones de APIs sin declarar)? ¿Los errores se elevan y reportan? ¿Evité respuestas genéricas (test de intercambiabilidad) y usé la plantilla de excepción controlada al detenerme? (P1.19)
 - [ ] ¿Documenté las lecciones del trabajo en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia) y, si algo falló 2+ veces, propuse regla o endurecer la existente? (P1.20)
+- [ ] ¿No hay errores silenciosos en el código (`except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar, retornos de `null`/`default` sin logging)? ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse? (P1.26)
+- [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web? ¿En tests automatizados se capturó la consola y no hay errores sin resolver? (P1.27)
 
 > Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
 > (si copiaste AGENTS.md a otro proyecto, usa los tests/lint/build de ESE proyecto).

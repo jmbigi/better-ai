@@ -55,6 +55,8 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Cambios ejecutados sin autorización explícita** | El agente ejecuta cambios irreversibles, destructivos o de alto impacto sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo (AWS Security Blog 2026: "Require human approval for irreversible actions"; OWASP/NIST: revisión humana obligatoria para cambios en autenticación, autorización y secretos) | P1.23 |
 | **Implementación sin planilla de requerimientos** | No seguir una plantilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables; la hoja de requerimientos detallados no puede ser reemplazada por IA porque el juicio humano es obligatorio para aprobar/ajustar/priorizar los requisitos (ISO/IEC/IEEE 29148:2018; IEEE 830; MoSCoW DIN 69901-5; Asana SRS template 2026) | P1.24 |
 | **Cambios fuera de especificación** | Desviarse de los requerimientos formalizados en la planilla sin declararlo explícitamente ni consultar al programador; se agrega funcionalidad, refactor o "mejoras" fuera de lo pedido sin orden explícita | P1.25 |
+| **Errores silenciosos prohibidos** | Código con `except: pass`, `catch {}` vacíos, `try/except` que devuelven defaults sin reportar, retornos de `null`/`undefined`/`default` ante fallos sin logging, o cualquier constructo que trague un error y devuelva un resultado como si nada hubiera fallado — el peor modo de fallo porque es invisible | P1.26 |
+| **Consolas web con errores** | Entregar código web (frontend, SPA, PWA, extensiones) con errores en la consola del navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) sin corregir, degradando la experiencia del usuario | P1.27 |
 
 ## 2. Estructura de prioridades
 
@@ -456,6 +458,42 @@ con los requerimientos definidos por el usuario y formalizados en la planilla. S
 implementación se desvía de lo especificado, la desviación se declara explícitamente y se
 consulta al programador antes de continuar. No se agrega funcionalidad, refactor ni
 "mejoras" fuera de lo pedido en la planilla sin orden explícita.
+
+### P1.26 Errores silenciosos prohibidos
+**Error**: el LLM escribe código con errores silenciosos: `except: pass`, `catch {}`
+vacíos, `try/except` que devuelven valores por defecto sin reportar, funciones que
+retornan `null`/`undefined`/`default` ante fallos sin logging, o cualquier constructo
+que trague el error y devuelva un resultado como si nada hubiera fallado. El resultado
+es una app que "funciona" pero con comportamiento indefinido o datos incorrectos que
+nadie detecta: el peor modo de fallo, porque es invisible.
+**Prevención**: el error se REPORTa y se ELEVA (fail fast) o se maneja con lógica
+explícita de recuperación documentada; nunca se devuelve un valor de "éxito" como si no
+hubiera error. La detección de errores silenciosos en pruebas automatizadas BLOQUEA la
+entrega: si un test, linter o herramienta de análisis detecta un error silencioso en el
+código, se declara y se consulta al programador antes de continuar.
+**Fuentes**: Microsoft Learn — Best practices for exceptions (.NET): *"A crashed app is
+more reliable and diagnosable than an app with undefined behavior"*; Google SRE Book
+(cap. 6 Monitoring Distributed Systems): la observabilidad requiere que los errores sean
+detectables, no enmascarados por retries silenciosos; Python docs — Errors and
+Exceptions: *"The most common pattern for handling Exception is to print or log the
+exception and then re-raise it"*.
+
+### P1.27 Consolas web sin errores
+**Error**: el agente entrega código web (frontend, SPA, PWA, extensiones) con errores en
+la consola del navegador sin detectarlos ni corregirlos: `console.error`,
+`TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`,
+`Uncaught (in promise)` y cualquier otro mensaje de error. Estos errores degradan la
+experiencia del usuario, indican fallos de implementación y complican el debugging.
+**Prevención**: antes de entregar, verificar que la consola del navegador esté limpia
+de errores: abrir DevTools, navegar la aplicación y confirmar que no haya errores. Si
+aparecen errores, se corrigen antes de declarar la tarea completada. En pruebas
+automatizadas (Playwright, Puppeteer, Selenium), capturar los mensajes de consola y
+BLOQUEAR si hay errores de tipo `error` o `warning` sin resolver; la ausencia de errores
+en la consola es criterio de aceptación medible.
+**Fuentes**: MDN Web API — `console.error()`: *"Outputs a message to the console with
+the error log level"*; Chrome DevTools Console API reference: documentación oficial del
+estándar WHATWG Console API; Playwright — `page.consoleMessages()`: API para capturar
+errores de consola en tests automatizados.
 
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.

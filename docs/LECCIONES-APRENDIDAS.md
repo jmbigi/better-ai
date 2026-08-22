@@ -644,6 +644,29 @@ pero requiere backup, ejecución manual coordinada del force-push (deny determin
 y re-clonado de los remotos para verificar.
 **Estado**: cerrada.
 
+## 2026-08-22 — Agregadas reglas P1.26 (errores silenciosos prohibidos) y P1.27 (consolas web sin errores)
+
+**Problema**: el programador pidió incorporar dos reglas nuevas: (1) errores silenciosos
+prohibidos — no enmascarar errores con `except: pass`, `catch {}` vacíos, defaults
+ante fallos sin reportar ni retornos de `null`/`default` sin logging; (2) consolas web
+sin errores — no entregar código frontend/SPA/PWA con errores en la consola del
+navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `CORS error`,
+`Uncaught (in promise)`); verificar consola limpia antes de entregar y capturar errores
+en tests automatizados.
+**Solución**: reglas nuevas P1.26 y P1.27 en AGENTS.md (tabla + secciones detalladas +
+checklist), sincronizadas en README (errores #41–#42, smoke test "13 P0 y 27 P1"),
+CHECKLIST (secciones P1.26 y P1.27), REGLAS-COMPLETAS (limitaciones #41–#42 + detalle
++ 6 fuentes nuevas verificadas HTTP 200: Microsoft Learn best practices exceptions,
+Google SRE book cap. 6, Python docs errors, MDN console.error, Chrome DevTools Console
+API, Playwright consoleMessages) y verificador (27 P1 / 42 limitaciones / 42 errores).
+**Evidencia**: fuentes verificadas con webfetch/curl (todas HTTP 200); `verificar-proyecto.sh`
+27 OK, 0 FALLOS.
+**Lección**: la capa de reglas de texto previene modos de fallo que la capa determinista
+no puede cubrir (errores silenciosos en lógica de aplicación, errores de consola en
+frontend); las fuentes de la industria (Microsoft, Google SRE, MDN, Chrome, Playwright)
+respaldan que un error visible es más fiable que un fallback invisible.
+**Estado**: cerrada.
+
 ## 2026-08-16 — Doble codificación base64 en URLs cifradas: PHP `openssl_decrypt` re-decodifica internamente (auditoría de enlaces)
 
 **Problema**: en una auditoría de enlaces de un sitio PHP, la URL real de cada enlace estaba

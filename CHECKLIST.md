@@ -225,6 +225,20 @@
 - [ ] ¿Si hubo desviaciones, se declararon explícitamente y se consultó al programador antes de continuar?
 - [ ] ¿No se agregó funcionalidad, refactor ni "mejoras" fuera de lo pedido en la planilla sin orden explícita?
 
+## Errores silenciosos prohibidos (P1.26)
+
+- [ ] ¿No hay errores silenciosos en el código (`except: pass`, `catch {}` vacíos, `try/except` con defaults sin reportar, retornos de `null`/`undefined`/`default` ante fallos sin logging)?
+- [ ] ¿Los errores se elevan y reportan con su contexto (fail fast) o se manejan con lógica explícita de recuperación documentada?
+- [ ] ¿Nunca se devuelve un valor de "éxito" como si no hubiera error?
+- [ ] ¿Si un test, linter o herramienta de análisis detectó un error silencioso, se declaró y consultó al programador antes de continuar?
+
+## Consolas web sin errores (P1.27)
+
+- [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web?
+- [ ] ¿Verifiqué abriendo DevTools, navegando la aplicación y confirmando que no haya errores? Si aparecieron, se corrigieron antes de declarar la tarea completada.
+- [ ] ¿En pruebas automatizadas (Playwright, Puppeteer, Selenium) se capturaron los mensajes de consola y no hay errores de tipo `error` o `warning` sin resolver?
+- [ ] ¿La ausencia de errores en la consola es un criterio de aceptación medible de la entrega?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

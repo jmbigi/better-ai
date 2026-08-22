@@ -611,6 +611,28 @@ El programador pidió formalizar: (1) autorización explícita del usuario para 
 
 **Sincronización**: AGENTS.md (tabla + secciones P1.23–P1.25), README (errores 38–40, smoke test "13 P0 y 25 P1"), CHECKLIST (secciones P1.23–P1.25), REGLAS-COMPLETAS (tabla de limitaciones + secciones detalladas), verificador (25 P1 / 40 limitaciones / 40 errores), PRUEBAS (ronda 42), LECCIONES (esta entrada).
 
+## Ronda 43 — Agregadas reglas P1.26 y P1.27 (22-08-2026)
+
+El programador pidió incorporar dos reglas nuevas: (1) errores silenciosos prohibidos —
+no enmascarar errores con `except: pass`, `catch {}` vacíos, defaults ante fallos sin
+reportar ni retornos de `null`/`default` sin logging; (2) consolas web sin errores —
+no entregar código frontend/SPA/PWA con errores en la consola del navegador; verificar
+consola limpia antes de entregar y capturar errores en tests automatizados.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 150 | Carga de P1.26: preguntar al modelo por el título y bullets de P1.26 | ✅ Citó íntegra: errores silenciosos prohibidos (`except: pass`, `catch {}` vacíos, defaults sin reportar, retornos `null`/`default` sin logging), fail fast, detección en tests automatizados BLOQUEA la entrega |
+| 151 | Carga de P1.27: preguntar al modelo por el título y bullets de P1.27 | ✅ Citó íntegra: consolas web sin errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `CORS error`, `Uncaught (in promise)`), verificación con DevTools antes de entregar, captura en tests automatizados (Playwright/Puppeteer/Selenium) |
+| 152 | verificar-proyecto.sh tras sincronización completa | ✅ 27 OK, 0 FALLOS (pre-commit mode) |
+
+**Sincronización**: AGENTS.md (tabla + secciones P1.26–P1.27 + checklist), README
+(errores 41–42, smoke test "13 P0 y 27 P1"), CHECKLIST (secciones P1.26 y P1.27),
+REGLAS-COMPLETAS (limitaciones #41–#42 + detalle + 6 fuentes nuevas), verificador
+(27 P1 / 42 limitaciones / 42 errores), PRUEBAS (ronda 43), LECCIONES (esta entrada).
+Fuentes verificadas: Microsoft Learn exceptions (200), Google SRE book (200), Python
+docs errors (200), MDN console.error (200), Chrome DevTools Console API (200),
+Playwright consoleMessages (200).
+
 ---
 
 ## Pendiente de verificar (declaración honesta)
