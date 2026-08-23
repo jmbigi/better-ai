@@ -54,6 +54,9 @@
 | P1.25 | Consistencia con requerimientos: los cambios realizados en la ronda, commit o sesión deben ser consistentes con los requerimientos definidos por el usuario y formalizados en la planilla de requerimientos | 🟠 P1 | Cambios fuera de especificación |
 | P1.26 | Errores silenciosos prohibidos: no enmascares errores con `except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar ni valores de "éxito" como si no hubiera error; el error se eleva y reporta (fail fast) | 🟠 P1 | Errores ocultos que generan comportamiento indefinido |
 | P1.27 | Consolas web sin errores: prohibido entregar código web con errores en la consola del navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`); verificar consola limpia antes de entregar | 🟠 P1 | Errores de consola ocultos que degradan la experiencia |
+| P1.28 | Verifica el destino antes de escribir/borrar: antes de cualquier operación de escritura/borrado (especialmente remota) verifica el contenido actual del destino; no des por sentado que un directorio remoto es "solo build" o "descartable" sin inspeccionarlo | 🟠 P1 | Sobrescritura/borrado sobre destino desconocido |
+| P1.29 | No adivines configuraciones ni secretos: si falta un secreto, `.env`, credencial, API key, token, password o configuración: NO la inventes, crees ni adivines; REPORTA la falta al programador y ESPERA su orden | 🟠 P1 | Inventar configuraciones que rompen entornos |
+| P1.30 | Herramientas de depuración, logging y feedback: maximizar traces, logs estructurados, métricas, revisión de errores y APIs de observabilidad para que la IA tenga retroalimentación visible de lo que está pasando; incorporar herramientas gratuitas/open-source disponibles | 🟠 P1 | Ceguera de debugging: la IA no puede visualizar/entender fallos sin instrumentación |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ---
@@ -364,6 +367,20 @@
 - Un secreto faltante se resuelve con el humano, no con la IA: no hay "default productivo" inventado.
 - Fuente: incidente [proyecto-privado] — se inventó `DB_PASSWORD=[password-ejemplo]` porque faltaba en el `.env` recreado.
 
+### P1.30 Herramientas de depuración, logging y feedback para IA
+- Los modelos y software de IA tienen limitaciones sistemáticas para visualizar problemas internos: sin instrumentación, la IA no puede ver qué falló, por qué falló ni en qué punto del flujo se produjo el error.
+- Por ello, se deben MAXIMIZAR las herramientas de depuración, logging y feedback en todo sistema que use IA: traces distribuidos, logs estructurados, métricas, revisión de errores, APIs de observabilidad y elementos del sistema que entreguen retroalimentación visible de lo que está pasando.
+- Si el proyecto aún no tiene estas herramientas: PROPONLAS al programador antes de continuar, indicando las opciones gratuitas/open-source disponibles y su justificación.
+- Herramientas gratuitas/open-source recomendadas (verificar existencia y licencia antes de usar):
+  - **Traces y observabilidad**: OpenTelemetry (Apache-2.0, `opentelemetry-python`), Arize Phoenix (BSD, `arize-phoenix`), LangSmith (free tier para desarrollo).
+  - **Logging estructurado**: Python `logging` + `structlog` (MIT), JSON logging, correlación de request IDs.
+  - **Métricas y experimentos**: Weights & Biases (MIT, free tier para proyectos pequeños), Prometheus + Grafana (Apache-2.0).
+  - **Revisión de errores**: Sentry (FSL-1.1 con free tier), herramientas de stack trace con contexto de variables.
+  - **APIs de feedback**: endpoints de healthcheck, métricas de latencia/errores, dashboards de monitoreo.
+- Todo log o métrica debe incluir contexto suficiente (request ID, user ID, timestamp, modelo usado, parámetros) para que una IA pueda diagnosticar el fallo sin acceso al código fuente.
+- La ausencia de instrumentación en un sistema con IA se declara explícitamente como riesgo y se consulta al programador antes de declarar la tarea completada.
+- Fuente: Anthropic "hidden context" (LLM08), OWASP GenAI LLM Top 10 2026 (LLM07 Misinformation), SRE observability principles, OpenTelemetry docs.
+
 ---
 
 ## P2 — Preferencias (cuando aplique)
@@ -417,6 +434,7 @@ varía por herramienta:
 - [ ] ¿Documenté las lecciones del trabajo en `docs/LECCIONES-APRENDIDAS.md` (fecha, problema, solución, evidencia) y, si algo falló 2+ veces, propuse regla o endurecer la existente? (P1.20)
 - [ ] ¿No hay errores silenciosos en el código (`except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar, retornos de `null`/`default` sin logging)? ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse? (P1.26)
 - [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web? ¿En tests automatizados se capturó la consola y no hay errores sin resolver? (P1.27)
+- [ ] ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
 
 > Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
 > (si copiaste AGENTS.md a otro proyecto, usa los tests/lint/build de ESE proyecto).

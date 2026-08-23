@@ -61,6 +61,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Recreación autónoma de entornos productivos** | Borrar servidores, bases de datos, contenedores, directorios productivos, `.env` o configuraciones productivas para "volver a empezar" como solución a un error; no hay "reset productivo" aprobado por la IA: toda recuperación requiere plan humano, backup verificado y confirmación explícita (arXiv:2508.11824, SAFE-AI Framework) | P0.14 |
 | **Verificar destino antes de escribir/borrar** | No verificar el contenido actual del destino antes de operaciones de escritura/borrado (especialmente remotas), asumiendo que un directorio remoto es "solo build" o "descartable" sin inspeccionarlo (incidente [proyecto-privado]: `rsync --delete` sobre `/var/www/[host-produccion]/` sin verificar que contenía código Laravel + `.env` productivo) | P1.28 |
 | **No adivinar configuraciones ni secretos** | Inventar, crear o adivinar secretos, `.env`, credenciales, API keys, tokens, passwords o configuraciones faltantes en lugar de reportar la falta al programador y esperar su orden (incidente [proyecto-privado]: se inventó `DB_PASSWORD=[password-ejemplo]` porque faltaba en el `.env` recreado) | P1.29 |
+| **Ceguera de debugging sin instrumentación** | Los modelos de IA tienen limitaciones sistemáticas para visualizar problemas internos: sin traces, logs estructurados, métricas y APIs de observabilidad, la IA no puede diagnosticar fallos, entender por qué se produjeron ni en qué punto del flujo (Anthropic LLM08; OWASP GenAI LLM Top 10 2026 LLM07 Misinformation; SRE observability principles; OpenTelemetry docs) | P1.30 |
 
 ## 2. Estructura de prioridades
 
@@ -560,6 +561,34 @@ se resuelve con el humano, no con la IA: no hay "default productivo" inventado.
 **Fuente**: incidente [proyecto-privado] — se inventó `DB_PASSWORD=[password-ejemplo]`
 porque faltaba en el `.env` recreado.
 
+### P1.30 Herramientas de depuración, logging y feedback para IA
+**Error**: los modelos y software de IA tienen limitaciones sistemáticas para
+visualizar problemas internos: sin instrumentación (traces, logs, métricas, APIs
+de observabilidad), la IA no puede ver qué falló, por qué falló ni en qué punto
+del flujo se produjo el error, generando "ceguera de debugging".
+**Prevención**: se deben MAXIMIZAR las herramientas de depuración, logging y
+feedback en todo sistema que use IA:
+- **Traces distribuidos**: OpenTelemetry (Apache-2.0), Arize Phoenix (BSD),
+  LangSmith (free tier para desarrollo).
+- **Logging estructurado**: Python `logging` + `structlog` (MIT), JSON logging,
+  correlación de request IDs.
+- **Métricas**: Weights & Biases (MIT, free tier para proyectos pequeños),
+  Prometheus + Grafana (Apache-2.0).
+- **Revisión de errores**: Sentry (FSL-1.1 con free tier), stack traces con
+  contexto de variables.
+- **APIs de feedback**: endpoints de healthcheck, métricas de latencia/errores,
+  dashboards de monitoreo.
+Todo log o métrica debe incluir contexto suficiente (request ID, user ID, timestamp,
+modelo usado, parámetros) para que una IA pueda diagnosticar el fallo sin acceso
+al código fuente.
+Si el proyecto aún no tiene estas herramientas: PROPONLAS al programador antes de
+continuar, indicando las opciones gratuitas/open-source disponibles y su justificación.
+La ausencia de instrumentación en un sistema con IA se declara explícitamente como
+riesgo y se consulta al programador antes de declarar la tarea completada.
+**Fuente**: Anthropic "hidden context" (LLM08); OWASP GenAI LLM Top 10 2026
+(LLM07 Misinformation); SRE observability principles; OpenTelemetry docs
+(opentelemetry.io).
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres
@@ -577,6 +606,7 @@ Obligatorio al terminar cualquier tarea (versión imprimible: `CHECKLIST.md`):
 6. ¿Ejecuté los tests/lint/build y pasan?
 7. ¿Solo cambié lo necesario (alcance)?
 8. ¿Reporté qué falta y qué no pude verificar?
+9. ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
 
 ## 5. Fuentes de la investigación
 
@@ -831,8 +861,8 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 | LLM04 Supply Chain | **P1.18** (imports/dependencias), P1.2 (no instalar sin permiso) | ask de `pip install`, `npm -g`, etc. |
 | LLM05 Data Model Poisoning | No aplicable a un ruleset (no se entrena el modelo) | — |
 | LLM06 Unbounded Consumption | **Decisión de coste** (modelos permitidos en AGENTS.md, sección Entorno) | `enabled_providers` en opencode.json / kilo.json |
-| LLM07 Misinformation | **P0.1** (evidencia), P1.1 (verificación), P1.6 (honestidad), P1.15 (revisión humana) | — |
-| LLM08 Hidden Context Exposure | **P0.13** (contextos no confiables), P0.11 (reportar) | deny de eval/pipes |
+| LLM07 Misinformation | **P0.1** (evidencia), P1.1 (verificación), P1.6 (honestidad), P1.15 (revisión humana), **P1.30** (instrumentación: traces, logs, métricas para diagnosticar fallos sin ceguera) | — |
+| LLM08 Hidden Context Exposure | **P0.13** (contextos no confiables), P0.11 (reportar), **P1.30** (logging estructurado y APIs de feedback para exponer el estado interno del sistema) | deny de eval/pipes |
 | LLM09 Vector and Embedding Weaknesses | No aplicable a un ruleset (sin RAG embebida) | — |
 | LLM10 Improper Output Handling | **P0.1, P1.1, P1.15, P1.19** (salidas no verificadas o con fallbacks silenciosos) | verificador del proyecto en el hook pre-commit |
 
