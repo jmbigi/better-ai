@@ -780,3 +780,15 @@ contenido cruzado (P1.21 aplicada a sí misma).
 **Lección**: la autoridad de especificación reside en la planilla aprobada por el programador, no en la generación del modelo; el agente puede proponer, pero no sustituir el juicio humano sobre requisitos.
 
 **Estado**: cerrada.
+
+## 2026-08-23 — Agregada regla P1.21b: pruebas visuales aisladas para interfaces gráficas
+
+**Problema**: el programador solicitó crear una regla P1 coherente con P1.21 (divide y vencerás) para exigir prototipado aislado de pruebas visuales, OCR y visión IA en proyectos con GUI/gráficos/imágenes, investigando previamente su precisión y conveniencia.
+
+**Solución**: (1) Investigación web en fuentes oficiales (Playwright, Cypress, Storybook, Applitools, Wikipedia) sobre pruebas visuales/OCR/visión IA: precisión depende del entorno (pixel diff es muy preciso pero frágil; IA visual mitiga flakiness); conveniente como capa complementaria en design systems, E2E y componentes gráficos; no conveniente como única estrategia ni sin entorno reproducible. (2) AGENTS.md: tabla resumen (P1.21b) + sección detallada con bullets (5 bullets: prototipo aislado con imágenes de referencia/mocks/stubs/time freeze; verificación con casos límite y ajuste de umbrales; complementan, no reemplazan, las pruebas funcionales; integración solo en entorno controlado con baselines estables; fuentes).
+
+**Evidencia**: investigación web completada con fuentes verificadas; regla insertada en AGENTS.md entre P1.21 y P1.22.
+
+**Lección**: las pruebas visuales/OCR/visión IA tienen fragilidades específicas (píxeles, DPI, fuentes, temas) que las pruebas funcionales no cubren; extender P1.21 con una regla hermana mantiene la consistencia del sistema sin redundancia.
+
+**Estado**: cerrada.

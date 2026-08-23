@@ -51,6 +51,7 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Pérdida de memoria del proyecto** | No documentar pruebas, fallos ni hallazgos en `docs/LECCIONES-APRENDIDAS.md` (o hacerlo sin evidencia ni anonimización): la lección muere con la sesión y los errores se repiten | P1.20 |
 | **Secuestro del agente (prompt injection)** | Instrucciones maliciosas incrustadas en contenido que el agente procesa (webs, documentos, correos, salidas de herramientas, archivos) que el agente obedece como si fueran órdenes del programador (OWASP LLM01; Anthropic: "hidden context" — LLM08) | P0.13 |
 | **Piezas rotas que contaminan el sistema** | Integrar módulos o componentes al código base sin construirlos y probarlos antes de forma aislada: un fallo local se mezcla con el resto del sistema, rompe un estado que estaba en verde y es difícil de localizar (divide y vencerás) | P1.21 |
+| **Pruebas visuales frágiles que generan ruido en CI** | Integrar pruebas de screenshot, OCR o visión IA en el pipeline sin prototipar aislado ni calibrar umbrales; suites visuales en entornos no controlados erosionan la confianza en los tests por falsos positivos (píxeles, DPI, fuentes, temas) | P1.21b |
 | **Cambios ejecutados sin consentimiento visual** | El agente ejecuta cambios sin presentar un diagrama visual al programador ni solicitar autorización explícita, o no acompaña las opciones múltiples con representaciones gráficas (ASCII/Python-Qt) | P1.22 |
 | **Cambios ejecutados sin autorización explícita** | El agente ejecuta cambios irreversibles, destructivos o de alto impacto sin confirmación previa del programador; el juicio humano se reserva para decisiones de riesgo (AWS Security Blog 2026: "Require human approval for irreversible actions"; OWASP/NIST: revisión humana obligatoria para cambios en autenticación, autorización y secretos) | P1.23 |
 | **Implementación sin planilla de requerimientos** | No seguir una plantilla de requerimientos estándar (SRS, historias de usuario, MoSCoW, etc.) con criterios de aceptación medibles y trazables; la hoja de requerimientos detallados no puede ser reemplazada por IA porque el juicio humano es obligatorio para aprobar/ajustar/priorizar los requisitos (ISO/IEC/IEEE 29148:2018; IEEE 830; MoSCoW DIN 69901-5; Asana SRS template 2026) | P1.24 |
@@ -427,6 +428,35 @@ entregables y verificables (Wikipedia/Agile Alliance user story). La prueba aisl
 es la primera fase de la verificación, no la última: tras integrar, verificar
 también el conjunto (P1.1, P1.11) — la pieza probada en aislamiento puede fallar al
 interactuar con el resto del sistema.
+
+### P1.21b Pruebas visuales aisladas para interfaces gráficas
+**Error**: el LLM integra directamente en el pipeline pruebas de screenshot, OCR o
+visión IA sin prototiparlas de forma aislada ni calibrar sus umbrales. Las pruebas
+visuales en entornos no controlados generan falsos positivos por diferencias de
+píxeles, DPI, fuentes, temas o anti-aliasing, erosionando la confianza en el test
+suite y contaminando un sistema que estaba en verde (P1.11).
+**Prevención**: antes de integrar pruebas visuales, OCR o visión IA en un proyecto
+con GUI/gráficos/imágenes, prototiparlas de forma aislada en un entorno mínimo
+controlado (imágenes de referencia, mocks del browser/backend, stubs de datos
+dinámicos y time freeze). Verificar su precisión con casos límite (temas claro/oscuro,
+DPI alto/bajo, fuentes variables, contenido dinámico, anti-aliasing) y ajustar los
+umbrales de diff (`maxDiffPixels`, `threshold`, match levels de IA) hasta que el nivel
+de falsos positivos sea aceptable. Las pruebas visuales complementan las pruebas
+funcionales (P1.21), no las reemplazan: verifican la apariencia (layout, estilos, texto
+en imágenes), pero no la lógica de negocio ni el comportamiento. Solo integrarlas al
+pipeline si pasan de forma estable en el mismo entorno donde se generaron las
+baselines (Docker, browser versionado, viewport fijo). Ejecutarlas en entornos no
+controlados introduce flakiness que erosiona la confianza en el test suite.
+**Evidencia de la industria**: Playwright docs (test-snapshots) documenta
+`maxDiffPixels`, `stylePath` y la necesidad de entornos idénticos para screenshots
+estables. Cypress docs (visual testing) señala que los fallos visuales tienen dos
+causas: la app cambió, o cambió el entorno (datos de test, timing, fuentes,
+rendering). Storybook blog (Jun 2024) argumenta que un solo snapshot valida texto,
+color, forma, fuente, espaciado y solapamiento sin aserciones explícitas. Applitools
+docs (match levels, OCR) define niveles de comparación semántica (Strict, Layout,
+Dynamic) que mitigan la fragilidad del pixel diff. Wikipedia GUI testing confirma que
+la validación automática puramente visual es extremadamente difícil sin normalizar
+elementos dinámicos.
 
 ### P1.22 Autorización gráfica de cambios
 **Error**: el LLM ejecuta cambios en código o interfaces sin consentimiento visual
