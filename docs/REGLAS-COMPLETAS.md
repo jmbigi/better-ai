@@ -202,6 +202,41 @@ al programador con evidencia y ESPERA su orden explícita. No hay "reset product
 aprobado por la IA: toda recuperación de entorno productivo requiere plan humano,
 backup verificado y confirmación explícita del programador.
 
+### P0.15 Antes de empezar: lee las reglas y la documentación completa del proyecto
+**Error**: el agente inicia una tarea sin haber leído `AGENTS.md`, `README.md` y la
+documentación relevante del proyecto (`docs/REGLAS-COMPLETAS.md`, `CHECKLIST.md`,
+configs), causando errores por desconocimiento de convenciones, scope creep,
+uso de modelos/proveedores no permitidos o violación de políticas del proyecto.
+**Prevención**: OBLIGATORIO leer la documentación completa antes de iniciar CUALQUIER
+tarea. NO asumir que se conocen las reglas, la estructura o las convenciones: verificar
+leyendo. Si el proyecto tiene `opencode.json` / `kilo.json`: leerlos para entender
+los guardarraíles deterministas y los modelos permitidos. "No lo sabía" no es excusa.
+
+### P0.16 Antes de empezar: detecta el entorno de programación y el sistema operativo
+**Error**: el agente ejecuta comandos incompatibles, instala paquetes globales
+indebidos o usa rutas rotas por no identificar el entorno de desarrollo (lenguajes,
+frameworks, gestores de paquetes, herramientas de build/test) y el sistema operativo
+(Linux, macOS, Windows, WSL, contenedor).
+**Prevención**: OBLIGATORIO identificar el entorno antes de iniciar CUALQUIER tarea.
+Verificar: `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, `pom.xml`,
+`build.gradle`, `composer.json`, `pyproject.toml`, `Makefile`, `justfile`,
+`.tool-versions`, `nix`, `Dockerfile`, `docker-compose.yml` y variables de entorno
+relevantes. Detectar el SO: `uname -a`, `lsb_release -a`, `/etc/os-release`,
+`cat /proc/version`, `env | grep -i wsl`, `systemd-detect-virt`. NO asumir
+herramientas, rutas ni comandos: cada entorno tiene sus convenciones y restricciones
+(P0.5).
+
+### P0.17 Antes de empezar: lee el código del proyecto
+**Error**: el agente alucina APIs, rompe convenciones, duplica código o edita a ciegas
+por no explorar el código base real (estructura de directorios, puntos de entrada,
+módulos principales, convenciones de命名, patrones de error handling, tests existentes,
+configuración) antes de implementar o modificar.
+**Prevención**: OBLIGATORIO explorar el código base real antes de implementar o
+modificar. Usar: `glob`, `grep`, `read` para mapear el código relevante a la tarea.
+No inventar APIs ni rutas (P0.2). Si la tarea toca código existente: LEERLO primero
+(mínimo parcial) antes de modificar (P0.3). NO asumir que el código sigue un patrón
+estándar sin verificarlo en ESTE proyecto.
+
 ### P1.1 Verificación obligatoria
 **Error**: entregar sin ejecutar tests/lint/build, o "arreglar" ocultando errores.
 **Prevención**: ejecutar las comprobaciones del proyecto y mostrar la salida; los tests

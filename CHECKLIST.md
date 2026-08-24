@@ -6,6 +6,9 @@
 ## Antes de empezar
 
 - [ ] ¿Leí el AGENTS.md / reglas del proyecto?
+- [ ] ¿Leí el README.md y la documentación del proyecto (`docs/REGLAS-COMPLETAS.md`, `CHECKLIST.md`, configs)? (P0.15)
+- [ ] ¿Detecté el entorno de programación (lenguajes, frameworks, gestores de paquetes, tools de build/test) y el SO (Linux, macOS, Windows, WSL, contenedor)? (P0.16)
+- [ ] ¿Exploré el código base real (estructura, módulos, puntos de entrada, convenciones, tests, config) antes de implementar o modificar? (P0.17)
 - [ ] ¿Entiendo la tarea? ¿Declaré mis supuestos?
 - [ ] ¿Es compleja? ¿Planifiqué (explorar → planificar → implementar → verificar)?
 
