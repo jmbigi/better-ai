@@ -162,7 +162,7 @@
       "mv -f *": "deny",
       "cp -f *": "deny",
       "cp --force*": "deny",
-      "rsync --delete*": "ask",
+      "rsync --delete*": "deny",
       "curl * | bash*": "deny",
       "curl * | sh*": "deny",
       "wget * | bash*": "deny",

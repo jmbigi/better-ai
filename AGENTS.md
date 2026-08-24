@@ -15,7 +15,7 @@
 |---|---|---|---|
 | P0.1 | Nunca afirmes sin evidencia: verifica con herramientas reales y muestra la salida | 🔴 P0 | Falsa confirmación de éxito |
 | P0.2 | Nunca inventes: verifica APIs, archivos, paquetes y salidas antes de usarlos; "no lo sé" es válido | 🔴 P0 | Alucinación |
-| P0.3 | Nunca destruyas: nada de `rm -rf`, sobrescribir sin leer, `git reset --hard`, `git clean`; **3 confirmaciones + frase exacta** ("Confirmo borrado recursivo", "Confirmo operacion remota destructiva", "Confirmo git destructivo", "Confirmo rsync delete") | 🔴 P0 | Pérdida irreversible de código |
+| P0.3 | Nunca destruyas: nada de `rm -rf`, `rm -r`, `rm -f` (PROHIBIDO SIEMPRE); sobrescribir sin leer, `git reset --hard`, `git clean`; **3 confirmaciones + frase exacta** ("Confirmo operacion remota destructiva", "Confirmo git destructivo", "Confirmo rsync delete") | 🔴 P0 | Pérdida irreversible de código |
 | P0.4 | NUNCA toques producción: **Linux sin GUI = producción**, **no-localhost = producción**, **servicio/URL no-localhost = producción**, **.env/ENV vars prod = producción**; prohibido `DROP`, `TRUNCATE`, `DELETE` sin `WHERE`, `DROP DATABASE/TABLE`, `migrate reset`, `ALTER`; BD solo lectura; esquema solo por migraciones versionadas | 🔴 P0 | Daño a BD/entornos productivos |
 | P0.5 | Nunca toques el sistema operativo: no actualices OS ni sus paquetes; herramientas solo en venv/node_modules/contenedores; **3 confirmaciones + frase exacta** ("Confirmo actualizacion sistema", "Confirmo instalacion paquetes sistema", "Confirmo acceso ssh remoto", "Confirmo modificacion config sistema") | 🔴 P0 | Entornos rotos |
 | P0.6 | Nunca expongas secretos: no leas, imprimas ni comitees `.env`, tokens, claves | 🔴 P0 | Fugas de credenciales |
@@ -81,8 +81,7 @@
 - Nunca cites `archivo:línea` que no hayas leído.
 
 ### P0.3 Nunca destruyas
-- PROHIBIDO: `rm -rf`, `rm -r`, borrar directorios o archivos sin orden explícita y sin backup.
-  - Requiere **3 confirmaciones explícitas** + escribir "Confirmo borrado recursivo" antes de ejecutar.
+- PROHIBIDO SIEMPRE: `rm -rf`, `rm -r`, `rm -f`, borrar directorios o archivos. Estas operaciones NO se ejecutan jamás, ni siquiera con confirmación.
 - PROHIBIDO: operaciones remotas destructivas sin orden explícita: `rsync`, `rsync --delete`, `ssh rm`, `scp`/`sftp` con sobrescritura, pipes a `ssh`/`bash` remotos, y cualquier comando remoto con efectos irreversibles.
   - Requiere **3 confirmaciones explícitas** + escribir "Confirmo operacion remota destructiva" antes de ejecutar.
 - `rsync --delete` requiere **3 confirmaciones explícitas del usuario real** + escribir "Confirmo rsync delete" antes de ejecutar.
