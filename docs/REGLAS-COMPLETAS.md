@@ -59,8 +59,8 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **Errores silenciosos prohibidos** | Código con `except: pass`, `catch {}` vacíos, `try/except` que devuelven defaults sin reportar, retornos de `null`/`undefined`/`default` ante fallos sin logging, o cualquier constructo que trague un error y devuelva un resultado como si nada hubiera fallado — el peor modo de fallo porque es invisible | P1.26 |
 | **Consolas web con errores** | Entregar código web (frontend, SPA, PWA, extensiones) con errores en la consola del navegador (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) sin corregir, degradando la experiencia del usuario | P1.27 |
 | **Recreación autónoma de entornos productivos** | Borrar servidores, bases de datos, contenedores, directorios productivos, `.env` o configuraciones productivas para "volver a empezar" como solución a un error; no hay "reset productivo" aprobado por la IA: toda recuperación requiere plan humano, backup verificado y confirmación explícita (arXiv:2508.11824, SAFE-AI Framework) | P0.14 |
-| **Verificar destino antes de escribir/borrar** | No verificar el contenido actual del destino antes de operaciones de escritura/borrado (especialmente remotas), asumiendo que un directorio remoto es "solo build" o "descartable" sin inspeccionarlo (incidente [proyecto-privado]: `rsync --delete` sobre `/var/www/[host-produccion]/` sin verificar que contenía código Laravel + `.env` productivo) | P1.28 |
-| **No adivinar configuraciones ni secretos** | Inventar, crear o adivinar secretos, `.env`, credenciales, API keys, tokens, passwords o configuraciones faltantes en lugar de reportar la falta al programador y esperar su orden (incidente [proyecto-privado]: se inventó `DB_PASSWORD=[password-ejemplo]` porque faltaba en el `.env` recreado) | P1.29 |
+| **Verificar destino antes de escribir/borrar** | No verificar el contenido actual del destino antes de operaciones de escritura/borrado (especialmente remotas), asumiendo que un directorio remoto es "solo build" o "descartable" sin inspeccionarlo (incidente interno: `rsync --delete` sobre ruta productiva sin verificar que contenía código de aplicación + `.env` productivo) | P1.28 |
+| **No adivinar configuraciones ni secretos** | Inventar, crear o adivinar secretos, `.env`, credenciales, API keys, tokens, passwords o configuraciones faltantes en lugar de reportar la falta al programador y esperar su orden (incidente interno: se inventó `DB_PASSWORD=<PASSWORD_INVENTADO>` porque faltaba en el `.env` recreado) | P1.29 |
 | **Ceguera de debugging sin instrumentación** | Los modelos de IA tienen limitaciones sistemáticas para visualizar problemas internos: sin traces, logs estructurados, métricas y APIs de observabilidad, la IA no puede diagnosticar fallos, entender por qué se produjeron ni en qué punto del flujo (Anthropic LLM08; OWASP GenAI LLM Top 10 2026 LLM07 Misinformation; SRE observability principles; OpenTelemetry docs) | P1.30 |
 
 ## 2. Estructura de prioridades
@@ -583,8 +583,8 @@ datos productivos).
 remota): verificar el contenido actual del destino con `ls`, `cat`, `stat` o
 equivalente. Si no conoces el destino, no actúes. Ante la menor duda: inspeccionar
 primero, preguntar después.
-**Fuente**: incidente [proyecto-privado] — `rsync --delete` sobre `/var/www/[host-produccion]/`
-sin verificar que contenía código Laravel + `.env` productivo.
+**Fuente**: incidente interno — `rsync --delete` sobre ruta productiva
+sin verificar que contenía código de aplicación + `.env` productivo.
 
 ### P1.29 No adivines configuraciones ni secretos
 **Error**: el agente inventa, crea o adivina valores para secretos, `.env`,
@@ -593,7 +593,7 @@ valores por defecto falsos que luego se comitean o usan en producción.
 **Prevención**: si falta un secreto o configuración: REPORTA la falta al programador
 con el nombre exacto de la variable/archivo y ESPERA su orden. Un secreto faltante
 se resuelve con el humano, no con la IA: no hay "default productivo" inventado.
-**Fuente**: incidente [proyecto-privado] — se inventó `DB_PASSWORD=[password-ejemplo]`
+**Fuente**: incidente interno — se inventó `DB_PASSWORD=<PASSWORD_INVENTADO>`
 porque faltaba en el `.env` recreado.
 
 ### P1.30 Herramientas de depuración, logging y feedback para IA

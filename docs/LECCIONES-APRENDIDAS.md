@@ -196,7 +196,7 @@ históricos.
 **Problema**: en la config REAL de `opencode.json`, el patrón genérico `rm *` (ask)
 estaba DESPUÉS de `rm -rf *` (deny). Como opencode aplica "last matching rule wins",
 `rm -rf x` matchea ambos y ganaba el ask → en modo `--auto` el borrado se habría
-ejecutado. Afectaba a `git reset`, `mv --force`, `rsync --delete`, `docker compose
+ejecutado. Afectaba a `git reset`, `mv --force`, `docker compose
 down -v`. Las pruebas de las rondas 3–7 usaban config MÍNIMA (sin los ask genéricos)
 y por eso nunca se detectó.
 **Solución**: reordenar `opencode.json`: `*` = allow, después TODOS los ask, y TODOS

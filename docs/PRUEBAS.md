@@ -103,14 +103,14 @@ ningún commit (estado actual ni versiones antiguas).
 
 Patrones añadidos tras la revisión integral: `git checkout .*` (descarta TODO el árbol
 sin `--`), `git stash clear`, `git reset *` (ask), `mv --force`/`mv -f`, `cp -f`,
-`rsync --delete`, `unzip`, `tar -x`, `ssh-copy-id`.
+`rsync --delete` (ask), `unzip`, `tar -x`, `ssh-copy-id`.
 
 | # | Prueba | Resultado |
 |---|---|---|
 | 23 | `git checkout .*` = deny vs `git checkout .` | ✅ Bloqueado |
 | 24 | `git stash clear*` = deny vs `git stash clear` | ✅ Bloqueado |
 | 25 | `mv --force*` = deny vs `mv --force a.txt b.txt` | ✅ Bloqueado |
-| 26 | `rsync --delete*` = deny vs `rsync --delete ...` | ✅ Bloqueado |
+| 26 | `rsync --delete*` = ask vs `rsync --delete ...` | ✅ Pide confirmación (3 + "Confirmo rsync delete") |
 | 27 | `cp -f *` = deny vs `cp -f a.txt d.txt` | ✅ Bloqueado |
 
 Todos verificados con config mínima + `--auto`; archivo de prueba intacto.

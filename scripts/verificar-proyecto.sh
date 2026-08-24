@@ -58,8 +58,8 @@ check "245 patrones de permisos bash" python3 -c "
 import json
 b = json.load(open('kilo.json'))['permission']['bash']
 assert len(b) == 245, len(b)
-assert sum(1 for v in b.values() if v == 'deny') == 159
-assert sum(1 for v in b.values() if v == 'ask') == 85
+assert sum(1 for v in b.values() if v == 'deny') == 158
+assert sum(1 for v in b.values() if v == 'ask') == 86
 "
 check "kilo.json y opencode.json tienen los mismos permisos bash" python3 -c "
 import json
@@ -112,7 +112,6 @@ pares = [
     ('git reset *', 'git reset --hard*'),
     ('git push *', 'git push --force*'),
     ('mv *', 'mv --force*'), ('mv *', 'mv -f *'),
-    ('rsync *', 'rsync --delete*'),
     ('docker compose down*', 'docker compose down -v*'),
     ('pip install *', 'pip install --user *'),
     ('psql -c *', 'psql * *DROP*'), ('psql -c *', 'psql * *TRUNCATE*'),

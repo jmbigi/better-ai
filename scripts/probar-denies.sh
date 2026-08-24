@@ -90,7 +90,7 @@ mv --force*@@mv --force dummy.txt dummy2.txt
 mv -f *@@mv -f dummy.txt dummy2.txt
 cp -f *@@cp -f dummy.txt dummy2.txt
 cp --force*@@cp --force dummy.txt dummy2.txt
-rsync --delete*@@rsync --delete dummy.txt dummy2.txt
+
 curl * | bash*@@STATIC
 curl * | sh*@@STATIC
 wget * | bash*@@STATIC
