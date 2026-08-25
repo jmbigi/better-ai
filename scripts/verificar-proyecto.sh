@@ -34,6 +34,8 @@ for f in files:
 faltan = [r for r in sorted(rutas) if not os.path.exists(r)]
 assert not faltan, 'referencias rotas: ' + str(faltan)
 "
+# REQ-001
+check "requisitos versionados y referencias de codigo validos" python3 scripts/doc_validator.py --root .
 check "ningun .env versionado en git" bash -c "test -z \"\$(git ls-files | grep -E '\\.env(\$|\\.)' | grep -v '\\.env\\.example')\""
 check "47 limitaciones en REGLAS-COMPLETAS" bash -c "test \$(grep -cE '^\\| \\*\\*' docs/REGLAS-COMPLETAS.md) -eq 47"
 check "50 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 50"

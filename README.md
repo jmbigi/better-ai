@@ -14,6 +14,7 @@ Repositorio público:
 | Archivo | Qué es |
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode y kilocode lo cargan automáticamente en cada sesión. |
+| `.docs/requirements/` | **Contrato de requisitos**. Cada requisito `REQ-XXX` define alcance, prioridad, estado y criterios de aceptación; `scripts/doc_validator.py` comprueba su coherencia y trazabilidad desde el código. |
 | `opencode.json` | **Guardarraíles deterministas** para opencode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `read`/`edit` deniegan también rutas de claves y credenciales; `enabled_providers: ["opencode", "opencode-go"]` solo carga los proveedores de modelos permitidos (decisión de coste). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
 | `kilo.json` | **Guardarraíles deterministas** para kilocode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `enabled_providers: ["kilo", "deepseek", "openrouter"]`. Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
 | `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.11, P1.18, P1.19). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. Compartidos con kilocode vía `.kilo/agents/` (symlink). |
@@ -21,6 +22,7 @@ Repositorio público:
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
+| `docs/INTEGRACION-ASISTENTES.md` | Núcleo común y adaptadores para opencode, kilocode, Copilot y otros asistentes en distintos sistemas operativos. |
 | `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/probar-denies.sh` | **Red-team de los guardarraíles**: prueba cada `deny` de `opencode.json` contra el matcher REAL de opencode (config mínima aislada, sin AGENTS.md) con variantes canónicas seguras y falla si algún deny no bloquea. Los 154 `deny` son idénticos en `kilo.json` (kilocode). 154/154 verificados (15-08-2026). Uso: `bash scripts/probar-denies.sh` |
@@ -99,6 +101,13 @@ Añade al `AGENTS.md` solo lo que evita errores: comandos de build/test, convenc
 gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
 (en opencode: campo `instructions` en `opencode.json`; en kilocode: campo `instructions`
 en `kilo.json`).
+
+Los cambios de alcance significativo deben registrarse primero en
+`.docs/requirements/` con un archivo `REQ-XXX`. Usa `python3 scripts/doc_validator.py --root .`
+para comprobar el frontmatter y que las referencias `REQ-XXX` del código existen.
+En Windows puedes usar `scripts/verificar-requisitos.ps1` o
+`scripts/verificar-requisitos.cmd`. La verificación completa basada en Bash
+continúa disponible para entornos Unix; consulta `docs/INTEGRACION-ASISTENTES.md`.
 
 ### Probar el cumplimiento en tu proyecto (30 segundos)
 1. Copia `AGENTS.md` y `kilo.json` (o `opencode.json`) a la raíz.

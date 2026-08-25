@@ -9,6 +9,22 @@
 - Formato: **Fecha — Título** → Problema / Solución / Evidencia.
 - Si el mismo fallo se repite 2+ veces: proponer una regla nueva o endurecer una existente.
 
+## 2026-08-25 — Núcleo portable y adaptadores por asistente
+
+**Problema**: los permisos deterministas no tienen un formato común para todos los
+asistentes ni todos los sistemas operativos; `opencode.json` y `kilo.json` solo
+pueden ser aplicados por sus runtimes.
+**Solución**: separar un núcleo compartido (`AGENTS.md`, requisitos en `.docs/` y
+validador Python 3) de adaptadores específicos. Añadir lanzadores PowerShell y CMD
+para validar requisitos en Windows, manteniendo el verificador Bash para Unix.
+**Evidencia**: `python3 scripts/doc_validator.py --root .` devolvió `OK`; la suite
+`bash scripts/verificar-proyecto.sh --pre-commit` devolvió `30 OK, 1 FALLO`, siendo
+el único fallo el hook local no instalado en este clon.
+**Lección**: documentar explícitamente la diferencia entre instrucciones del agente
+y bloqueos deterministas; no afirmar compatibilidad universal de permisos cuando el
+runtime no la proporciona.
+**Estado**: abierta hasta instalar el hook local y verificarlo en cada plataforma.
+
 ---
 
 ## 2026-07-31 — opencode.json: `permission.webfetch` no acepta sintaxis de objeto
