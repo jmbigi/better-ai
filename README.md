@@ -78,6 +78,7 @@ Repositorio público:
 47. **Empezar sin leer reglas y documentación**: iniciar tareas sin haber leído `AGENTS.md`, `README.md` y la documentación del proyecto, causando errores por desconocimiento de convenciones, scope creep o uso de modelos no permitidos (P0.15)
 48. **Empezar sin detectar entorno**: ejecutar comandos incompatibles, instalar paquetes globales o usar rutas rotas por no identificar el entorno de desarrollo (lenguajes, frameworks, gestores de paquetes) y el SO (Linux, macOS, Windows, WSL, contenedor) (P0.16)
 49. **Empezar sin leer el código**: alucinar APIs, romper convenciones, duplicar código o editar a ciegas por no explorar el código base real (estructura, módulos, tests, patrones) antes de modificar (P0.17)
+50. **Ejecución de sudo y búsqueda de claves**: la IA nunca ejecuta comandos `sudo` (ni siquiera con autorización del programador), ya que otorgan privilegios de root y pueden instalar paquetes, modificar configs de sistema, cambiar claves de usuarios/BD o gestionar servicios — efectos irreversibles e impredecibles (P0.5). Tampoco busca ni intenta descubrir la clave de root ni de ningún usuario (`sudo su`, `sudo -l`, `cat /etc/shadow`, etc.): expondría credenciales y facilitaría accesos no autorizados (P0.12)
 
 ## Cómo usar
 

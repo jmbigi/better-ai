@@ -57,6 +57,8 @@
 - [ ] ¿No actualicé el sistema operativo ni sus paquetes?
 - [ ] ¿No instalé/actualicé dependencias sin permiso?
 - [ ] ¿Las herramientas se instalaron SOLO en el proyecto (venv/node_modules/contendor)?
+- [ ] ¿Nunca ejecuté `sudo`, sin excepción (ni siquiera con autorización del programador)? Si la tarea lo requería, lo reporté y esperé.
+- [ ] ¿Nunca busqué ni intenté descubrir la clave de root ni de ningún usuario (`sudo su`, `sudo -l`, `cat /etc/shadow`, `cat /etc/gshadow`)?
 
 ## Secretos (P0.6, P0.7)
 

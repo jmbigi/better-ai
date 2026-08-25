@@ -789,6 +789,37 @@ contenido cruzado (P1.21 aplicada a sí misma).
 
 **Evidencia**: investigación web completada con fuentes verificadas; regla insertada en AGENTS.md entre P1.21 y P1.22.
 
-**Lección**: las pruebas visuales/OCR/visión IA tienen fragilidades específicas (píxeles, DPI, fuentes, temas) que las pruebas funcionales no cubren; extender P1.21 con una regla hermana mantiene la consistencia del sistema sin redundancia.
+**Lección**: las pruebas visuales/OCR/visión IA tienen fragilidades específicas (píxeles, DPI, fuentes, temas) que las pruebas funcionales no cubren; extender P1.21 con una regla hermana mantiene la coherencia del sistema sin redundancia.
+
+**Estado**: cerrada.
+
+## 2026-08-24 — Endurecida P0.5: prohibición absoluta de `sudo` y búsqueda de claves
+
+**Problema**: la regla P0.5 (nunca toques el sistema operativo) no prohibía
+explícitamente `sudo`, dejando ambigüedad sobre si el agente podría elevar privilegios
+con autorización del programador. Además, no estaba prohibido buscar/inspeccionar
+claves de root/usuarios (`cat /etc/shadow`, `sudo -l`, etc.), lo que podría exponer
+credenciales.
+
+**Solución**: (1) AGENTS.md: P0.5 refuerza el prohibir `sudo` como regla absoluta —
+no hay excepción, ni siquiera con autorización del programador; el agente debe negarse
+y reportar al humano. La config determinista (`opencode.json`/`kilo.json`) marca
+`sudo *` como `ask`, pero la regla de texto P0.5 prevalece como prohibición. (2) P0.5
+y P0.12 añaden la prohibición de buscar/inspeccionar claves de root/usuarios
+(`sudo su`, `sudo -l`, `cat /etc/shadow`, `cat /etc/gshadow`): si el agente no tiene
+credencial, no la busca ni la adivina (P1.29). (3) README.md: error #50 sobre sudo y
+búsqueda de claves. (4) docs/REGLAS-COMPLETAS.md: detalle en P0.5 y P0.12.
+(5) CHECKLIST.md: nuevas casillas de sudo y búsqueda de claves.
+(6) scripts/verificar-proyecto.sh: ajustado conteo de errores README 49 → 50.
+
+**Evidencia**: verificación con `bash scripts/verificar-proyecto.sh` (112 OK, 0 FALLOS)
+confirmando coherencia entre AGENTS.md, README.md, REGLAS-COMPLETAS.md, CHECKLIST.md
+y scripts/verificar-proyecto.sh.
+
+**Lección**: la autoridad de la config determinista (`ask` vs prohibición de texto) debe
+ser complementada por reglas de texto P0 que dejan claro la prohibición absoluta;
+`ask` en la config no significa "permitido con autorización" — una regla P0 de texto
+prevalece sobre `ask` y exige el agente a negarse. Las claves/credenciales son tan
+sensibles al descubrimiento como al cambio.
 
 **Estado**: cerrada.
