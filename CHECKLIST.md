@@ -244,6 +244,24 @@
 - [ ] ¿En pruebas automatizadas (Playwright, Puppeteer, Selenium) se capturaron los mensajes de consola y no hay errores de tipo `error` o `warning` sin resolver?
 - [ ] ¿La ausencia de errores en la consola es un criterio de aceptación medible de la entrega?
 
+## Supply Chain Security (P0.18)
+
+- [ ] ¿Verifiqué integridad de dependencias (SBOM con syft, procedencia SLSA) antes de usar?
+- [ ] ¿Escané vulnerabilidades (grype/pip-audit/npm audit) y bloqueé si CRITICAL/HIGH sin excepción documentada?
+- [ ] ¿Registré SBOM en docs/SBOM-<fecha>.spdx.json como evidencia?
+
+## Unbounded Consumption (P0.19)
+
+- [ ] ¿Definí y respeté límites de tokens/coste/tiempo por sesión (1M tokens, $5, 30 min por defecto)?
+- [ ] ¿Alerté al 80% y bloqueé al 100% con confirmación explícita requerida?
+- [ ] ¿Registré métricas (tokens, coste, latencia, modelo) al final de la tarea?
+
+## Vector/Embedding Validation (P0.20)
+
+- [ ] ¿Verifiqué integridad (hash), procedencia (fuente oficial, licencia) de embeddings/RAG?
+- [ ] ¿Ejecuté benchmarks retrieval (recall@k, MRR, nDCG) en entorno aislado con casos límite?
+- [ ] ¿Bloqueé si recall@10 < 0.7, latencia p95 > 500ms, o modelo sin hash/firma?
+
 ---
 
 **Resultado**:  TODAS P0 marcadas y con evidencia → tarea verificada.

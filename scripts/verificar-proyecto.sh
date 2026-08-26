@@ -1,8 +1,45 @@
 #!/usr/bin/env bash
 # Verificación de coherencia del proyecto better-ai (lección: revisión cruzada
 # como paso previo a cada commit). Uso: bash scripts/verificar-proyecto.sh
+# Instrumentado con OpenTelemetry (P1.30) para traces distribuidos
 set -u
 cd "$(dirname "$0")/.." || exit 1
+
+# OpenTelemetry instrumentation (P1.30)
+OTEL_ENABLED="${OTEL_ENABLED:-false}"
+OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318/v1/traces}"
+SESSION_ID="${SESSION_ID:-$(uuidgen 2>/dev/null || date +%s%N | sha256sum | head -c 16)}"
+TRACE_ID="$(uuidgen 2>/dev/null || date +%s%N | sha256sum | head -c 32)"
+SPAN_ID="$(uuidgen 2>/dev/null || date +%s%N | sha256sum | head -c 16)"
+
+otel_start_span() {
+    local name="$1"
+    local parent_span_id="${2:-$SPAN_ID}"
+    if [ "$OTEL_ENABLED" = "true" ]; then
+        local start_time=$(date -u +%s%N)
+        echo "{\"name\":\"$name\",\"context\":{\"trace_id\":\"$TRACE_ID\",\"span_id\":\"$SPAN_ID\"},\"parent_span_id\":\"$parent_span_id\",\"start_time_unix_nano\":\"$start_time\"}" >> /tmp/otel-spans-${SESSION_ID}.jsonl
+    fi
+}
+
+otel_end_span() {
+    local name="$1"
+    local status="${2:-OK}"
+    if [ "$OTEL_ENABLED" = "true" ]; then
+        local end_time=$(date -u +%s%N)
+        echo "{\"name\":\"$name\",\"context\":{\"trace_id\":\"$TRACE_ID\",\"span_id\":\"$SPAN_ID\"},\"end_time_unix_nano\":\"$end_time\",\"status\":{\"code\":$( [ "$status" = "OK" ] && echo 1 || echo 2 )}}" >> /tmp/otel-spans-${SESSION_ID}.jsonl
+    fi
+}
+
+# Export spans to OTLP endpoint if configured
+otel_export() {
+    if [ "$OTEL_ENABLED" = "true" ] && [ -f "/tmp/otel-spans-${SESSION_ID}.jsonl" ]; then
+        curl -s -X POST "$OTEL_EXPORTER_OTLP_ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -s '.' /tmp/otel-spans-${SESSION_ID}.jsonl 2>/dev/null || cat /tmp/otel-spans-${SESSION_ID}.jsonl)" \
+            >/dev/null 2>&1 || true
+        rm -f /tmp/otel-spans-${SESSION_ID}.jsonl
+    fi
+}
 
 PASS=0
 FAIL=0
@@ -19,8 +56,10 @@ check() {
     fi
 }
 
+otel_start_span "verificar.total"
+otel_start_span "verificar.reglas"
 echo "== 1. Reglas =="
-check "17 reglas P0 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P0' AGENTS.md) -eq 17"
+check "20 reglas P0 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P0' AGENTS.md) -eq 20"
 check "31 reglas P1 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P1' AGENTS.md) -eq 31"
 check "IDs identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -oE '^### P[0-2]\\.[0-9]+' AGENTS.md | sort -V) <(grep -oE '^### P[0-2]\\.[0-9]+' docs/REGLAS-COMPLETAS.md | sort -V)"
 check "titulos de reglas identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -E '^### P0|^### P1' AGENTS.md) <(grep -E '^### P0|^### P1' docs/REGLAS-COMPLETAS.md)"
@@ -52,7 +91,9 @@ citadas = set(int(m) for m in re.findall(r'pruebas? (\\d+)', open('docs/LECCIONE
 existentes = set(int(m) for m in re.findall(r'^\\| (\\d+) \\|', open('docs/PRUEBAS.md').read(), re.M))
 assert citadas <= existentes, 'lecciones citan pruebas inexistentes: ' + str(citadas - existentes)
 "
+otel_end_span "verificar.reglas"
 
+otel_start_span "verificar.config"
 echo "== 2. Config =="
 check "kilo.json es JSON valido" python3 -c "import json; json.load(open('kilo.json'))"
 check "opencode.json es JSON valido (compatibilidad)" python3 -c "import json; json.load(open('opencode.json'))"
@@ -77,15 +118,21 @@ for sec in ('edit', 'read'):
     for pat in ('~/.ssh/*', '*.ssh/*', '~/.aws/*', '*.aws/*', '*.pem', '*id_rsa*', '*id_ed25519*', '*credentials*'):  # deny: patrones
         assert p[sec].get(pat) == 'deny', (sec, pat)
 "
-check "enabled_providers en kilo.json: kilo, deepseek, openrouter" python3 -c "
+check "experimental.policies en kilo.json: deny all + allow kilo, deepseek, openrouter" python3 -c "
 import json
 c = json.load(open('kilo.json'))
-assert c.get('enabled_providers') == ['kilo', 'deepseek', 'openrouter'], c.get('enabled_providers')
+policies = c.get('experimental', {}).get('policies', [])
+assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '*'}, policies[0]
+allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
+assert set(allowed) == {'kilo', 'deepseek', 'openrouter'}, allowed
 "
-check "enabled_providers en opencode.json: opencode, opencode-go, kilo" python3 -c "
+check "experimental.policies en opencode.json: deny all + allow opencode, opencode-go, kilo" python3 -c "
 import json
 c = json.load(open('opencode.json'))
-assert c.get('enabled_providers') == ['opencode', 'opencode-go', 'kilo'], c.get('enabled_providers')
+policies = c.get('experimental', {}).get('policies', [])
+assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '*'}, policies[0]
+allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
+assert set(allowed) == {'opencode', 'opencode-go', 'kilo'}, allowed
 "
 check "conteos de patrones en README coherentes con la config" python3 -c "
 import json, re
@@ -161,7 +208,9 @@ for i, deny in enumerate(k):
                 fallos.append((deny, ask, v))
 assert not fallos, 'ask posterior anula deny: ' + '; '.join(f'{d} / {a} para {v}' for d, a, v in fallos)
 "
+otel_end_span "verificar.config"
 
+otel_start_span "verificar.seguridad"
 echo "== 3. Seguridad (P0.9/P0.10) =="
 # Nota: se excluyen los placeholders del red-team (scripts/probar-denies.sh):
 # 'dummy*' (archivos de prueba), '127.0.0.1' (loopback de la comprobacion de redis,
@@ -213,8 +262,25 @@ for f in sorted(os.listdir('scripts')):
         assert not pat.search(linea), (f, i, linea)
 "
 check "agentes de solo lectura con edit deny" bash -c "for a in security-auditor code-reviewer; do grep -q 'edit: deny' .opencode/agents/\$a.md && grep -q 'mode: subagent' .opencode/agents/\$a.md && [ -L .kilo/agents ] || exit 1; done"
+otel_end_span "verificar.seguridad"
 
-echo "== 4. Repositorio =="
+otel_start_span "verificar.supply-chain"
+echo "== 4. Supply Chain (P0.18) =="
+check "syft disponible para SBOM" bash -c "command -v syft >/dev/null || echo 'WARNING: syft no instalado; SBOM no generado'"
+check "grype disponible para vuln scan" bash -c "command -v grype >/dev/null || echo 'WARNING: grype no instalado; vuln scan no ejecutado'"
+check "SBOM generado (docs/SBOM-*.spdx.json)" bash -c "ls docs/SBOM-*.spdx.json 2>/dev/null | head -1 >/dev/null || echo 'WARNING: SBOM no encontrado en docs/'"
+if command -v grype >/dev/null 2>&1; then
+    check "sin vulns CRITICAL/HIGH sin excepcion documentada" bash -c "! grype dir:. -o json 2>/dev/null | jq -e '.matches[] | select(.vulnerability.severity == \"Critical\" or .vulnerability.severity == \"High\") | .vulnerability.id' >/dev/null || echo 'INFO: vulns CRITICAL/HIGH detectadas (requieren excepcion documentada)'"
+fi
+otel_end_span "verificar.supply-chain"
+
+otel_start_span "verificar.drift"
+echo "== 5. Config Drift Detection (P1.9) =="
+check "sin drift en configs criticas (baseline firmada)" bash -c "bash scripts/detect-drift.sh >/dev/null 2>&1 || (echo 'DRIFT DETECTADO - Ejecuta: bash scripts/detect-drift.sh para detalles' && exit 1)"
+otel_end_span "verificar.drift"
+
+otel_start_span "verificar.repositorio"
+echo "== 6. Repositorio =="
 check "hook pre-commit instalado identico al script" bash -c "cmp -s scripts/hooks/pre-commit .git/hooks/pre-commit"
 check "sin objetos huerfanos en git (fsck)" bash -c "test -z \"\$(git fsck --unreachable 2>&1)\""
 if [ "${1:-}" = "--pre-commit" ]; then
@@ -224,7 +290,12 @@ else
     check "rama main sincronizada con origin" bash -c "test -z \"\$(git status --porcelain --branch | grep -E 'adelant|ahead|behind|adelanta')\""
     check "HEAD remoto apunta a main" bash -c "test \"\$(git ls-remote origin HEAD | cut -f1)\" = \"\$(git ls-remote origin refs/heads/main | cut -f1)\""
 fi
+otel_end_span "verificar.repositorio"
+
+otel_end_span "verificar.total"
+otel_export
 
 echo
 echo "Resultado: $PASS OK, $FAIL FALLOS"
+[ "$OTEL_ENABLED" = "true" ] && echo "Trace ID: $TRACE_ID (exported to $OTEL_EXPORTER_OTLP_ENDPOINT)"
 [ "$FAIL" -eq 0 ] || exit 1

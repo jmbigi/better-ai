@@ -1,0 +1,12 @@
+# Config Baseline - Generated 2026-08-26T13:33:31Z
+# DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
+# Format: <sha256>  <relative-path>
+
+cf03eb33c1afc003965c315916122a7e11722274677a61a8ef6b64fae2459f7c  opencode.json
+78b26c9b0da0a42ebd639ebd406847fb2ab925a001734c0e4c8264b629aee7aa  kilo.json
+299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
+490bb0e3de135ffd1e205072968c84a4241855165d55683b182ab4ebb5d8dd84  AGENTS.md
+32d225886f6508b8ca73f4ea2894d207b70b322338be965a1e174e05fdb2893e  scripts/verificar-proyecto.sh
+5f7b02c4f1572347b0b8ebc33a9042e2b6106dc7f63b8a82a21120ccea3b0dc6  scripts/probar-denies.sh
+dcdd0f2f585c58cb59faa708a2f024a073c0113e79a01f14ad4e5c0d02b39018  scripts/rotate-secret.sh
+809e01bc6c13d596b02a87a6786171ab40eeb99226a57e13f2801e0d0b0e3b6a  scripts/opencode-sandbox.sh

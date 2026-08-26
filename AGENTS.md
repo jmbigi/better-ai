@@ -30,6 +30,9 @@
 | P0.15 | Antes de empezar: lee las reglas y la documentación completa del proyecto (`AGENTS.md`, `README.md`, `docs/REGLAS-COMPLETAS.md`, `CHECKLIST.md`, configs) | 🔴 P0 | Empezar sin leer reglas/docs |
 | P0.16 | Antes de empezar: detecta el entorno de programación y el SO (lenguajes, frameworks, gestores de paquetes, tools de build/test; Linux, macOS, Windows, WSL, contenedor) | 🔴 P0 | Empezar sin detectar entorno |
 | P0.17 | Antes de empezar: lee el código del proyecto (estructura, módulos, puntos de entrada, convenciones, tests, config) antes de implementar o modificar | 🔴 P0 | Empezar sin leer el código |
+| P0.18 | Seguridad de cadena de suministro: verifica integridad dependencias (SBOM, SLSA, vulnerabilidades) antes de usar; bloquea si vulns CRITICAL/HIGH sin excepción documentada | 🔴 P0 | Supply chain compromise (LLM04) |
+| P0.19 | Límites de consumo no acotado: tokens, coste, tiempo por sesión; alertas y bloqueo si supera umbrales configurados | 🔴 P0 | Unbounded consumption (LLM06) |
+| P0.20 | Validación de vectores/embeddings: verifica integridad, procedencia y calidad de embeddings/RAG antes de usar en producción | 🔴 P0 | Vector/embedding weaknesses (LLM09) |
 | P1.1 | Verificación obligatoria: ejecuta tests/lint/build y muestra la salida; tests que puedan fallar | 🟠 P1 | Entregas rotas |
 | P1.2 | Respeta el alcance: solo lo pedido; sin refactorizar, sin crear archivos innecesarios ni instalar dependencias sin permiso | 🟠 P1 | Scope creep, archivos duplicados |
 | P1.3 | Gestiona el contexto: explorar → planificar → implementar → verificar; declara supuestos | 🟠 P1 | Errores por falta de entendimiento |
@@ -199,6 +202,29 @@
 - Si la tarea toca código existente: LÉELO primero (mínimo parcial) antes de modificar (P0.3).
 - NO asumas que el código sigue un patrón estándar sin verificarlo en ESTE proyecto.
 - Esta regla previene: alucinación de APIs/archivos, convenciones rotas, duplicación, scope creep, edits a ciegas.
+
+### P0.18 Seguridad de cadena de suministro
+- OBLIGATORIO: antes de usar cualquier dependencia (npm, pip, cargo, go, maven, composer, etc.), verifica su integridad generando un SBOM (Software Bill of Materials) y escaneando vulnerabilidades.
+- Herramientas requeridas: `syft` (SBOM SPDX/CycloneDX), `grype` / `pip-audit` / `npm audit` / `cargo audit` / `trivy` según ecosistema.
+- BLOQUEA la tarea si se detectan vulnerabilidades CRITICAL o HIGH sin excepción documentada y aprobada por el programador (riesgo aceptado por escrito con justificación y plan de mitigación).
+- Verifica procedencia (SLSA Level 1+): confirma que el artefacto proviene de la fuente oficial y no ha sido alterado (hashes, firmas, reproducible builds).
+- No uses dependencias sin SBOM verificado; registra el SBOM en `docs/SBOM-<fecha>.spdx.json` como evidencia.
+- Fuente: OWASP GenAI LLM Top 10 2026 — LLM04 Supply Chain; SLSA Framework; NIST SSDF.
+
+### P0.19 Límites de consumo no acotado
+- Define y respeta límites máximos por sesión: tokens totales (input+output), coste estimado USD, tiempo de ejecución.
+- Umbrales por defecto (configurables por proyecto): 1M tokens, $5 USD, 30 min. Al superar 80%: alerta; al 100%: BLOQUEO automático y requiere confirmación explícita para continuar.
+- Implementa contadores en hooks/skills: `cost-tracker` skill registra modelo, tokens in/out, coste, latencia por llamada.
+- Reporta métricas al final de cada tarea: tokens usados, coste, tiempo, modelo(s) utilizado(s).
+- Si no hay instrumentación (P1.30): declara explícitamente como riesgo y consulta al programador antes de continuar.
+- Fuente: OWASP GenAI LLM Top 10 2026 — LLM06 Unbounded Consumption; Anthropic context engineering.
+
+### P0.20 Validación de vectores/embeddings
+- Antes de usar embeddings/RAG en producción: verifica integridad (hash del modelo/índice), procedencia (fuente oficial, versión, licencia), y calidad (benchmarks de retrieval: recall@k, MRR, nDCG).
+- Pruebas obligatorias en entorno aislado (P1.21): consulta con casos límite (vacíos, ambiguos, adversariales, multilingües), mide latencia y precisión.
+- Bloquea si: recall@10 < 0.7 (umbral configurable), latencia p95 > 500ms, o embeddings de modelo no verificado (sin hash/firma).
+- Monitorea drift: recomputa métricas semanalmente o tras reindexado; alerta si degradación > 10%.
+- Fuente: OWASP GenAI LLM Top 10 2026 — LLM09 Vector and Embedding Weaknesses; NIST AI RMF.
 
 ---
 
@@ -443,19 +469,21 @@ Ambas cargan AGENTS.md automáticamente y aplican los mismos 245 guardarraíles 
 permisos (159 `deny`, 85 `ask`, 1 `allow` por defecto). La config determinista
 varía por herramienta:
 
-- **opencode**: `opencode.json` con `enabled_providers: ["opencode", "opencode-go"]`
+- **opencode**: `opencode.json` con `experimental.policies` (deny all, allow list)
   y modelos permitidos (precio bajo): **`opencode/deepseek-v4-flash-free`** o
   **`opencode-go/deepseek-v4-flash`**.
-- **kilocode**: `kilo.json` con `enabled_providers: ["kilo", "deepseek", "openrouter"]`
+- **kilocode**: `kilo.json` con `experimental.policies` (deny all, allow list)
   y modelos permitidos (precio bajo): **`deepseek/deepseek-chat`** (provider DeepSeek)
   o **`kilo-auto/free`** / **`kilo-auto/efficient`** (Kilo Gateway auto-routing).
 
 - PROHIBIDO usar cualquier otro modelo (incluidos `pro` y otros proveedores) sin
   permiso explícito del programador o presupuesto aprobado.
-- Refuerzo determinista: `enabled_providers` en la config solo carga los proveedores
-  de modelos permitidos (decisión de coste); el resto NO se cargan aunque haya
+- Refuerzo determinista: `experimental.policies` en la config solo permite los proveedores
+  de modelos listados (decisión de coste); el resto NO se cargan aunque haya
   credenciales. Los modelos `pro` del mismo proveedor siguen visibles: su prohibición
   es regla de texto (AGENTS.md) — no hay lista determinista por modelo en la config.
+  Ventaja sobre `enabled_providers` legacy: prioridad global > project, previene que
+  un repo malicioso re-habilite proveedores denegados globalmente.
 - Las pruebas y verificaciones de este proyecto se ejecutan SOLO con los modelos
   permitidos.
 
@@ -480,6 +508,9 @@ varía por herramienta:
 - [ ] ¿No hay errores silenciosos en el código (`except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar, retornos de `null`/`default` sin logging)? ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse? (P1.26)
 - [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web? ¿En tests automatizados se capturó la consola y no hay errores sin resolver? (P1.27)
 - [ ] ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
+- [ ] ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
+- [ ] ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
+- [ ] ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
 
 > Verificación de ESTE repositorio (el ruleset better-ai): `bash scripts/verificar-proyecto.sh`
 > (si copiaste AGENTS.md a otro proyecto, usa los tests/lint/build de ESE proyecto).
@@ -489,6 +520,69 @@ varía por herramienta:
 ## Lecciones aprendidas
 
 Regla **P1.20**: se actualizan en `docs/LECCIONES-APRENDIDAS.md` tras cada prueba, fallo o hallazgo relevante. Este archivo es memoria del proyecto: si algo falló 2+ veces, la lección se documenta aquí con su solución y se propone regla nueva o endurecimiento.
+
+---
+
+## MCP (Model Context Protocol)
+
+El proyecto configura servidores MCP en `opencode.json`/`kilo.json` bajo la clave `mcp`:
+
+| Servidor | Tipo | Uso | Comando opencode |
+|----------|------|-----|------------------|
+| `context7` | remote | Buscar documentación técnica actualizada | `use context7` |
+| `gh_grep` | remote | Buscar código en GitHub | `use gh_grep` |
+| `sentry` | remote | Consultar issues/errores de Sentry (OAuth) | `use sentry` |
+| `verify-local` | local | Ejecutar `verificar-proyecto.sh` como herramienta | `use verify-local` |
+
+**Uso en prompts:**
+- `use context7` — para buscar docs de librerías, APIs, frameworks
+- `use gh_grep` — para encontrar ejemplos de código en GitHub
+- `use sentry` — para investigar errores en producción
+- `use verify-local` — para auto-verificar el proyecto
+
+**Configuración:** Sección `mcp` en `opencode.json`/`kilo.json` con `enabled: true`. Los remotos usan OAuth donde aplica (Sentry).
+
+---
+
+## Agent Skills (`.opencode/skills/`)
+
+Skills reutilizables cargados on-demand via tool `skill`:
+
+| Skill | Descripción | Invocación |
+|-------|-------------|------------|
+| `security-audit` | Auditoría completa: verificador + security-auditor | `skill security-audit` |
+| `red-team-denies` | Red-team de 159 deny patterns vs matcher real | `skill red-team-denies` |
+| `owasp-mapping` | Verifica cobertura OWASP GenAI LLM Top 10 2026 | `skill owasp-mapping` |
+| `dependency-check` | SBOM (syft), vuln scan (grype), licencias | `skill dependency-check` |
+| `cost-tracker` | Rastrea tokens, coste, latencia por sesión | `skill cost-tracker` |
+
+**Ubicación:** `.opencode/skills/<name>/SKILL.md` (frontmatter YAML obligatorio: name, description, license, compatibility)
+
+**Permisos:** Controlados en `permission.skill` de `opencode.json`/`kilo.json` (patrones allow/ask/deny)
+
+**Uso:** El agente descubre skills disponibles y los carga con `skill({ name: "nombre" })`
+
+---
+
+## Observabilidad OpenTelemetry (P1.30)
+
+El verificador `verificar-proyecto.sh` incluye instrumentación OpenTelemetry opcional:
+
+```bash
+# Habilitar traces (requiere collector OTLP en localhost:4318)
+OTEL_ENABLED=true bash scripts/verificar-proyecto.sh
+
+# Variables de entorno:
+OTEL_ENABLED=true|false              # default: false
+OTEL_EXPORTER_OTLP_ENDPOINT=...      # default: http://localhost:4318/v1/traces
+SESSION_ID=...                       # auto-generado si no se provee
+```
+
+**Spans generados:** `verificar.total`, `verificar.reglas`, `verificar.config`, `verificar.seguridad`, `verificar.supply-chain`, `verificar.repositorio`
+
+**Export:** JSONL a `/tmp/otel-spans-<SESSION_ID>.jsonl` + POST a OTLP endpoint
+
+**Integración:** Arize Phoenix (gratis), Jaeger, Grafana Tempo, o análisis local
 
 ---
 

@@ -1,0 +1,61 @@
+# NeMo Guardrails Configuration for better-ai
+# Aligns with P0.13 (anti prompt-injection), P0.1 (evidence), P1.3 (flow)
+models:
+  - type: main
+    engine: openai
+    model: gpt-4o-mini
+
+rails:
+  # Input rails - applied to user input before processing
+  input:
+    flows:
+      - check prompt injection
+      - check jailbreak
+      - mask sensitive data
+      - validate evidence requirement
+
+  # Output rails - applied to model output before returning
+  output:
+    flows:
+      - check hallucination
+      - check facts
+      - mask sensitive data output
+      - verify no silent fallbacks
+
+  # Dialog rails - control conversation flow
+  dialog:
+    flows:
+      - enforce exploration first
+      - enforce verification step
+
+config:
+  # Sensitive data detection for input/output
+  sensitive_data_detection:
+    input:
+      entities:
+        - PERSON
+        - EMAIL_ADDRESS
+        - PHONE_NUMBER
+        - IP_ADDRESS
+        - API_KEY
+        - PASSWORD
+        - SSH_PRIVATE_KEY
+    output:
+      entities:
+        - PERSON
+        - EMAIL_ADDRESS
+        - PHONE_NUMBER
+        - IP_ADDRESS
+        - API_KEY
+        - PASSWORD
+        - SSH_PRIVATE_KEY
+
+  # Hallucination detection settings
+  hallucination:
+    threshold: 0.7
+    mode: "self_check"
+
+  # Fact checking settings
+  fact_check:
+    enabled: true
+    threshold: 0.8

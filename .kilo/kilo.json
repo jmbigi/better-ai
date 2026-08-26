@@ -1,5 +1,46 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
   "model": "kilo-auto/free",
-  "small_model": "kilo-auto/free"
+  "small_model": "kilo-auto/free",
+  "experimental": {
+    "policies": [
+      { "effect": "deny", "action": "provider.use", "resource": "*" },
+      { "effect": "allow", "action": "provider.use", "resource": "kilo" },
+      { "effect": "allow", "action": "provider.use", "resource": "deepseek" },
+      { "effect": "allow", "action": "provider.use", "resource": "openrouter" }
+    ]
+  },
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "gh_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app",
+      "enabled": true
+    },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.dev/mcp",
+      "enabled": true,
+      "oauth": {}
+    },
+    "verify-local": {
+      "type": "local",
+      "command": ["bash", "scripts/verificar-proyecto.sh"],
+      "enabled": true,
+      "cwd": "${workspace}"
+    },
+    "nemo-guardrails": {
+      "type": "local",
+      "command": ["nemoguardrails", "server", "--config", ".opencode/guardrails"],
+      "enabled": false,
+      "cwd": "${workspace}",
+      "environment": {
+        "NEMOGUARDRAILS_NO_USAGE_STATS": "1"
+      }
+    }
+  }
 }

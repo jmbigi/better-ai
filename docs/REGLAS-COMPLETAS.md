@@ -250,6 +250,54 @@ No inventar APIs ni rutas (P0.2). Si la tarea toca código existente: LEERLO pri
 (mínimo parcial) antes de modificar (P0.3). NO asumir que el código sigue un patrón
 estándar sin verificarlo en ESTE proyecto.
 
+### P0.18 Seguridad de cadena de suministro
+**Error**: el agente usa dependencias sin verificar su integridad, procedencia o
+vulnerabilidades conocidas, introduciendo riesgos de supply chain compromise
+(OWASP LLM04). Dependencias comprometidas o con vulnerabilidades CRITICAL/HIGH
+se propagan al proyecto sin detección.
+**Prevención**: OBLIGATORIO antes de usar cualquier dependencia (npm, pip, cargo,
+go, maven, composer, etc.): generar SBOM (Software Bill of Materials) con `syft`
+(SPDX/CycloneDX), escanear vulnerabilidades con `grype` / `pip-audit` / `npm audit`
+/ `cargo audit` / `trivy` según ecosistema. BLOQUEA la tarea si se detectan
+vulnerabilidades CRITICAL o HIGH sin excepción documentada y aprobada por el
+programador (riesgo aceptado por escrito con justificación y plan de mitigación).
+Verifica procedencia (SLSA Level 1+): confirma que el artefacto proviene de la
+fuente oficial y no ha sido alterado (hashes, firmas, reproducible builds).
+No uses dependencias sin SBOM verificado; registra el SBOM en
+`docs/SBOM-<fecha>.spdx.json` como evidencia.
+Fuente: OWASP GenAI LLM Top 10 2026 — LLM04 Supply Chain; SLSA Framework; NIST SSDF.
+
+### P0.19 Límites de consumo no acotado
+**Error**: el agente consume tokens, coste y tiempo sin límites por sesión,
+generando costes inesperados, latencias inaceptables o agotamiento de cuotas
+(OWASP LLM06). Sin instrumentación, la IA no puede auto-regular su consumo.
+**Prevención**: Define y respeta límites máximos por sesión: tokens totales
+(input+output), coste estimado USD, tiempo de ejecución. Umbrales por defecto
+(configurables por proyecto): 1M tokens, $5 USD, 30 min. Al superar 80%: alerta;
+al 100%: BLOQUEO automático y requiere confirmación explícita para continuar.
+Implementa contadores en hooks/skills: `cost-tracker` skill registra modelo,
+tokens in/out, coste, latencia por llamada. Reporta métricas al final de cada
+tarea: tokens usados, coste, tiempo, modelo(s) utilizado(s). Si no hay
+instrumentación (P1.30): declara explícitamente como riesgo y consulta al
+programador antes de continuar.
+Fuente: OWASP GenAI LLM Top 10 2026 — LLM06 Unbounded Consumption; Anthropic context engineering.
+
+### P0.20 Validación de vectores/embeddings
+**Error**: el agente usa embeddings/RAG en producción sin verificar integridad
+(hash del modelo/índice), procedencia (fuente oficial, versión, licencia) o
+calidad (benchmarks de retrieval: recall@k, MRR, nDCG) (OWASP LLM09).
+Embeddings de modelos no verificados o índices corruptos degradan silenciosamente
+la calidad de retrieval.
+**Prevención**: Antes de usar embeddings/RAG en producción: verifica integridad
+(hash del modelo/índice), procedencia (fuente oficial, versión, licencia), y
+calidad (benchmarks de retrieval: recall@k, MRR, nDCG). Pruebas obligatorias
+en entorno aislado (P1.21): consulta con casos límite (vacíos, ambiguos,
+adversariales, multilingües), mide latencia y precisión. Bloquea si:
+recall@10 < 0.7 (umbral configurable), latencia p95 > 500ms, o embeddings de
+modelo no verificado (sin hash/firma). Monitorea drift: recomputa métricas
+semanalmente o tras reindexado; alerta si degradación > 10%.
+Fuente: OWASP GenAI LLM Top 10 2026 — LLM09 Vector and Embedding Weaknesses; NIST AI RMF.
+
 ### P1.1 Verificación obligatoria
 **Error**: entregar sin ejecutar tests/lint/build, o "arreglar" ocultando errores.
 **Prevención**: ejecutar las comprobaciones del proyecto y mostrar la salida; los tests
@@ -655,6 +703,9 @@ Obligatorio al terminar cualquier tarea (versión imprimible: `CHECKLIST.md`):
 7. ¿Solo cambié lo necesario (alcance)?
 8. ¿Reporté qué falta y qué no pude verificar?
 9. ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
+10. ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
+11. ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
+12. ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
 
 ## 5. Fuentes de la investigación
 
@@ -906,12 +957,12 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 | LLM01 Prompt Injection | **P0.13** (contenido no confiable = dato, no orden), P0.8 (código peligroso), P0.2 (verificar procedencia) | deny de eval/pipes y de comandos destructivos |
 | LLM02 Sensitive Information Disclosure | **P0.6, P0.9, P0.10, P0.11** | deny de lectura de `.env`, `.ssh`, `.aws`, claves |
 | LLM03 Excessive Agency | **P0.3, P0.4, P1.8, P1.9, P1.11** | 159 deny de comandos destructivos + ask |
-| LLM04 Supply Chain | **P1.18** (imports/dependencias), P1.2 (no instalar sin permiso) | ask de `pip install`, `npm -g`, etc. |
+| LLM04 Supply Chain | **P0.18** (SBOM, SLSA, vuln scan), P1.18 (imports/dependencias), P1.2 | ask de `pip install`, `npm -g` + verificador SBOM |
 | LLM05 Data Model Poisoning | No aplicable a un ruleset (no se entrena el modelo) | — |
-| LLM06 Unbounded Consumption | **Decisión de coste** (modelos permitidos en AGENTS.md, sección Entorno) | `enabled_providers` en opencode.json / kilo.json |
+| LLM06 Unbounded Consumption | **P0.19** (límites tokens/coste/tiempo, alertas, bloqueo), **P1.30** (instrumentación) | `experimental.policies` (modelos permitidos), cost-tracker skill |
 | LLM07 Misinformation | **P0.1** (evidencia), P1.1 (verificación), P1.6 (honestidad), P1.15 (revisión humana), **P1.30** (instrumentación: traces, logs, métricas para diagnosticar fallos sin ceguera) | — |
 | LLM08 Hidden Context Exposure | **P0.13** (contextos no confiables), P0.11 (reportar), **P1.30** (logging estructurado y APIs de feedback para exponer el estado interno del sistema) | deny de eval/pipes |
-| LLM09 Vector and Embedding Weaknesses | No aplicable a un ruleset (sin RAG embebida) | — |
+| LLM09 Vector and Embedding Weaknesses | **P0.20** (validación integridad/procedencia/calidad embeddings/RAG), P1.21 (tests aislados) | — |
 | LLM10 Improper Output Handling | **P0.1, P1.1, P1.15, P1.19** (salidas no verificadas o con fallbacks silenciosos) | verificador del proyecto en el hook pre-commit |
 
 ### MITRE ATLAS (tácticas)
@@ -924,7 +975,8 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 | Exfiltration (datos sensibles, credenciales) | P0.6, P0.9, P0.10, P0.11 + deny de lectura de claves |
 | Denial of Service (consumo de recursos/coste) | Decisión de coste (modelos permitidos), P1.6 (parar tras 2 fallos) |
 
-**Limitación declarada**: LLM05 (Data Model Poisoning) y LLM09 (Vector/Embedding
-Weaknesses) no aplican a un ruleset de agente de código sin RAG ni entrenamiento;
-si el proyecto anfitrión las necesita, se cubren con reglas específicas de ese
-proyecto (sección 6).
+**Limitación declarada**: LLM05 (Data Model Poisoning) no aplica a un ruleset
+de agente de código sin entrenamiento del modelo; si el proyecto anfitrión la
+necesita, se cubre con reglas específicas de ese proyecto (sección 6). LLM04
+(Supply Chain), LLM06 (Unbounded Consumption) y LLM09 (Vector/Embedding
+Weaknesses) están ahora cubiertas por P0.18, P0.19 y P0.20 respectivamente.

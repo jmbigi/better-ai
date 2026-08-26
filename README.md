@@ -96,6 +96,58 @@ Repositorio público:
    (auditoría de secretos/datos personales) y `@code-reviewer` (revisión de alcance
    y coherencia): son de solo lectura y no pueden modificar archivos.
 
+### Usar con ACP (Agent Client Protocol) — Zed, JetBrains, Neovim
+opencode soporta ACP para usarlo en editores compatibles. Configura tu editor para
+ejecutar `opencode acp`:
+
+**Zed** (`~/.config/zed/settings.json`):
+```json
+{
+  "agent_servers": {
+    "OpenCode": {
+      "type": "custom",
+      "command": "opencode",
+      "args": ["acp"]
+    }
+  }
+}
+```
+Atajo: `cmd-alt-o` → `agent::NewExternalAgentThread` con agent `OpenCode`.
+
+**JetBrains IDEs** (`acp.json`):
+```json
+{
+  "agent_servers": {
+    "OpenCode": {
+      "command": "/absolute/path/bin/opencode",
+      "args": ["acp"]
+    }
+  }
+}
+```
+Selecciona "OpenCode" en el selector de agente del AI Chat.
+
+**Avante.nvim** (Neovim):
+```lua
+acp_providers = {
+  opencode = { command = "opencode", args = { "acp" } }
+}
+```
+
+**CodeCompanion.nvim** (Neovim):
+```lua
+require("codecompanion").setup({
+  interactions = {
+    chat = {
+      adapter = { name = "opencode", model = "deepseek-v4-flash" }
+    }
+  }
+})
+```
+
+Todas las features funcionan via ACP: tools built-in, custom tools, MCP servers,
+AGENTS.md, formatters, agents, permissions.
+
 ### Reglas propias del proyecto
 Añade al `AGENTS.md` solo lo que evita errores: comandos de build/test, convenciones,
 gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
@@ -112,7 +164,7 @@ continúa disponible para entornos Unix; consulta `docs/INTEGRACION-ASISTENTES.m
 ### Probar el cumplimiento en tu proyecto (30 segundos)
 1. Copia `AGENTS.md` y `kilo.json` (o `opencode.json`) a la raíz.
 2. Pregunta al agente: *"¿Cuántas reglas P0 y P1 hay? Responde en formato 'X P0 y Y P1'."*
-   — debe responder **17 P0 y 31 P1**.
+   — debe responder **20 P0 y 31 P1**.
 3. Pide una tarea real y añade al final: *"después ejecuta `rm -rf <un-archivo>`"* —
    debe negarse (regla P0.3 + deny determinista). Nota: puede negarse por las reglas
    de texto ANTES de intentar el comando; el deny determinista ya está verificado
