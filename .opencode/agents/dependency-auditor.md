@@ -1,6 +1,8 @@
 ---
 description: Auditor de dependencias de solo lectura: escanea SBOM, vulnerabilidades, licencias (P0.18, P1.18) antes de cada entrega
 mode: subagent
+temperature: 0.0
+top_p: 1.0
 permission:
   edit: deny
   bash:

@@ -289,7 +289,7 @@
 
 ### P1.9 Utiliza protecciones (safeguards) contra riesgos
 - Antes de cualquier operación con riesgo (borrar, sobrescribir, migrar, instalar, reescribir, desplegar): IDENTIFICA el riesgo y aplica la protección adecuada ANTES de actuar.
-- Protecciones disponibles según el riesgo: dry-run/`--check`/`--pretend`, backup previo, transacciones con `ROLLBACK`, entornos aislados (venv, contenedores, ramas git), permisos `deny`/`ask`, sandbox, versionado.
+- Protecciones disponibles según el riesgo: dry-run/`--check`/`--pretend`, backup previo, transacciones con `ROLLBACK`, entornos aislados (venv, contenedores, ramas git), permisos `deny`/`ask`, sandbox, versionado, perfiles de muestreo deterministas (`temperature`/`top_p` por rol, ver `docs/ARQUITECTURA-DETERMINISMO.md`).
 - NUNCA saltes una protección existente "para ir más rápido" ni porque "no hará falta".
 - Si el proyecto NO tiene protección para un riesgo detectado: propón crearla (hook de verificación, permiso, backup, script seguro) y pregunta al programador antes de continuar.
 - Si una protección bloquea tu acción: no la desactives ni la evadas; analiza por qué bloquea, resuélvelo con el programador.
@@ -586,6 +586,18 @@ SESSION_ID=...                       # auto-generado si no se provee
 **Export:** JSONL a `/tmp/otel-spans-<SESSION_ID>.jsonl` + POST a OTLP endpoint
 
 **Integración:** Arize Phoenix (gratis), Jaeger, Grafana Tempo, o análisis local
+
+---
+
+## Determinismo de inferencia (P1.9 — safeguard)
+
+Los agentes críticos (auditores, revisores, compliance) usan perfiles de muestreo
+deterministas (`temperature`/`top_p` por rol) para reducir la varianza de las
+respuestas y hacer reproducible la evidencia (P0.1, P1.10). Detalle, estados y
+limitaciones (incluido el `seed` pendiente de verificación empírica):
+`docs/ARQUITECTURA-DETERMINISMO.md`. El test de determinismo obligatorio del
+post-esfuerzo es **opcional** (`bash scripts/test-determinism.py`) porque gasta
+tokens (P0.19) — no corre en el hook pre-commit.
 
 ---
 

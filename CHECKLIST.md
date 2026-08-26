@@ -138,6 +138,7 @@
 
 - [ ] ¿Identifiqué los riesgos de la tarea (borrar, sobrescribir, migrar, instalar, desplegar)?
 - [ ] ¿Apliqué la protección adecuada antes de actuar (dry-run, backup, transacción, entorno aislado, permiso deny/ask)?
+- [ ] ¿Si el cambio es sensible (auditoría/revisión), definí el perfil de muestreo determinista por rol (`temperature`/`top_p`, ver `docs/ARQUITECTURA-DETERMINISMO.md`)? (P1.9)
 - [ ] ¿No salté ninguna protección existente "para ir más rápido"?
 - [ ] ¿Si detecté un riesgo sin protección, propuse crear una y pregunté?
 - [ ] ¿Si configuré/ajusté patrones de permisos, los probé contra el comando real que deben bloquear? (lección: los patrones matchean por tokens, no por subcadenas)

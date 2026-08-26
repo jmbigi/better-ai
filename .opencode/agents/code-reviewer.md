@@ -1,6 +1,8 @@
 ---
 description: Revisor de código de solo lectura: alcance, coherencia, honestidad y verificabilidad (P1.2/P1.5/P1.6/P1.10/P1.11/P1.18/P1.19/P1.20/P0.13) antes de entregar
 mode: subagent
+temperature: 0.0
+top_p: 1.0
 permission:
   edit: deny
   bash:

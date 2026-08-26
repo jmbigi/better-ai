@@ -1,6 +1,8 @@
 ---
 description: Optimizador de coste de solo lectura: rastrea tokens, coste, latencia, sugiere routing de modelos (P0.19, P1.30)
 mode: subagent
+temperature: 0.1
+top_p: 1.0
 permission:
   edit: deny
   bash:

@@ -659,3 +659,21 @@ Playwright consoleMessages (200).
   `kilo-auto/free` / `kilo-auto/efficient` (Kilo Gateway auto-routing).
 - El verificador (`scripts/verificar-proyecto.sh`) ahora verifica `kilo.json` y
   comprueba que `opencode.json` tiene los mismos permisos bash.
+
+## Ronda 42 — Determinismo de inferencia: perfiles aplicados, test creado y ejecución PENDIENTE (26-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 153 | Determinismo (P1.9): `temperature`/`top_p` por rol aplicados (`opencode.json` agent build/plan + 5 subagentes Markdown), `seed` NO aplicado (pendiente verificación empírica), `maxSteps`/`tools` deprecados NO usados; `test-determinism.py` creado (py_compile OK, --help OK, fail explícito sin fallbacks) | ✅ Compilado y validado en el proyecto; configuración verificada con la doc oficial de opencode (agents/Options, HTTP 200) |
+
+**Evidencia de los errores de servicio de modelos (26-08-2026, declaración honesta P0.1)**:
+- `opencode-go/deepseek-v4-flash` → `{"error":{"name":"APIError","data":{"message":"You have reached your monthly spending limit of $10...","statusCode":401}}}` (evidencia real del pilot).
+- `opencode/deepseek-v4-flash-free` → `{"error":{"name":"UnknownError","ref":"err_88c4a551"}}`.
+- `deepseek/deepseek-chat` → `{"error":{"name":"UnknownError","ref":"err_3a588c9a"}}`.
+
+**Conclusión honesta**: el EMR del test de determinismo **NO se ejecutó ni se reporta**
+(sin evidencia no hay resultado, P0.1). La ejecución queda **PENDIENTE** de servicio
+de modelos disponible; se re-ejecutará con `python3 scripts/test-determinism.py` y
+se documentará el EMR real (umbral 95 %, fail fast). Mientras tanto, los perfiles
+`temperature`/`top_p` sí están aplicados y verificados con evidencia documental
+(doc oficial) + JSON válido (runtime).

@@ -1,6 +1,8 @@
 ---
 description: Verificador de compliance de solo lectura: OWASP GenAI LLM Top 10 2026, MITRE ATLAS, políticas organización (P1.7, P1.16)
 mode: subagent
+temperature: 0.0
+top_p: 1.0
 permission:
   edit: deny
   bash:

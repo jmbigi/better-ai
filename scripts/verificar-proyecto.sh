@@ -126,13 +126,22 @@ assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '
 allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
 assert set(allowed) == {'kilo', 'deepseek', 'openrouter'}, allowed
 "
-check "experimental.policies en opencode.json: deny all + allow opencode, opencode-go, kilo" python3 -c "
+check "experimental.policies en opencode.json: deny all + allow opencode, opencode-go, kilo, deepseek" python3 -c "
 import json
 c = json.load(open('opencode.json'))
 policies = c.get('experimental', {}).get('policies', [])
 assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '*'}, policies[0]
 allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
-assert set(allowed) == {'opencode', 'opencode-go', 'kilo'}, allowed
+assert set(allowed) == {'opencode', 'opencode-go', 'kilo', 'deepseek'}, allowed
+"
+check "agente determinista: temperature/top_p en build y plan (sin seed, sin maxSteps)" python3 -c "
+import json
+a = json.load(open('opencode.json'))['agent']
+assert a['build']['temperature'] == 0.3 and a['build']['top_p'] == 1.0, a['build']
+assert a['plan']['temperature'] == 0.1 and a['plan']['top_p'] == 1.0, a['plan']
+for k in ('seed', 'maxSteps', 'steps'):
+    assert k not in a['build'], 'build no debe llevar ' + k
+    assert k not in a['plan'], 'plan no debe llevar ' + k
 "
 check "conteos de patrones en README coherentes con la config" python3 -c "
 import json, re
@@ -272,6 +281,7 @@ check "SBOM generado (docs/SBOM-*.spdx.json)" bash -c "ls docs/SBOM-*.spdx.json 
 if command -v grype >/dev/null 2>&1; then
     check "sin vulns CRITICAL/HIGH sin excepcion documentada" bash -c "! grype dir:. -o json 2>/dev/null | jq -e '.matches[] | select(.vulnerability.severity == \"Critical\" or .vulnerability.severity == \"High\") | .vulnerability.id' >/dev/null || echo 'INFO: vulns CRITICAL/HIGH detectadas (requieren excepcion documentada)'"
 fi
+check "test-determinism.py instalado y valido (sin llamadas LLM)" bash -c "python3 scripts/test-determinism.py --help >/dev/null 2>&1"
 otel_end_span "verificar.supply-chain"
 
 otel_start_span "verificar.drift"

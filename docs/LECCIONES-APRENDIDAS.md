@@ -839,3 +839,36 @@ prevalece sobre `ask` y exige el agente a negarse. Las claves/credenciales son t
 sensibles al descubrimiento como al cambio.
 
 **Estado**: cerrada.
+
+## 2026-08-26 — Determinismo de inferencia: aplicar Perfiles temperature/top_p sin verificar antes "seed"
+
+**Problema**: al incorporar la propuesta de determinismo (PDF del programador), la
+propuesta usaba `maxSteps` y `tools:` — ambos **DEPRECIADOS** según la doc oficial de
+opencode (26-08-2026: `steps`, `permission`) — y planteaba fijar `seed` por agente,
+que **no está documentado** como opción de agente (solo se pasa al proveedor vía
+"Additional", sin validación). Además, hoy **todos los modelos permitidos devolvían
+error de servicio**: `opencode-go/deepseek-v4-flash` → 401 ("monthly spending limit"),
+`opencode/deepseek-v4-flash-free` → UnknownError, `deepseek/deepseek-chat` → UnknownError:
+sin modelo disponible no hay EMR real que reportar.
+
+**Solución**: (1) aplicar solo lo verificado: `temperature`/`top_p` por rol (doc
+oficial + runtime JSON válido) en `opencode.json` (agent build=0.3/plan=0.1) y 5
+subagentes Markdown (0.0/0.1); (2) **NO aplicar `seed`** hasta prueba empírica
+(decisión C2-primero) — documentado en `docs/ARQUITECTURA-DETERMINISMO.md`; (3) crear
+`scripts/test-determinism.py` (10 runs, EMR >= 95 %, fail fast, falla EXPLÍCITO si la
+API falla — P0.1/P1.19, reporta coste estimado — P0.19); (4) **no integrar en verde** el
+check: la ejecución queda PENDIENTE de servicio; (5) `kilo.json` sin bloque `agent`
+(sin evidencia de soporte; declarado en la doc).
+
+**Evidencia**: errores de API reales (ref err_88c4a551, err_3a588c9a, 401) registrados
+en `docs/PRUEBAS.md` ronda 42 (prueba 153); `opencode --version` = 1.18.23;
+`opencode run --help` sin flags seed/temperature; doc oficial agents/Options (HTTP 200);
+`verificar-proyecto.sh --pre-commit` = 37 OK, 0 FALLOS.
+
+**Lección**: un parámetro no verificado (seed) no se reclama ni se fija en configs
+(P0.1); la doc oficial gana sobre la intuición (P1.7); los tests que gastan tokens son
+opcionales y fuera del hook (P0.19, patrón probar-denies.sh); el "no verificado hoy"
+se declara en PRUEBAS + LECCIONES en lugar de inventar el EMR.
+
+**Estado**: configuración aplicada y verificada; ejecución del test PENDIENTE de
+servicio de modelos (re-ejecutar: `python3 scripts/test-determinism.py`).

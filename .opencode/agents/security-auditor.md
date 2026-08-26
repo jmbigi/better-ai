@@ -1,6 +1,8 @@
 ---
 description: Auditor de seguridad de solo lectura: detecta secretos, datos personales, contenido no confiable y riesgos P0.6/P0.9/P0.10/P0.11/P0.13 antes de cada entrega
 mode: subagent
+temperature: 0.0
+top_p: 1.0
 permission:
   edit: deny
   bash:

@@ -359,7 +359,10 @@ reescribir, desplegar) sin aplicar la protección disponible, o saltándola "por
 rápido" — causando daños perfectamente evitables.
 **Prevención**: identificar el riesgo y elegir la protección antes de actuar
 (dry-run/`--check`/`--pretend`, backup previo, transacciones con `ROLLBACK`, entornos
-aislados como venv/contenedores/ramas git, permisos `deny`/`ask`, sandbox, versionado).
+aislados como venv/contenedores/ramas git, permisos `deny`/`ask`, sandbox, versionado,
+perfiles de muestreo deterministas `temperature`/`top_p` por rol — ver
+`docs/ARQUITECTURA-DETERMINISMO.md`, para reducir la varianza de respuestas en
+auditorías/revisiones y hacer reproducible la evidencia P0.1/P1.10).
 Si el proyecto no tiene protección para un riesgo, proponer crearla y preguntar. Nunca
 desactivar una protección que bloquea: entender por qué bloquea y resolverlo con el
 programador.

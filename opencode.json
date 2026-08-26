@@ -5,7 +5,8 @@
       { "effect": "deny", "action": "provider.use", "resource": "*" },
       { "effect": "allow", "action": "provider.use", "resource": "opencode" },
       { "effect": "allow", "action": "provider.use", "resource": "opencode-go" },
-      { "effect": "allow", "action": "provider.use", "resource": "kilo" }
+      { "effect": "allow", "action": "provider.use", "resource": "kilo" },
+      { "effect": "allow", "action": "provider.use", "resource": "deepseek" }
     ]
   },
   "mcp": {
@@ -39,6 +40,18 @@
       "environment": {
         "NEMOGUARDRAILS_NO_USAGE_STATS": "1"
       }
+    }
+  },
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "temperature": 0.3,
+      "top_p": 1.0
+    },
+    "plan": {
+      "mode": "primary",
+      "temperature": 0.1,
+      "top_p": 1.0
     }
   },
   "permission": {

@@ -15,14 +15,15 @@ Repositorio público:
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode y kilocode lo cargan automáticamente en cada sesión. |
 | `.docs/requirements/` | **Contrato de requisitos**. Cada requisito `REQ-XXX` define alcance, prioridad, estado y criterios de aceptación; `scripts/doc_validator.py` comprueba su coherencia y trazabilidad desde el código. |
-| `opencode.json` | **Guardarraíles deterministas** para opencode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `read`/`edit` deniegan también rutas de claves y credenciales; `enabled_providers: ["opencode", "opencode-go", "kilo"]` solo carga los proveedores de modelos permitidos (decisión de coste). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
-| `kilo.json` | **Guardarraíles deterministas** para kilocode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `enabled_providers: ["kilo", "deepseek", "openrouter"]`. Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
+| `opencode.json` | **Guardarraíles deterministas** para opencode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; `read`/`edit` deniegan también rutas de claves y credenciales; `experimental.policies` (deny all + allow `opencode`, `opencode-go`, `kilo`, `deepseek`) solo permite los proveedores de modelos autorizados (decisión de coste) y `agent` define perfiles deterministas de muestreo (`temperature`/`top_p`). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `kilo.json` | **Guardarraíles deterministas** para kilocode: 245 patrones bash (159 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `experimental.policies` (deny all + allow `kilo`, `deepseek`, `openrouter`). Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
 | `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.11, P1.18, P1.19). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. Compartidos con kilocode vía `.kilo/agents/` (symlink). |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 | `docs/INTEGRACION-ASISTENTES.md` | Núcleo común y adaptadores para opencode, kilocode, Copilot y otros asistentes en distintos sistemas operativos. |
+| `docs/ARQUITECTURA-DETERMINISMO.md` | Determinismo de inferencia: perfiles `temperature`/`top_p` por rol, soporte verificado de parameters, estado del `seed` (pendiente de verificación empírica) y test `test-determinism.py`. |
 | `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/probar-denies.sh` | **Red-team de los guardarraíles**: prueba 154 variantes canónicas seguras de los `deny` de `opencode.json` contra el matcher REAL de opencode (config mínima aislada, sin AGENTS.md) y falla si alguna no bloquea. Las 159 reglas `deny` son idénticas en `kilo.json` (kilocode); 154 variantes fueron verificadas (15-08-2026). Uso: `bash scripts/probar-denies.sh` |
@@ -183,7 +184,7 @@ permitidos por precio bajo**: `opencode/deepseek-v4-flash-free`,
 `kilo-auto/free` / `kilo-auto/efficient` (kilocode). Por falta de presupuesto/permiso
 NO se han verificado otros modelos (claude, gpt, gemini, `pro`, etc.), y está
 **prohibido** usarlos en este proyecto sin orden explícita. La prohibición de
-PROVEEDORES es determinista (`enabled_providers` en `kilo.json` / `opencode.json`);
+PROVEEDORES es determinista (`experimental.policies` en `kilo.json` / `opencode.json`);
 la prohibición del modelo `pro` (mismo proveedor) es regla de texto. El cumplimiento
 de las reglas de texto (AGENTS.md) puede variar entre modelos; por eso la capa de
 protección real son los `deny` deterministas de la config, que se aplican en runtime
