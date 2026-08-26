@@ -62,8 +62,7 @@ regla extra diluiría las existentes (fuente Anthropic 5: no sobreconstreñir).
 
 ### 4.2 Principio de no-romper coexistentes
 
-- La config global sigue permitiendo `enabled_providers`/policies (deny all +
-  allow list) — sin cambios.
+- La config global usa `experimental.policies` (deny all + allow list) — sin cambios.
 - Los subagentes mantienen `permission` (edit/bash deny) — sin cambios.
 
 ## 5. Test de determinismo (`scripts/test-determinism.py`)

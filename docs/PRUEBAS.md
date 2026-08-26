@@ -654,7 +654,7 @@ Playwright consoleMessages (200).
 - Los `deny` de `kilo.json` son idénticos a los de `opencode.json`; por tanto, el
   **red-team de `scripts/probar-denies.sh` (154/154 verificados)** aplica a kilocode
   con el mismo alcance.
-- `enabled_providers` en `kilo.json` es `["kilo", "deepseek", "openrouter"]`; los
+- `experimental.policies` en `kilo.json` es (deny all + allow) `["kilo", "deepseek", "openrouter"]`; los
   modelos low-cost compatibles son `deepseek/deepseek-chat` (provider DeepSeek) y
   `kilo-auto/free` / `kilo-auto/efficient` (Kilo Gateway auto-routing).
 - El verificador (`scripts/verificar-proyecto.sh`) ahora verifica `kilo.json` y
