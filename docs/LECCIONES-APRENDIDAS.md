@@ -966,3 +966,36 @@ es defensa en profundidad, no requisito funcional; si falla, la proteccion
 restante son los deny/ask deterministas de opencode.json.
 
 **Estado**: implementada Fase 4.1; pendiente Fase 4.2 (parser de shell) y commit.
+
+---
+
+## 2026-08-28 — Fase 4.2: pipes peligrosos no son detectables con comodines JSON
+
+**Problema**: los patrones deterministas `curl * | bash*`, `curl * | sh*`, `wget * | bash*`
+y `wget * | sh*` de `opencode.json`/`kilo.json` no pueden probarse con
+`scripts/probar-denies.sh` (marcados como `STATIC`) y el matcher de comodines no
+entiende sintaxis de shell (espacios variables, comillas, opciones, `sudo`, etc.).
+Esto deja una brecha real para P0.8 (ejecución de código no verificado).
+
+**Solución**: implementar un analizador léxico de shell puro en Python stdlib
+(`scripts/analyze_shell.py` con `shlex`) y una suite de pruebas
+(`scripts/check-shell-pipes.py`) que verifique variantes de pipes peligrosos,
+`eval`, `source` y `bash -c "$(...)"`. Integrar la suite en `make test` y en
+`scripts/verificar-proyecto.sh`.
+
+**Evidencia**: `python3 scripts/check-shell-pipes.py` devuelve `21 OK, 0 FALLOS`;
+cubre `curl|bash`, `wget|sh`, `fetch|bash`, `sudo bash`, `eval $(curl)`,
+`bash -c $(curl)` y `source <(curl)`; no genera falsos positivos con comandos
+legítimos como `curl --help`, `bash script.sh` o `cat file | grep`.
+
+**Lección**: cuando los patterns de comodines alcanzan su límite sintáctico,
+añadir una capa de análisis semántico (aunque sea heurística y stdlib-only) es
+más valioso que depender de un matcher más potente que requiera dependencias
+externas no auditadas.
+
+**Limitación conocida**: `shlex` no es un parser completo de Bash; construcciones
+muy retorcidas podrían escapar. Se documenta explícitamente para no vender una
+garantía falsa.
+
+**Estado**: implementada Fase 4.2; pendiente commit y push.
+

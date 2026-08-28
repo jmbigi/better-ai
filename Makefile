@@ -9,7 +9,7 @@ help:
 	@echo "Targets disponibles:"
 	@echo "  make check         - Ejecuta lint + test + verificacion completa"
 	@echo "  make lint          - shellcheck y validacion JSON"
-	@echo "  make test          - doc_validator, parity de configs y symlinks"
+	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
 	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
 	@echo "  make hooks         - Instala el hook git pre-commit (legacy)"
 	@echo "  make hooks-lefthook - Instala hooks via Lefthook (recomendado)"
@@ -29,6 +29,7 @@ test:
 	python3 scripts/doc_validator.py --root .
 	python3 scripts/check-config-parity.py
 	bash scripts/check-symlinks.sh
+	python3 scripts/check-shell-pipes.py
 
 sync:
 	bash scripts/sync-agents.sh

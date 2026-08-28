@@ -217,6 +217,7 @@ for i, deny in enumerate(k):
                 fallos.append((deny, ask, v))
 assert not fallos, 'ask posterior anula deny: ' + '; '.join(f'{d} / {a} para {v}' for d, a, v in fallos)
 "
+check "analizador de pipes peligrosos detecta variantes documentadas" bash -c "python3 scripts/check-shell-pipes.py"
 otel_end_span "verificar.config"
 
 otel_start_span "verificar.seguridad"
