@@ -1,4 +1,4 @@
-# Config Baseline - Generated 2026-08-28T20:00:00Z
+# Config Baseline - Generated 2026-08-28T17:53:20Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
@@ -6,7 +6,12 @@ a2fb5af876b1c575da76019c4f3f5e1ea2c33ea7b3fc09e623bd11f1fa09aa50  opencode.json
 78b26c9b0da0a42ebd639ebd406847fb2ab925a001734c0e4c8264b629aee7aa  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
 74ceab454e749436ca8f3f679c07882543caafde996c65e47be2cac8a463ac15  AGENTS.md
-cc7966f6ac3f32425ca17b923834ae83e8207c42eda679364c372d2c406340f3  scripts/verificar-proyecto.sh
+73386290a58a2bcc2b5d4a29470c760a93b815e9affa3663fc1a4872bd5a0d3c  scripts/verificar-proyecto.sh
 5f7b02c4f1572347b0b8ebc33a9042e2b6106dc7f63b8a82a21120ccea3b0dc6  scripts/probar-denies.sh
 bf4f1d220b041c496a562a6c3af25f5d4dc76472a098b194e1cefd89962a8986  scripts/rotate-secret.sh
 a71999bae3a923d5378690339a16d1cf1ff6738fb6ed03a3fb57e82df93da665  scripts/opencode-sandbox.sh
+2a376408a2cdc98523e32129c65057bf648433c3d2b33b6d4122bf0891d7a1c0  scripts/install-better-ai.sh
+4240db2d665c66f0f2807530718fb9a346d7d8435571ae0162d5d0db8884831f  scripts/update-better-ai.sh
+9cfa1adf1b0d9a8ae8ce931fd2b504472c70ccb5e2c65e756cdfb4168afff4a9  scripts/test-installer.sh
+eddf54898ca3192a6856269bc070f01f9b38b6e04763f1e6c215ba0e4f5e7d79  scripts/analyze_shell.py
+48d8c2bac0f23b15e43da271db1992f0d0560bb0ce2c04bc0103b07bb5cacf13  scripts/check-shell-pipes.py

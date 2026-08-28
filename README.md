@@ -30,6 +30,41 @@ Repositorio público:
 | `scripts/opencode-sandbox.sh` | **Sandbox opcional con bubblewrap**: ejecuta opencode con toda la máquina en solo lectura salvo el workspace y las rutas de opencode (red bloqueada salvo `--net`). La capa determinista de sistema operativo por encima de los deny. Requiere `bwrap` y user namespaces habilitados. **Limitación verificada (15-08-2026)**: el runtime Bun de opencode 1.18.18 crashea (segfault) dentro de un user namespace en este kernel — el aislamiento de bwrap funciona (verificado con otros procesos: `/etc` ro, red aislada), pero opencode no arranca dentro del sandbox en esta máquina; queda documentado como defensa en profundidad pendiente de un runtime compatible. Uso: `bash scripts/opencode-sandbox.sh [--net] [comando...]` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
+## Instalación en otro proyecto
+
+No se requieren cuentas en la nube ni `curl | bash`. Clona el repo localmente y
+copia las reglas a tu proyecto destino:
+
+```bash
+git clone https://github.com/jmbigi/better-ai /tmp/better-ai
+bash /tmp/better-ai/scripts/install-better-ai.sh /ruta/a/tu/proyecto
+```
+
+Instalación mínima (solo `AGENTS.md`, configs y agentes):
+
+```bash
+bash /tmp/better-ai/scripts/install-better-ai.sh --core-only /ruta/a/tu/proyecto
+```
+
+Con hooks git pre-commit:
+
+```bash
+bash /tmp/better-ai/scripts/install-better-ai.sh --with-hooks /ruta/a/tu/proyecto
+```
+
+### Actualizar
+
+Cuando haya cambios en better-ai, vuelve a clonar/actualizar el repo fuente y
+ejecuta:
+
+```bash
+bash /tmp/better-ai/scripts/update-better-ai.sh /ruta/a/tu/proyecto
+```
+
+El actualizador crea un backup timestamped en `.better-ai-backup-<fecha>/` y
+actualiza el manifesto `.better-ai.manifest`. Si modificaste `AGENTS.md` o los
+configs del destino, recupera lo que necesites del backup antes de continuar.
+
 ## Los 50 errores de LLM que se previenen
 
 1. **Alucinación**: inventar APIs, archivos, paquetes o resultados (P0.2)

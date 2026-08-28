@@ -20,6 +20,11 @@ CRITICAL_CONFIGS=(
     "scripts/probar-denies.sh"
     "scripts/rotate-secret.sh"
     "scripts/opencode-sandbox.sh"
+    "scripts/install-better-ai.sh"
+    "scripts/update-better-ai.sh"
+    "scripts/test-installer.sh"
+    "scripts/analyze_shell.py"
+    "scripts/check-shell-pipes.py"
 )
 
 UPDATE_BASELINE=false

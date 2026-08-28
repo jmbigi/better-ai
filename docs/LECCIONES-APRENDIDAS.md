@@ -999,3 +999,33 @@ garantía falsa.
 
 **Estado**: implementada Fase 4.2; pendiente commit y push.
 
+
+---
+
+## 2026-08-28 — Fase 5: instalador y actualizador local de better-ai
+
+**Problema**: incorporar better-ai a un proyecto requeria copiar manualmente
+`AGENTS.md`, `opencode.json`/`kilo.json`, agentes, scripts, `Makefile`, etc., y
+no existia mecanismo de actualizacion cuando el autor publica correcciones de
+seguridad. Esto frena la adopcion y deja instalaciones obsoletas.
+
+**Solucion**: crear `scripts/install-better-ai.sh` y `scripts/update-better-ai.sh`
+(Bash, compatible con Git Bash en Windows), mas `scripts/test-installer.sh` para
+verificar el flujo. El instalador copia archivos esenciales, crea un manifesto
+`.better-ai.manifest` y ofrece `--dry-run` y `--core-only`. El actualizador lee
+el manifesto, crea un backup timestamped y sobrescribe solo los archivos
+instalados originalmente.
+
+**Evidencia**: `bash scripts/test-installer.sh` devuelve `11 OK, 0 FALLOS`;
+`bash scripts/install-better-ai.sh --dry-run /tmp/dest` muestra los 38 archivos
+que copiaria; `bash scripts/update-better-ai.sh /tmp/dest` crea
+`.better-ai-backup-<fecha>/` y actualiza el manifesto.
+
+**Leccion**: para un ruleset de seguridad, la experiencia de instalacion y
+actualizacion es tan importante como las reglas: si la gente no puede adoptarlo
+sin friccion, la proteccion no llega. Un instalador local, sin dependencias de
+cloud y sin `curl | bash`, es el minimo exigible para un proyecto que predica
+P0.8.
+
+**Estado**: implementada Fase 5; pendiente commit.
+

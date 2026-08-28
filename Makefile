@@ -3,7 +3,7 @@
 
 SHELLCHECK_SEVERITY ?= error
 
-.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help
+.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help install update
 
 help:
 	@echo "Targets disponibles:"
@@ -16,6 +16,8 @@ help:
 	@echo "  make ci-local      - Ejecuta .github/workflows/ci.yml con act"
 	@echo "  make dagger        - Ejecuta pipeline Dagger local"
 	@echo "  make clean         - Limpia temporales de red-team"
+	@echo "  make install DEST=/ruta  - Instala better-ai en otro proyecto"
+	@echo "  make update DEST=/ruta   - Actualiza better-ai en otro proyecto"
 
 check: lint test
 	bash scripts/verificar-proyecto.sh
@@ -53,3 +55,11 @@ dagger:
 
 clean:
 	rm -rf /tmp/opencode/redteam.*
+
+install:
+	@if [ -z "$(DEST)" ]; then echo "[FALLO] Define DEST=/ruta/del/proyecto"; exit 1; fi
+	bash scripts/install-better-ai.sh "$(DEST)"
+
+update:
+	@if [ -z "$(DEST)" ]; then echo "[FALLO] Define DEST=/ruta/del/proyecto"; exit 1; fi
+	bash scripts/update-better-ai.sh "$(DEST)"
