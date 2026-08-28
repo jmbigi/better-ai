@@ -1,4 +1,4 @@
-# Config Baseline - Generated 2026-08-28T15:22:01Z
+# Config Baseline - Generated 2026-08-28T16:19:43Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
@@ -9,4 +9,4 @@ a2fb5af876b1c575da76019c4f3f5e1ea2c33ea7b3fc09e623bd11f1fa09aa50  opencode.json
 5c619451953898bc46b6996c93b8a9897bbb43fcc9f70cebe6f82efcb5f5c92f  scripts/verificar-proyecto.sh
 5f7b02c4f1572347b0b8ebc33a9042e2b6106dc7f63b8a82a21120ccea3b0dc6  scripts/probar-denies.sh
 bf4f1d220b041c496a562a6c3af25f5d4dc76472a098b194e1cefd89962a8986  scripts/rotate-secret.sh
-809e01bc6c13d596b02a87a6786171ab40eeb99226a57e13f2801e0d0b0e3b6a  scripts/opencode-sandbox.sh
+a71999bae3a923d5378690339a16d1cf1ff6738fb6ed03a3fb57e82df93da665  scripts/opencode-sandbox.sh

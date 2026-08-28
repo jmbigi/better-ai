@@ -909,3 +909,60 @@ ayuda a detectar errores reales sin bloquear por advertencias historicas.
 
 **Estado**: implementada Fase 1; pendiente actualizar baseline de drift tras
 revision y aprobacion del programador.
+
+
+---
+
+## 2026-08-28 — Fase 3: CI local self-hosted ligero
+
+**Problema**: faltaba una capa de CI local que permitiera ejecutar checks de forma
+automatizada y reproducible sin depender de cuentas en GitHub, GitLab ni servicios
+cloud. El hook pre-commit se instalaba solo mediante script legacy, sin gestor
+multiplataforma.
+
+**Solucion**: (1) crear `lefthook.yml` para gestionar hooks Git de forma
+multiplataforma con Lefthook; (2) crear `.github/workflows/ci.yml` para ejecutar
+localmente con `act` (sin subir nada a GitHub); (3) crear `ci/dagger.py` como
+pipeline portable opcional con Dagger; (4) actualizar `Makefile` con targets
+`hooks-lefthook`, `ci-local` y `dagger`; (5) actualizar
+`scripts/install-hooks.sh` para usar Lefthook si esta disponible y caer al
+script legacy si no; (6) documentar todo en `README.md` e
+`docs/INTEGRACION-ASISTENTES.md`.
+
+**Evidencia**: `make test` pasa en local; `bash scripts/install-hooks.sh` detecta
+la ausencia de Lefthook e instala el hook legacy; el contenedor `docker run --rm
+better-ai` sigue pasando todos los checks excepto los esperados de arbol de
+trabajo no limpio y rama ahead de origin.
+
+**Leccion**: para un proyecto local-first, Lefthook + Makefile es suficiente;
+`act` y Dagger son opciones avanzadas que no deben ser obligatorias; los
+workflows de GitHub Actions pueden coexistir como opcion local si se documenta
+que no requieren cuenta para ejecutarse con `act`.
+
+**Estado**: implementada Fase 3; pendiente commit tras revision.
+
+
+---
+
+## 2026-08-28 — Fase 4.1: pre-flight check del sandbox
+
+**Problema**: `scripts/opencode-sandbox.sh` ejecutaba `bwrap` directamente; en
+kernels donde los user namespaces no funcionan (documentado: Bun/opencode crashea
+con segfault), el script fallaba sin dar una alternativa al usuario.
+
+**Solucion**: (1) anadir flag `--disable-sandbox` para obediencia explicita
+(P1.8); (2) anadir pre-flight funcional `bwrap --unshare-all --die-with-parent
+true` antes de lanzar opencode; (3) si bwrap no esta instalado o el pre-flight
+falla, advertir al usuario y ejecutar opencode SIN sandbox mediante `exec opencode
+"$@"`; (4) actualizar la cabecera del script con el nuevo uso.
+
+**Evidencia**: `shellcheck --severity=error scripts/*.sh` pasa; `make test` pasa;
+el entorno actual devuelve `bwrap: loopback: Failed RTM_NEWADDR: Operation not
+permitted`, lo que confirma que el pre-flight detecta correctamente la
+incompatibilidad y activaria el fallback.
+
+**Leccion**: "degradacion elegante" es mejor que un crash silencioso; el sandbox
+es defensa en profundidad, no requisito funcional; si falla, la proteccion
+restante son los deny/ask deterministas de opencode.json.
+
+**Estado**: implementada Fase 4.1; pendiente Fase 4.2 (parser de shell) y commit.

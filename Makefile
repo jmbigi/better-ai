@@ -3,16 +3,19 @@
 
 SHELLCHECK_SEVERITY ?= error
 
-.PHONY: check lint test sync hooks clean help
+.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  make check   - Ejecuta lint + test + verificacion completa"
-	@echo "  make lint    - shellcheck y validacion JSON"
-	@echo "  make test    - doc_validator, parity de configs y symlinks"
-	@echo "  make sync    - Sincroniza .kilo/agents con .opencode/agents"
-	@echo "  make hooks   - Instala el hook git pre-commit"
-	@echo "  make clean   - Limpia temporales de red-team"
+	@echo "  make check         - Ejecuta lint + test + verificacion completa"
+	@echo "  make lint          - shellcheck y validacion JSON"
+	@echo "  make test          - doc_validator, parity de configs y symlinks"
+	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
+	@echo "  make hooks         - Instala el hook git pre-commit (legacy)"
+	@echo "  make hooks-lefthook - Instala hooks via Lefthook (recomendado)"
+	@echo "  make ci-local      - Ejecuta .github/workflows/ci.yml con act"
+	@echo "  make dagger        - Ejecuta pipeline Dagger local"
+	@echo "  make clean         - Limpia temporales de red-team"
 
 check: lint test
 	bash scripts/verificar-proyecto.sh
@@ -33,6 +36,19 @@ sync:
 
 hooks:
 	bash scripts/install-hooks.sh
+
+hooks-lefthook:
+	@command -v lefthook >/dev/null 2>&1 || { echo "[FALLO] lefthook no esta instalado. Ver https://lefthook.dev/installation"; exit 1; }
+	lefthook install
+	@echo "[OK] Hooks de Lefthook instalados"
+
+ci-local:
+	@command -v act >/dev/null 2>&1 || { echo "[FALLO] act no esta instalado. Ver https://nektos.github.io/act"; exit 1; }
+	act -j verify
+
+dagger:
+	@command -v dagger >/dev/null 2>&1 || { echo "[FALLO] dagger no esta instalado. Ver https://dagger.io/"; exit 1; }
+	dagger run python ci/dagger.py
 
 clean:
 	rm -rf /tmp/opencode/redteam.*

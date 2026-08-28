@@ -5,33 +5,66 @@
 # ignorara las reglas, el kernel sigue limitando el dano: toda la maquina en SOLO
 # LECTURA salvo el workspace y las rutas de config/datos de opencode y git.
 # Red BLOQUEADA por defecto (--unshare-net); activar con --net.
-# Uso: bash scripts/opencode-sandbox.sh [--net] [argumentos de opencode...]
+# Uso: bash scripts/opencode-sandbox.sh [--net] [--disable-sandbox] [argumentos de opencode...]
 #      Ejemplos:
 #        bash scripts/opencode-sandbox.sh run "resumen del proyecto"
 #        bash scripts/opencode-sandbox.sh --net run "verifica una URL"
+#        bash scripts/opencode-sandbox.sh --disable-sandbox run "comando"
 set -u
 
-# Red BLOQUEADA por defecto (--unshare-net, el namespace de red se aísla y el
-# sandbox no tiene red); --net la comparte (necesario para webfetch/verificar URLs).
+# Flags opcionales
 NET="--unshare-net"
-[ "${1:-}" = "--net" ] && { NET="--share-net"; shift; }
+DISABLE_SANDBOX=false
 
-if ! command -v bwrap >/dev/null 2>&1; then
-    echo "ERROR: bwrap (bubblewrap) no esta instalado. Instala el paquete 'bubblewrap'"
-    echo "       de tu distribucion (SOLO en tu sistema, como usuario) o ejecuta"
-    echo "       opencode sin sandbox. Sin bwrap el sandbox NO se puede activar"
-    echo "       (no hay fallback silencioso; ver P1.19 del AGENTS.md)."
-    exit 1
-fi
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --net)
+            NET="--share-net"
+            shift
+            ;;
+        --disable-sandbox)
+            DISABLE_SANDBOX=true
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 if [ "$#" -eq 0 ]; then
-    echo "Uso: bash scripts/opencode-sandbox.sh [--net] <comando opencode...>"
+    echo "Uso: bash scripts/opencode-sandbox.sh [--net] [--disable-sandbox] <comando opencode...>"
     exit 1
 fi
 
 if ! command -v opencode >/dev/null 2>&1; then
     echo "ERROR: opencode no esta en el PATH dentro de este entorno."
     exit 1
+fi
+
+# Pre-flight: si el usuario solicita explicitamente --disable-sandbox, saltamos
+# bubblewrap sin mas preguntas (P1.8: obedece la orden explicita).
+if [ "$DISABLE_SANDBOX" = true ]; then
+    echo "AVISO: sandbox deshabilitado por --disable-sandbox."
+    echo "         La unica proteccion restante son los deny/ask de opencode.json."
+    exec opencode "$@"
+fi
+
+if ! command -v bwrap >/dev/null 2>&1; then
+    echo "AVISO: bwrap (bubblewrap) no esta instalado."
+    echo "         Ejecutando opencode SIN sandbox (solo proteccion de opencode.json)."
+    echo "         Instala el paquete 'bubblewrap' para activar la capa de sandbox."
+    exec opencode "$@"
+fi
+
+# Pre-flight funcional: verificar que bwrap puede crear un namespace minimo.
+# Esto detecta kernels/user namespaces incompatibles antes de intentar lanzar
+# opencode y evita el crash documentado del runtime Bun en ciertos kernels.
+if ! bwrap --unshare-all --die-with-parent true >/dev/null 2>&1; then
+    echo "AVISO: bubblewrap esta instalado pero no puede crear el namespace de sandbox"
+    echo "         en este kernel (posible user namespace deshabilitado o incompatible)."
+    echo "         Ejecutando opencode SIN sandbox (solo proteccion de opencode.json)."
+    exec opencode "$@"
 fi
 
 # Workspace actual (absoluto) -> unico punto de escritura del filesystem.
@@ -66,7 +99,7 @@ fi
 exec bwrap \
     --die-with-parent \
     --new-session \
-    $NET \
+    "$NET" \
     --proc /proc \
     --dev /dev \
     --tmpfs /tmp \

@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 # Instala el hook git pre-commit con backup del existente.
+# Si Lefthook esta disponible, lo usa como gestor de hooks preferido.
 # Uso: bash scripts/install-hooks.sh
 set -u
 cd "$(dirname "$0")/.." || exit 1
+
+if command -v lefthook >/dev/null 2>&1; then
+    echo "[INFO] Lefthook detectado; instalando hooks via lefthook install"
+    lefthook install
+    echo "[OK] Hooks de Lefthook instalados"
+    exit 0
+fi
 
 SRC="scripts/hooks/pre-commit"
 DEST=".git/hooks/pre-commit"
@@ -27,3 +35,4 @@ cp "$SRC" "$DEST"
 chmod +x "$DEST"
 
 echo "[OK] Hook pre-commit instalado en $DEST"
+echo "[INFO] Instala Lefthook (https://lefthook.dev/installation) para gestion multiplataforma de hooks"

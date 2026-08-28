@@ -64,9 +64,43 @@ podman run --rm better-ai
 Esto garantiza que el proyecto puede verificarse sin depender de infraestructura
 externa, cuentas de terceros ni API keys.
 
-### CI self-hosted opcional
+### CI local con Lefthook
 
-Para quienes deseen un servidor de CI propio sin nube, se pueden evaluar
-herramientas ligeras como Lefthook (gestion de hooks) o act (ejecucion local
-de workflows de GitHub Actions). Opciones mas potentes como Dagger, Woodpecker
-CI o Tekton se documentan como alternativas avanzadas en `contrib/`.
+[Lefthook](https://lefthook.dev/) es un gestor de hooks Git multiplataforma
+(Windows, macOS, Linux) que no requiere cuenta en la nube. La configuracion esta
+en `lefthook.yml`:
+
+```text
+make hooks-lefthook   # instala los hooks configurados
+lefthook run pre-commit  # ejecuta los checks manualmente
+```
+
+Si Lefthook no esta instalado, `make hooks` sigue funcionando con el script
+legacy `scripts/install-hooks.sh`.
+
+### Workflow local con act
+
+[act](https://nektos.github.io/act) ejecuta workflows de GitHub Actions en tu
+maquina usando Docker/Podman. No requiere cuenta de GitHub ni sube nada:
+
+```text
+make ci-local
+```
+
+Esto ejecuta `.github/workflows/ci.yml` localmente. El archivo de workflow es
+opcional: el proyecto funciona completamente sin el.
+
+### Pipeline portable con Dagger
+
+[Dagger](https://dagger.io/) permite definir pipelines como codigo y ejecutarlas
+localmente o en cualquier CI. El ejemplo del proyecto esta en `ci/dagger.py`:
+
+```text
+make dagger
+```
+
+### CI self-hosted avanzado
+
+Para equipos que necesiten un servidor de CI propio sin nube, opciones mas
+potentes como Woodpecker CI o Tekton se pueden evaluar. No son obligatorias
+para usar `better-ai`.

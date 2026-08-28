@@ -101,11 +101,14 @@ Repositorio público:
 El proyecto puede verificarse completamente en local:
 
 ```bash
-make check        # lint + tests + verificacion completa
-make lint         # shellcheck y validacion JSON
-make test         # doc_validator, parity y symlinks
-make sync         # sincroniza .kilo/agents con .opencode/agents
-make hooks        # instala el hook pre-commit (con backup)
+make check           # lint + tests + verificacion completa
+make lint            # shellcheck y validacion JSON
+make test            # doc_validator, parity y symlinks
+make sync            # sincroniza .kilo/agents con .opencode/agents
+make hooks           # instala el hook pre-commit (con backup)
+make hooks-lefthook  # instala hooks via Lefthook (recomendado)
+make ci-local        # ejecuta .github/workflows/ci.yml con act
+make dagger          # ejecuta pipeline Dagger local
 ```
 
 También puedes usar un contenedor local (Docker/Podman):
@@ -114,6 +117,14 @@ También puedes usar un contenedor local (Docker/Podman):
 podman build -t better-ai -f Containerfile .
 podman run --rm better-ai
 ```
+
+**Hooks con Lefthook**: si instalas [Lefthook](https://lefthook.dev/), `make hooks`
+o `make hooks-lefthook` configuraran automaticamente los hooks Git de forma
+multiplataforma. La configuracion esta en `lefthook.yml`.
+
+**Workflow local con act**: si instalas [act](https://nektos.github.io/act),
+`make ci-local` ejecuta `.github/workflows/ci.yml` en tu maquina sin subir nada
+a GitHub.
 
 ### Usar con ACP (Agent Client Protocol) — Zed, JetBrains, Neovim
 opencode soporta ACP para usarlo en editores compatibles. Configura tu editor para

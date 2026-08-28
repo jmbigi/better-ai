@@ -1,0 +1,14 @@
+# Lefthook: gestor de hooks Git multiplataforma
+# https://lefthook.dev/
+# Instalacion: https://lefthook.dev/installation
+# Uso local: lefthook install
+
+pre-commit:
+  parallel: false
+  commands:
+    lint:
+      run: make lint
+    test:
+      run: make test
+    verify:
+      run: bash scripts/verificar-proyecto.sh --pre-commit
