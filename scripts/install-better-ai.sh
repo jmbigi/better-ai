@@ -81,12 +81,14 @@ SCRIPT_FILES=(
     scripts/check-symlinks.sh
     scripts/detect-drift.sh
     scripts/doc_validator.py
+    scripts/install-better-ai.ps1
     scripts/install-better-ai.sh
     scripts/install-hooks.sh
     scripts/opencode-sandbox.sh
     scripts/probar-denies.sh
     scripts/rotate-secret.sh
     scripts/sync-agents.sh
+    scripts/update-better-ai.ps1
     scripts/update-better-ai.sh
     scripts/verificar-proyecto.sh
     scripts/verificar-requisitos.cmd
@@ -141,7 +143,9 @@ copy_dir() {
     fi
     mkdir -p "$dst"
     # Copiar contenido, no el directorio en si, para no anidar.
-    cp -r "${src}"/* "$dst"/ 2>/dev/null || true
+    if [ -n "$(find "$src" -mindepth 1 -print -quit 2>/dev/null)" ]; then
+        cp -r "$src"/. "$dst"/
+    fi
 }
 
 log "=== Instalando better-ai en $DEST ==="

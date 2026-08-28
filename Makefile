@@ -3,11 +3,12 @@
 
 SHELLCHECK_SEVERITY ?= error
 
-.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help install update
+.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help install update ci install-ps update-ps
 
 help:
 	@echo "Targets disponibles:"
 	@echo "  make check         - Ejecuta lint + test + verificacion completa"
+	@echo "  make ci            - CI local pura sin Docker (lint opcional + test + verificar)"
 	@echo "  make lint          - shellcheck y validacion JSON"
 	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
 	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
@@ -16,11 +17,16 @@ help:
 	@echo "  make ci-local      - Ejecuta .github/workflows/ci.yml con act"
 	@echo "  make dagger        - Ejecuta pipeline Dagger local"
 	@echo "  make clean         - Limpia temporales de red-team"
-	@echo "  make install DEST=/ruta  - Instala better-ai en otro proyecto"
-	@echo "  make update DEST=/ruta   - Actualiza better-ai en otro proyecto"
+	@echo "  make install DEST=/ruta  - Instala better-ai en otro proyecto (Bash)"
+	@echo "  make update DEST=/ruta   - Actualiza better-ai en otro proyecto (Bash)"
+	@echo "  make install-ps DEST=/ruta - Instala better-ai en otro proyecto (PowerShell)"
+	@echo "  make update-ps DEST=/ruta  - Actualiza better-ai en otro proyecto (PowerShell)"
 
 check: lint test
 	bash scripts/verificar-proyecto.sh
+
+ci:
+	bash scripts/ci-local-pure.sh
 
 lint:
 	shellcheck --severity=$(SHELLCHECK_SEVERITY) scripts/*.sh
@@ -63,3 +69,11 @@ install:
 update:
 	@if [ -z "$(DEST)" ]; then echo "[FALLO] Define DEST=/ruta/del/proyecto"; exit 1; fi
 	bash scripts/update-better-ai.sh "$(DEST)"
+
+install-ps:
+	@if [ -z "$(DEST)" ]; then echo "[FALLO] Define DEST=/ruta/del/proyecto"; exit 1; fi
+	pwsh -File scripts/install-better-ai.ps1 -Destino "$(DEST)"
+
+update-ps:
+	@if [ -z "$(DEST)" ]; then echo "[FALLO] Define DEST=/ruta/del/proyecto"; exit 1; fi
+	pwsh -File scripts/update-better-ai.ps1 -Destino "$(DEST)"

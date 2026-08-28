@@ -5,7 +5,8 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 1
 
-DEST="$(mktemp -d /tmp/better-ai-install-test-XXXXXX)"
+DEST="$(mktemp -d '/tmp/better-ai install test-XXXXXX')"
+export DEST
 trap 'rm -rf "$DEST"' EXIT
 
 PASS=0
@@ -36,8 +37,8 @@ check "agentes .kilo copiados" test -f "$DEST/.kilo/agents/security-auditor.md"
 check "scripts copiados" test -x "$DEST/scripts/verificar-proyecto.sh"
 
 check "actualizador respalda y actualiza" bash scripts/update-better-ai.sh "$DEST"
-check "backup creado" bash -c "ls -d $DEST/.better-ai-backup-* >/dev/null 2>&1"
-check "manifesto actualizado" bash -c "grep -q '^previous_commit:' $DEST/.better-ai.manifest"
+check "backup creado" bash -c 'ls -d "$DEST"/.better-ai-backup-* >/dev/null 2>&1'
+check "manifesto actualizado" bash -c 'grep -q "^previous_commit:" "$DEST/.better-ai.manifest"'
 
 echo
 if [ "$FAIL" -eq 0 ]; then

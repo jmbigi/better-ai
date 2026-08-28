@@ -22,7 +22,10 @@ CRITICAL_CONFIGS=(
     "scripts/opencode-sandbox.sh"
     "scripts/install-better-ai.sh"
     "scripts/update-better-ai.sh"
+    "scripts/install-better-ai.ps1"
+    "scripts/update-better-ai.ps1"
     "scripts/test-installer.sh"
+    "scripts/ci-local-pure.sh"
     "scripts/analyze_shell.py"
     "scripts/check-shell-pipes.py"
 )

@@ -1029,3 +1029,39 @@ P0.8.
 
 **Estado**: implementada Fase 5; pendiente commit.
 
+
+---
+
+## 2026-08-28 — Mejoras A+B+C: seguridad determinista, CI puro y soporte Windows
+
+**Problema**: tras alcanzar 8.6/10, quedaban tres frentes abiertos: (1) el
+analizador de shell no cubria variantes evasivas como rutas absolutas, sudo con
+opciones, process substitution y backticks; (2) no habia CI local que funcionara
+sin Docker; (3) no habia instalador nativo para Windows/PowerShell ni soporte
+garantizado para rutas con espacios.
+
+**Solucion**:
+- A: extender `scripts/analyze_shell.py` para detectar `/bin/bash`, `sudo -S bash`,
+  `bash <(curl ...)`, `` `curl ...` | bash `` y `bash -c "$(curl ...)"`. Ampliar
+  `scripts/check-shell-pipes.py` a 34 casos. Validar los 4 denies de pipe en
+  `scripts/probar-denies.sh` mediante `analyze_shell.py` (el matcher de opencode
+  sigue sin soportar pipes, pero ahora hay cobertura real).
+- B: crear `scripts/ci-local-pure.sh` y el target `make ci` para ejecutar lint
+  (opcional), tests y verificacion pre-commit sin Docker.
+- C: crear `scripts/install-better-ai.ps1` y `scripts/update-better-ai.ps1`,
+  robustecer los scripts Bash para rutas con espacios y documentar la matriz CI
+  y la instalacion Windows en `README.md`.
+
+**Evidencia**: `make ci` devuelve `3 OK, 0 FALLOS` en una maquina sin Docker;
+`python3 scripts/check-shell-pipes.py` devuelve `34 OK, 0 FALLOS`;
+`bash scripts/test-installer.sh` usa un tempdir con espacios y pasa;
+`pwsh -File scripts/install-better-ai.ps1 -Destino "/tmp/better-ai ps test"`
+copia 40 archivos y crea el manifesto.
+
+**Leccion**: cerrar brechas de seguridad determinista no siempre requiere un
+parser completo; un analyzer stdlib bien probado con casos límite puede cubrir
+las variantes documentadas sin anadir dependencias. Ademas, para un ruleset
+multiplataforma, PowerShell nativo y paths con espacios no son opcionales.
+
+**Estado**: implementadas mejoras A+B+C; pendiente commit y push.
+

@@ -5,8 +5,10 @@ Usa únicamente la stdlib de Python (shlex) para no añadir dependencias externa
 (P0.18). Detecta:
 
 - Pipes donde una fuente de red (curl/wget/fetch) alimenta un intérprete shell.
+- Process substitution que alimenta un shell: bash <(curl ...).
 - Uso de eval/exec/source.
 - Command substitution $(...) o `...` con descargadores dentro.
+- bash -c con contenido peligroso.
 
 Limitaciones conocidas: no es un parser completo de Bash. Construcciones muy
 retorcidas pueden escapar, pero cubre las variantes documentadas en P0.8.
@@ -59,18 +61,53 @@ def split_into_commands(tokens: List[str]) -> List[List[List[str]]]:
 
 def _basename(token: str) -> str:
     """Devuelve el nombre base de una ruta, sin comillas."""
-    # Quitar posibles comillas residuales (shlex posix ya las quita, pero por si acaso).
     token = token.strip("'\"")
     if "/" in token:
         return token.rsplit("/", 1)[-1]
     return token
 
 
+def _is_downloader_name(token: str) -> bool:
+    """True si el token (nombre o ruta) es un descargador conocido."""
+    return _basename(token) in DOWNLOADERS
+
+
+def _is_shell_name(token: str) -> bool:
+    """True si el token (nombre o ruta) es un intérprete shell."""
+    return _basename(token) in SHELL_NAMES
+
+
 def is_downloader(tokens: List[str], index: int = 0) -> bool:
     """True si el token en index es un descargador conocido."""
     if not tokens or index >= len(tokens):
         return False
-    return _basename(tokens[index]) in DOWNLOADERS
+    return _is_downloader_name(tokens[index])
+
+
+def has_downloader(tokens: List[str]) -> bool:
+    """True si algún token de la etapa es un descargador conocido."""
+    return any(_is_downloader_name(tok) for tok in tokens)
+
+
+def find_shell(tokens: List[str]) -> int:
+    """Devuelve el índice de un intérprete shell, o -1 si no hay.
+
+    Soporta prefijos como sudo / sudo -S.
+    """
+    i = 0
+    while i < len(tokens):
+        if _is_shell_name(tokens[i]):
+            return i
+        if _basename(tokens[i]) == SUDO:
+            # Saltar sudo y sus opciones hasta encontrar shell o fin.
+            i += 1
+            while i < len(tokens) and tokens[i].startswith("-"):
+                i += 1
+            if i < len(tokens) and _is_shell_name(tokens[i]):
+                return i
+            continue
+        i += 1
+    return -1
 
 
 def is_shell(tokens: List[str], index: int = 0) -> bool:
@@ -81,7 +118,7 @@ def is_shell(tokens: List[str], index: int = 0) -> bool:
     if name in SHELL_NAMES:
         return True
     if name == SUDO and index + 1 < len(tokens):
-        return _basename(tokens[index + 1]) in SHELL_NAMES
+        return _is_shell_name(tokens[index + 1])
     return False
 
 
@@ -102,6 +139,105 @@ def _extract_substitution(token: str) -> List[str]:
     return inner
 
 
+def _extract_command_substitutions(tokens: List[str]) -> List[str]:
+    """Extrae contenidos de command substitution $(...) de una lista de tokens.
+
+    shlex puede representar $(...) como un único token o como la secuencia
+    '$', '(', ..., ')' según el contexto; esta función cubre ambos casos.
+    """
+    result: List[str] = []
+    i = 0
+    while i < len(tokens):
+        # Caso 1: token único $(...)
+        if tokens[i].startswith("$(") and tokens[i].endswith(")"):
+            result.append(tokens[i][2:-1])
+            i += 1
+            continue
+        # Caso 2: secuencia '$', '(', ..., ')'
+        if tokens[i] == "$" and i + 1 < len(tokens) and tokens[i + 1] == "(":
+            depth = 1
+            start = i + 2
+            j = start
+            while j < len(tokens) and depth > 0:
+                if tokens[j] == "$" and j + 1 < len(tokens) and tokens[j + 1] == "(":
+                    depth += 1
+                    j += 1
+                elif tokens[j] == ")":
+                    depth -= 1
+                j += 1
+            if depth == 0:
+                inner = " ".join(tokens[start:j - 1])
+                result.append(inner)
+                i = j - 1
+        i += 1
+    return result
+
+
+def _extract_process_substitutions(tokens: List[str]) -> List[str]:
+    """Extrae contenidos de process substitution <(...)> como lista de strings."""
+    result: List[str] = []
+    i = 0
+    while i < len(tokens):
+        if tokens[i] == "<(":
+            depth = 1
+            start = i + 1
+            j = start
+            while j < len(tokens) and depth > 0:
+                if tokens[j] == "<(":
+                    depth += 1
+                elif tokens[j] == ")":
+                    depth -= 1
+                j += 1
+            if depth == 0:
+                inner = " ".join(tokens[start:j - 1])
+                result.append(inner)
+                i = j - 1
+        i += 1
+    return result
+
+
+def _extract_backtick_blocks(tokens: List[str]) -> List[str]:
+    """Reconstruye bloques entre backticks y devuelve sus contenidos."""
+    result: List[str] = []
+    i = 0
+    while i < len(tokens):
+        tok = tokens[i]
+        if tok.startswith("`"):
+            if tok.endswith("`") and len(tok) > 1:
+                result.append(tok[1:-1])
+                i += 1
+                continue
+            block = [tok[1:]]
+            j = i + 1
+            while j < len(tokens):
+                block.append(tokens[j])
+                if tokens[j].endswith("`"):
+                    break
+                j += 1
+            if j < len(tokens):
+                block[-1] = block[-1][:-1]
+                result.append(" ".join(block))
+                i = j
+        i += 1
+    return result
+
+
+def _extract_bash_c_content(tokens: List[str]) -> List[str]:
+    """Devuelve los argumentos de comandos shell invocados con -c."""
+    result: List[str] = []
+    if not tokens:
+        return result
+    if not _is_shell_name(tokens[0]):
+        return result
+    try:
+        idx = tokens.index("-c")
+    except ValueError:
+        return result
+    if idx + 1 < len(tokens):
+        result.append(tokens[idx + 1])
+    return result
+
+
 def analyze_stage(stage: List[str]) -> Set[str]:
     """Analiza una etapa de pipeline (sin pipes internos)."""
     findings: Set[str] = set()
@@ -112,17 +248,39 @@ def analyze_stage(stage: List[str]) -> Set[str]:
     if is_eval_like(stage):
         findings.add(f"eval-like: {' '.join(stage[:4])}")
 
-    # bash -c "$(curl ...)" (bypass común de los patterns de comodines)
-    if is_shell(stage) and "-c" in stage:
-        for tok in stage:
-            for inner in _extract_substitution(tok):
+    # bash -c "$(curl ...)" o bash -c "curl ... | bash"
+    if find_shell(stage) != -1 and "-c" in stage:
+        for content in _extract_bash_c_content(stage):
+            content_tokens = tokenize(content)
+            # Command substitution con descargador dentro del argumento -c
+            for inner in _extract_command_substitutions(content_tokens):
                 if any(dl in inner for dl in DOWNLOADERS):
                     findings.add(f"shell-c-with-downloader: {' '.join(stage[:4])}")
+            for inner in _extract_backtick_blocks(content_tokens):
+                if any(dl in inner for dl in DOWNLOADERS):
+                    findings.add(f"shell-c-with-downloader: {' '.join(stage[:4])}")
+            findings.update(analyze(content))
 
     # command substitution peligrosa dentro de la etapa (recursivo)
+    for inner in _extract_command_substitutions(stage):
+        findings.update(analyze(inner))
     for tok in stage:
         for inner in _extract_substitution(tok):
             findings.update(analyze(inner))
+
+    # process substitution peligrosa: bash <(curl ...)
+    shell_idx = find_shell(stage)
+    if shell_idx != -1:
+        for inner in _extract_process_substitutions(stage):
+            if any(dl in inner for dl in DOWNLOADERS):
+                findings.add(
+                    f"shell-with-process-substitution: {' '.join(stage[:4])}"
+                )
+            findings.update(analyze(inner))
+
+    # backtick blocks
+    for inner in _extract_backtick_blocks(stage):
+        findings.update(analyze(inner))
 
     return findings
 
@@ -137,10 +295,21 @@ def analyze_pipeline(stages: List[List[str]]) -> Set[str]:
     if len(stages) >= 2:
         source = stages[0]
         sink = stages[-1]
-        if is_downloader(source) and is_shell(sink):
+        if has_downloader(source) and find_shell(sink) != -1:
             findings.add(
                 f"dangerous-pipe: {' '.join(source[:4])} | ... | {' '.join(sink[:4])}"
             )
+
+    # Pipe donde la fuente es un backtick con descargador
+    if len(stages) >= 2:
+        source = stages[0]
+        sink = stages[-1]
+        if find_shell(sink) != -1:
+            for inner in _extract_backtick_blocks(source):
+                if any(dl in inner for dl in DOWNLOADERS):
+                    findings.add(
+                        f"dangerous-pipe-backtick: {' '.join(source[:4])} | ..."
+                    )
 
     # Analizar cada etapa por separado
     for stage in stages:

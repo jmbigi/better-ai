@@ -33,12 +33,23 @@ Repositorio público:
 ## Instalación en otro proyecto
 
 No se requieren cuentas en la nube ni `curl | bash`. Clona el repo localmente y
-copia las reglas a tu proyecto destino:
+copia las reglas a tu proyecto destino.
+
+### Linux / macOS / Git Bash en Windows
 
 ```bash
 git clone https://github.com/jmbigi/better-ai /tmp/better-ai
 bash /tmp/better-ai/scripts/install-better-ai.sh /ruta/a/tu/proyecto
 ```
+
+### Windows (PowerShell nativo)
+
+```powershell
+git clone https://github.com/jmbigi/better-ai C:\tmp\better-ai
+.\C:\tmp\better-ai\scripts\install-better-ai.ps1 -Destino C:\ruta\a\tu\proyecto
+```
+
+### Opciones comunes
 
 Instalación mínima (solo `AGENTS.md`, configs y agentes):
 
@@ -54,16 +65,34 @@ bash /tmp/better-ai/scripts/install-better-ai.sh --with-hooks /ruta/a/tu/proyect
 
 ### Actualizar
 
-Cuando haya cambios en better-ai, vuelve a clonar/actualizar el repo fuente y
-ejecuta:
+Bash / Git Bash:
 
 ```bash
 bash /tmp/better-ai/scripts/update-better-ai.sh /ruta/a/tu/proyecto
 ```
 
+PowerShell:
+
+```powershell
+.\C:\tmp\better-ai\scripts\update-better-ai.ps1 -Destino C:\ruta\a\tu\proyecto
+```
+
 El actualizador crea un backup timestamped en `.better-ai-backup-<fecha>/` y
 actualiza el manifesto `.better-ai.manifest`. Si modificaste `AGENTS.md` o los
 configs del destino, recupera lo que necesites del backup antes de continuar.
+
+## CI local
+
+Elige la opción que se ajuste a tu entorno; ninguna requiere cuenta en la nube:
+
+| Comando | Requiere Docker | Descripción |
+|---|---|---|
+| `make ci` | No | CI portable: lint (si shellcheck está disponible) + test + verificación pre-commit. Recomendado para entornos sin contenedores. |
+| `make ci-local` | Sí | Ejecuta `.github/workflows/ci.yml` con `act`. |
+| `make dagger` | Sí | Pipeline programático con Dagger. |
+| `make check` | No* | Verificación completa local; requiere `shellcheck` y un árbol de trabajo limpio. |
+
+\* `make check` no requiere Docker, pero `make ci-local` y `make dagger` sí.
 
 ## Los 50 errores de LLM que se previenen
 
