@@ -40,7 +40,7 @@ require_confirmation() {
         if [[ "${user_input}" == "${required_phrase}" ]]; then
             confirm_count=$((confirm_count + 1))
             echo -e "${GREEN}✓ Confirmación $i válida${NC}"
-        else:
+        else
             echo -e "${RED}✗ Frase incorrecta. Debe ser EXACTAMENTE: ${required_phrase}${NC}"
             log_audit "ERROR" "Confirmación $i fallida para rotación de secreto"
             return 1
@@ -135,7 +135,7 @@ done
 
 # Validar secret type
 VALID_TYPES=("db-password" "api-key" "ssh-key" "aws-credentials" "jwt-secret" "encryption-key")
-if [[ ! " ${VALID_TYPES[@]} " =~ " ${SECRET_TYPE} " ]]; then
+if [[ ! " ${VALID_TYPES[*]} " =~ " ${SECRET_TYPE} " ]]; then
     echo -e "${RED}Error: Tipo de secreto inválido: ${SECRET_TYPE}${NC}"
     show_usage
     exit 1
@@ -143,7 +143,7 @@ fi
 
 # Validar provider
 VALID_PROVIDERS=("vault" "aws-sm" "1password" "k8s-secret" "manual")
-if [[ ! " ${VALID_PROVIDERS[@]} " =~ " ${PROVIDER} " ]]; then
+if [[ ! " ${VALID_PROVIDERS[*]} " =~ " ${PROVIDER} " ]]; then
     echo -e "${RED}Error: Proveedor inválido: ${PROVIDER}${NC}"
     show_usage
     exit 1
@@ -254,7 +254,7 @@ if [[ "${DRY_RUN}" == "false" ]]; then
     
     log_audit "EXECUTE" "Rotación REAL completada para ${SECRET_NAME} en ${PROVIDER}"
     echo -e "${GREEN}✅ Rotación completada. Verifica funcionamiento y actualiza referencias.${NC}"
-else:
+else
     echo -e "${GREEN}✅ DRY-RUN completado. No se realizaron cambios reales.${NC}"
     echo -e "Para ejecutar realmente: $0 ${SECRET_NAME} ${SECRET_TYPE} --execute --provider ${PROVIDER}"
     log_audit "DRY_RUN" "Dry-run completado para ${SECRET_NAME}. Sin cambios reales."

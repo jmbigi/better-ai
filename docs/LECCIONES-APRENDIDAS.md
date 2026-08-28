@@ -872,3 +872,40 @@ se declara en PRUEBAS + LECCIONES en lugar de inventar el EMR.
 
 **Estado**: configuración aplicada y verificada; ejecución del test PENDIENTE de
 servicio de modelos (re-ejecutar: `python3 scripts/test-determinism.py`).
+
+
+---
+
+## 2026-08-28 — Fase 1: base local ejecutable y sincronizacion multiplataforma
+
+**Problema**: el proyecto carecia de task runner local, contenedor de verificacion y
+un mecanismo multiplataforma para mantener alineados `.opencode/agents/` y
+`.kilo/agents/`. El symlink `.kilo/agents -> ../.opencode/agents` se rompe en
+Windows con `core.symlinks=false`. Ademas, `shellcheck` revelo errores de sintaxis
+en `scripts/rotate-secret.sh` (`else:` en lugar de `else`, arrays con `@` en `[[ ]]`) y el verificador exigia que `.kilo/agents` fuera symlink, lo cual contradecia el
+plan de sincronizacion por copia.
+
+**Solucion**: (1) crear `Makefile` con targets `check`, `lint`, `test`, `sync`,
+`hooks`, `clean`; (2) crear `Containerfile` para ejecutar `make check` en contenedor
+local (Docker/Podman) con locale UTF-8 configurado; (3) crear
+`scripts/install-hooks.sh` con backup automatico del hook existente;
+`scripts/check-symlinks.sh` para detectar symlinks rotos;
+`scripts/check-config-parity.py` para comparar `opencode.json` y `kilo.json`;
+`scripts/sync-agents.sh` para reemplazar el symlink por copia idempotente; (4)
+corregir errores de sintaxis en `scripts/rotate-secret.sh`; (5) actualizar el check
+de agentes en `scripts/verificar-proyecto.sh` para verificar sincronizacion por
+contenido en lugar de exigir symlink.
+
+**Evidencia**: `make test` pasa en local; `docker build -t better-ai -f Containerfile
+. && docker run --rm better-ai` ejecuta lint + test + `verificar-proyecto.sh` con
+solo los fallos esperados de drift y arbol de trabajo no limpio;
+`scripts/install-hooks.sh` respalda e instala el hook correctamente.
+
+**Leccion**: un proyecto que pretende ser local-first necesita task runner y
+contenedor antes que CI server; los symlinks son fragiles en entornos
+multiplataforma; los checks de verificacion deben alinearse con la nueva
+arquitectura (no exigir lo que se va a eliminar); `shellcheck --severity=error`
+ayuda a detectar errores reales sin bloquear por advertencias historicas.
+
+**Estado**: implementada Fase 1; pendiente actualizar baseline de drift tras
+revision y aprobacion del programador.

@@ -87,15 +87,33 @@ Repositorio público:
 
 ### En este proyecto (o cualquiera)
 1. Copia `AGENTS.md` a la raíz del proyecto. Luego, según el agente que uses:
-   - **kilocode**: copia `kilo.json` y el directorio `.kilo/` (incluye `.kilo/agents/`
-     como symlink a `.opencode/agents/` — también copia `.opencode/agents/` para que
-     los subagentes `@security-auditor` / `@code-reviewer` funcionen).
+   - **kilocode**: copia `kilo.json` y el directorio `.kilo/` (incluye `.kilo/agents/`;
+     ejecuta `make sync` para sincronizarlo con `.opencode/agents/` de forma
+     multiplataforma, sin depender de symlinks).
    - **opencode**: copia `opencode.json` y el directorio `.opencode/`.
 2. Abre kilocode o opencode en ese proyecto: las reglas se cargan automáticamente.
 3. Al terminar cada tarea, el agente debe completar el checklist pre-entrega.
 4. Para una segunda capa de revisión antes de entregar, invoca `@security-auditor`
    (auditoría de secretos/datos personales) y `@code-reviewer` (revisión de alcance
    y coherencia): son de solo lectura y no pueden modificar archivos.
+
+### Verificación local (sin cuentas en la nube)
+El proyecto puede verificarse completamente en local:
+
+```bash
+make check        # lint + tests + verificacion completa
+make lint         # shellcheck y validacion JSON
+make test         # doc_validator, parity y symlinks
+make sync         # sincroniza .kilo/agents con .opencode/agents
+make hooks        # instala el hook pre-commit (con backup)
+```
+
+También puedes usar un contenedor local (Docker/Podman):
+
+```bash
+podman build -t better-ai -f Containerfile .
+podman run --rm better-ai
+```
 
 ### Usar con ACP (Agent Client Protocol) — Zed, JetBrains, Neovim
 opencode soporta ACP para usarlo en editores compatibles. Configura tu editor para

@@ -36,3 +36,37 @@ deben conectarse al sistema de tareas o CI nativo de cada proyecto.
 No existe una configuracion universal que pueda imponer permisos de ejecucion
 a todos los asistentes. Para obtener bloqueo real, hay que usar un sandbox o
 los permisos nativos del asistente, ademas de estas reglas compartidas.
+
+## Verificacion local sin nube
+
+El proyecto no requiere cuentas en GitHub, GitLab ni ningun servicio cloud para
+ser verificado. El task runner local esta en el `Makefile`:
+
+```text
+make check   # lint + tests + verificacion completa
+make lint    # shellcheck y validacion JSON
+make test    # doc_validator, parity de configs y symlinks
+make sync    # sincroniza .kilo/agents con .opencode/agents
+make hooks   # instala el hook pre-commit con backup
+make clean   # limpia temporales de red-team
+```
+
+### Contenedor local
+
+Tambien puedes usar el `Containerfile` para ejecutar la verificacion en un
+entorno aislado y reproducible:
+
+```text
+podman build -t better-ai -f Containerfile .
+podman run --rm better-ai
+```
+
+Esto garantiza que el proyecto puede verificarse sin depender de infraestructura
+externa, cuentas de terceros ni API keys.
+
+### CI self-hosted opcional
+
+Para quienes deseen un servidor de CI propio sin nube, se pueden evaluar
+herramientas ligeras como Lefthook (gestion de hooks) o act (ejecucion local
+de workflows de GitHub Actions). Opciones mas potentes como Dagger, Woodpecker
+CI o Tekton se documentan como alternativas avanzadas en `contrib/`.

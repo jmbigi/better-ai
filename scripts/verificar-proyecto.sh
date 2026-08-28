@@ -270,7 +270,14 @@ for f in sorted(os.listdir('scripts')):
             continue
         assert not pat.search(linea), (f, i, linea)
 "
-check "agentes de solo lectura con edit deny" bash -c "for a in security-auditor code-reviewer; do grep -q 'edit: deny' .opencode/agents/\$a.md && grep -q 'mode: subagent' .opencode/agents/\$a.md && [ -L .kilo/agents ] || exit 1; done"
+check "agentes de solo lectura con edit deny y sincronizados" bash -c "
+for a in security-auditor code-reviewer; do
+    grep -q 'edit: deny' .opencode/agents/\$a.md || exit 1
+    grep -q 'mode: subagent' .opencode/agents/\$a.md || exit 1
+    [ -f .kilo/agents/\$a.md ] || exit 1
+    cmp -s .opencode/agents/\$a.md .kilo/agents/\$a.md || exit 1
+done
+"
 otel_end_span "verificar.seguridad"
 
 otel_start_span "verificar.supply-chain"
