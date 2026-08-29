@@ -677,3 +677,20 @@ de modelos disponible; se re-ejecutará con `python3 scripts/test-determinism.py
 se documentará el EMR real (umbral 95 %, fail fast). Mientras tanto, los perfiles
 `temperature`/`top_p` sí están aplicados y verificados con evidencia documental
 (doc oficial) + JSON válido (runtime).
+
+## Ronda 43 — Determinismo de inferencia: test ejecutado y decisión sobre `seed` (28-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 154 | `test-determinism.py` actualizado para opencode 1.18.25: parsea eventos `type:text` del formato JSON de `opencode run --format json`; `--help` funciona; no hay fallbacks silenciosos | ✅ Ejecutado; salida cruda analizada y extractor actualizado |
+| 155 | Agente primario `audit` creado en `opencode.json` (`mode: primary`, `temperature: 0.0`, `top_p: 1.0`); verificador valida su existencia y valores | ✅ `opencode.json` carga correctamente; `opencode run --agent audit` lo reconoce |
+| 156 | EMR con modelo gratuito `opencode/mimo-v2.5-free` y agente `audit` (3 runs, prompt sintético anti `except:pass`) | ⚠️ **EMR 33,33 %** (umbral 95 %): el modelo gratuito es altamente no determinista aun con `temperature=0.0` |
+| 157 | EMR con modelo de pago `opencode-go/deepseek-v4-flash` y agente `audit` | ❌ **No ejecutado**: servicio devolvió `APIError` (límite de servicio/crédito). No se reporta EMR inventado (P0.1) |
+| 158 | Decisión sobre `seed`: verificado en CLI 1.18.25 y `$schema` oficial que no hay mecanismo documentado para fijar semilla en agentes primarios | ✅ **Decisión tomada**: `seed` NO se adopta. Se maximiza reproducibilidad con `temperature=0.0` y se mide por modelo |
+
+**Conclusión técnica**: el safeguard de determinismo está operativo (perfiles por
+rol + agente `audit` + test medible). La reproducibilidad real depende del modelo y
+no puede garantizarse bit a bit sin soporte de `seed`; el proyecto declara honestamente
+esta limitación y proporciona la herramienta para medirla. Para auditorías críticas se
+recomienda usar el agente `audit` y, si el presupuesto lo permite, validar el EMR del
+modelo de pago elegido antes de confiar en él para evidencia.

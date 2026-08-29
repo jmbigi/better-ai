@@ -53,6 +53,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Test de determinismo (EMR) vs opencode")
     p.add_argument("--runs", type=int, default=10, help="ejecuciones (max 20)")
     p.add_argument("--model", default=DEFAULT_MODEL, help="modelo provider/model")
+    p.add_argument("--agent", default="audit", help="agente primario de opencode (por defecto audit, temperature 0.0)")
     p.add_argument("--seed", type=int, default=None, help="semilla fija (solo experimental, ver docs)")
     p.add_argument("--prompt", default=DEFAULT_PROMPT, help="prompt sintetico a repetir")
     p.add_argument("--out", default=None, help="ruta opcional para reporte JSONL")
@@ -68,7 +69,7 @@ def parse_args() -> argparse.Namespace:
 
 def run_once(args: argparse.Namespace, attempts: list[dict], idx: int) -> dict:
     """Ejecuta un run de opencode y devuelve el texto del asistente o FALLA."""
-    cmd = ["opencode", "run", "--auto", "-m", args.model, "--format", "json", args.prompt]
+    cmd = ["opencode", "run", "--auto", "--agent", args.agent, "-m", args.model, "--format", "json", args.prompt]
     if args.seed is not None:
         # seed NO se pasa por CLI (opencode 1.18.23 no tiene flag --seed; ver
         # docs/ARQUITECTURA-DETERMINISMO.md seccion 6). Aviso explícito, sin
@@ -111,8 +112,11 @@ def run_once(args: argparse.Namespace, attempts: list[dict], idx: int) -> dict:
 def extract_assistant_text(stdout: str) -> str | None:
     """Extrae el ultimo texto del asistente de los eventos JSON de opencode.
 
-    El formato del CLI puede incluir eventos 'message' (role assistant) o 'part'.
-    Se busca tolerando ambas formas; si ninguna aparece, devuelve None.
+    El formato del CLI ha evolucionado. Se toleran eventos:
+      - 'text' (opencode >= 1.18.25): texto finalizado del asistente.
+      - 'message' con role 'assistant' y contenido texto.
+      - 'part' de tipo 'text' con estado 'completed'.
+    Si ninguna forma produce texto, devuelve None.
     """
     candidates: list[str] = []
     for line in stdout.splitlines():
@@ -124,7 +128,11 @@ def extract_assistant_text(stdout: str) -> str | None:
         except json.JSONDecodeError:
             continue
         etype = ev.get("type")
-        if etype == "message" and ev.get("role") == "assistant":
+        if etype == "text":
+            part = ev.get("part", {})
+            if isinstance(part, dict) and part.get("type") == "text":
+                candidates.append(part.get("text", ""))
+        elif etype == "message" and ev.get("role") == "assistant":
             content = ev.get("content")
             if isinstance(content, str):
                 candidates.append(content)
@@ -155,7 +163,7 @@ def estimate_cost(model: str, prompt: str, answers: list[str]) -> tuple[int, int
 def main() -> None:
     args = parse_args()
     print(f"== Test de determinismo (EMR >= {EMR_THRESHOLD:.0%}) ==")
-    print(f"Modelo: {args.model} | Runs: {args.runs} | Seed: {args.seed if args.seed is not None else 'defecto'}")
+    print(f"Modelo: {args.model} | Agente: {args.agent} | Runs: {args.runs} | Seed: {args.seed if args.seed is not None else 'defecto'}")
     print(f"Prompt ({len(args.prompt)} chars): {args.prompt[:80]}...")
     print()
 

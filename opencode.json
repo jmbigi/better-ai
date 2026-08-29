@@ -52,6 +52,11 @@
       "mode": "primary",
       "temperature": 0.1,
       "top_p": 1.0
+    },
+    "audit": {
+      "mode": "primary",
+      "temperature": 0.0,
+      "top_p": 1.0
     }
   },
   "permission": {
