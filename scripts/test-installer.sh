@@ -34,7 +34,10 @@ check "kilo.json copiado" test -f "$DEST/kilo.json"
 check "manifesto creado" test -f "$DEST/.better-ai.manifest"
 check "agentes .opencode copiados" test -f "$DEST/.opencode/agents/security-auditor.md"
 check "agentes .kilo copiados" test -f "$DEST/.kilo/agents/security-auditor.md"
+check "skills .opencode copiados" test -f "$DEST/.opencode/skills/cost-tracker/cost-tracker.py"
 check "scripts copiados" test -x "$DEST/scripts/verificar-proyecto.sh"
+check "docs/QUICKSTART.md copiado" test -f "$DEST/docs/QUICKSTART.md"
+check "scripts/generate-sbom.sh copiado" test -x "$DEST/scripts/generate-sbom.sh"
 
 check "actualizador respalda y actualiza" bash scripts/update-better-ai.sh "$DEST"
 check "backup creado" bash -c 'ls -d "$DEST"/.better-ai-backup-* >/dev/null 2>&1'

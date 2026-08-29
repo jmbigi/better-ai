@@ -71,6 +71,7 @@ $ScriptFiles = @(
     "scripts/check-symlinks.sh",
     "scripts/detect-drift.sh",
     "scripts/doc_validator.py",
+    "scripts/generate-sbom.sh",
     "scripts/install-better-ai.ps1",
     "scripts/install-better-ai.sh",
     "scripts/install-hooks.sh",
@@ -96,7 +97,12 @@ $DocFiles = @(
     "docs/INTEGRACION-ASISTENTES.md",
     "docs/LECCIONES-APRENDIDAS.md",
     "docs/PRUEBAS.md",
+    "docs/QUICKSTART.md",
     "docs/REGLAS-COMPLETAS.md"
+)
+
+$SkillDirs = @(
+    ".opencode/skills"
 )
 
 if ($CoreOnly) {
@@ -157,7 +163,7 @@ foreach ($rel in $FilesToInstall) {
     $InstalledFiles.Add($rel)
 }
 
-foreach ($rel in $AgentDirs) {
+foreach ($rel in $AgentDirs + $SkillDirs) {
     $src = Join-Path $SourceDir $rel
     if (-not (Test-Path -LiteralPath $src)) {
         Write-Warning "No existe directorio en fuente: $rel"

@@ -81,6 +81,7 @@ SCRIPT_FILES=(
     scripts/check-symlinks.sh
     scripts/detect-drift.sh
     scripts/doc_validator.py
+    scripts/generate-sbom.sh
     scripts/install-better-ai.ps1
     scripts/install-better-ai.sh
     scripts/install-hooks.sh
@@ -106,7 +107,12 @@ DOC_FILES=(
     docs/INTEGRACION-ASISTENTES.md
     docs/LECCIONES-APRENDIDAS.md
     docs/PRUEBAS.md
+    docs/QUICKSTART.md
     docs/REGLAS-COMPLETAS.md
+)
+
+SKILL_DIRS=(
+    .opencode/skills
 )
 
 if [ "$CORE_ONLY" = true ]; then
@@ -115,7 +121,7 @@ else
     FILES_TO_INSTALL=("${CORE_FILES[@]}" "${SCRIPT_FILES[@]}" "${BUILD_FILES[@]}" "${DOC_FILES[@]}")
 fi
 
-DIRS_TO_INSTALL=("${AGENT_DIRS[@]}")
+DIRS_TO_INSTALL=("${AGENT_DIRS[@]}" "${SKILL_DIRS[@]}")
 
 log() {
     echo "$1"
