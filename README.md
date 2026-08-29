@@ -9,6 +9,22 @@ Repositorio público:
 - GitHub: <https://github.com/jmbigi/better-ai>
 - Codeberg: <https://codeberg.org/jmbigi/better-ai>
 
+## Resumen ejecutivo
+
+better-ai es un **ruleset de protección determinista** para agentes de IA. En vez de
+confiar solo en que el modelo "recuerde" las reglas, define:
+
+- `AGENTS.md` — 51 reglas de comportamiento (20 P0 de protección, 31 P1 de trabajo)
+  que opencode/kilocode inyectan en cada sesión.
+- `opencode.json` / `kilo.json` — 245 patrones de permisos bash (159 `deny`,
+  85 `ask`, 1 `allow`) que bloquean comandos destructivos, acceso a secretos y
+  modificaciones de producción independientemente de lo que el modelo decida.
+- Verificación automática — `scripts/verificar-proyecto.sh` comprueba coherencia
+  de reglas, configs, seguridad, supply chain y drift antes de cada commit.
+- Observabilidad — skill `cost-tracker` y traces OpenTelemetry en el verificador.
+
+**Para empezar en 5 minutos**: [`docs/QUICKSTART.md`](docs/QUICKSTART.md).
+
 ## ¿Qué contiene?
 
 | Archivo | Qué es |
@@ -23,9 +39,11 @@ Repositorio público:
 | `docs/PRUEBAS.md` | Evidencia: informe de las pruebas ejecutadas contra opencode + deepseek-v4-flash. |
 | `docs/LECCIONES-APRENDIDAS.md` | Memoria del proyecto: fallos, hallazgos y soluciones documentadas. |
 | `docs/INTEGRACION-ASISTENTES.md` | Núcleo común y adaptadores para opencode, kilocode, Copilot y otros asistentes en distintos sistemas operativos. |
-| `docs/ARQUITECTURA-DETERMINISMO.md` | Determinismo de inferencia: perfiles `temperature`/`top_p` por rol, soporte verificado de parameters, estado del `seed` (pendiente de verificación empírica) y test `test-determinism.py`. |
+| `docs/ARQUITECTURA-DETERMINISMO.md` | Determinismo de inferencia: perfiles `temperature`/`top_p` por rol, agente `audit`, decisión documentada sobre `seed` y test `test-determinism.py`. |
+| `docs/QUICKSTART.md` | Guía de 5 minutos para adoptar better-ai en cualquier proyecto. |
 | `LICENSE` | Licencia **CC BY-SA 4.0** (copyleft), texto legal oficial. |
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
+| `scripts/generate-sbom.sh` | Genera SBOM SPDX del proyecto con syft (P0.18). Uso: `bash scripts/generate-sbom.sh` |
 | `scripts/probar-denies.sh` | **Red-team de los guardarraíles**: prueba 154 variantes canónicas seguras de los `deny` de `opencode.json` contra el matcher REAL de opencode (config mínima aislada, sin AGENTS.md) y falla si alguna no bloquea. Las 159 reglas `deny` son idénticas en `kilo.json` (kilocode); 154 variantes fueron verificadas (15-08-2026). Uso: `bash scripts/probar-denies.sh` |
 | `scripts/opencode-sandbox.sh` | **Sandbox opcional con bubblewrap**: ejecuta opencode con toda la máquina en solo lectura salvo el workspace y las rutas de opencode (red bloqueada salvo `--net`). La capa determinista de sistema operativo por encima de los deny. Requiere `bwrap` y user namespaces habilitados. **Limitación verificada (15-08-2026)**: el runtime Bun de opencode 1.18.18 crashea (segfault) dentro de un user namespace en este kernel — el aislamiento de bwrap funciona (verificado con otros procesos: `/etc` ro, red aislada), pero opencode no arranca dentro del sandbox en esta máquina; queda documentado como defensa en profundidad pendiente de un runtime compatible. Uso: `bash scripts/opencode-sandbox.sh [--net] [comando...]` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
@@ -34,6 +52,8 @@ Repositorio público:
 
 No se requieren cuentas en la nube ni `curl | bash`. Clona el repo localmente y
 copia las reglas a tu proyecto destino.
+
+> **¿Primera vez?** Empieza por [`docs/QUICKSTART.md`](docs/QUICKSTART.md) — guía de 5 minutos.
 
 ### Linux / macOS / Git Bash en Windows
 
@@ -88,11 +108,13 @@ Elige la opción que se ajuste a tu entorno; ninguna requiere cuenta en la nube:
 | Comando | Requiere Docker | Descripción |
 |---|---|---|
 | `make ci` | No | CI portable: lint (si shellcheck está disponible) + test + verificación pre-commit. Recomendado para entornos sin contenedores. |
-| `make ci-local` | Sí | Ejecuta `.github/workflows/ci.yml` con `act`. |
+| `make check` | No* | Verificación completa local; requiere `shellcheck`, syft y grype para SBOM/vuln scan completos, y un árbol de trabajo limpio. |
+| `make sbom` | No | Genera SBOM SPDX en `docs/SBOM-*.spdx.json` con syft (si está instalado). |
+| `make vuln-scan` | No | Escanea vulnerabilidades con grype (si está instalado). |
+| `make ci-local` | Sí | Ejecuta `.github/workflows/ci.yml` con `act` (incluye SBOM y vuln scan via GitHub Actions). |
 | `make dagger` | Sí | Pipeline programático con Dagger. |
-| `make check` | No* | Verificación completa local; requiere `shellcheck` y un árbol de trabajo limpio. |
 
-\* `make check` no requiere Docker, pero `make ci-local` y `make dagger` sí.
+\* `make ci`, `make sbom` y `make vuln-scan` no requieren Docker; `make ci-local` y `make dagger` sí.
 
 ## Los 50 errores de LLM que se previenen
 
