@@ -9,7 +9,7 @@ help:
 	@echo "Targets disponibles:"
 	@echo "  make check         - Ejecuta lint + test + verificacion completa + SBOM/vuln scan si estan disponibles"
 	@echo "  make ci            - CI local pura sin Docker (lint opcional + test + verificar)"
-	@echo "  make lint          - shellcheck y validacion JSON"
+	@echo "  make lint          - shellcheck (si esta disponible) y validacion JSON"
 	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
 	@echo "  make sbom          - Genera SBOM SPDX con syft (requiere syft)"
 	@echo "  make vuln-scan     - Escanea vulnerabilidades con grype (requiere grype)"
@@ -31,7 +31,11 @@ ci:
 	bash scripts/ci-local-pure.sh
 
 lint:
-	shellcheck --severity=$(SHELLCHECK_SEVERITY) scripts/*.sh
+	@if command -v shellcheck >/dev/null 2>&1; then \
+		shellcheck --severity=$(SHELLCHECK_SEVERITY) scripts/*.sh; \
+	else \
+		echo "[WARNING] shellcheck no instalado; se omite (instalar para lint completo)"; \
+	fi
 	python3 -m json.tool opencode.json >/dev/null
 	python3 -m json.tool kilo.json >/dev/null
 
