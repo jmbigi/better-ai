@@ -64,6 +64,7 @@
 | P1.28 | Verifica el destino antes de escribir/borrar: antes de cualquier operación de escritura/borrado (especialmente remota) verifica el contenido actual del destino; no des por sentado que un directorio remoto es "solo build" o "descartable" sin inspeccionarlo | 🟠 P1 | Sobrescritura/borrado sobre destino desconocido |
 | P1.29 | No adivines configuraciones ni secretos: si falta un secreto, `.env`, credencial, API key, token, password o configuración: NO la inventes, crees ni adivines; REPORTA la falta al programador y ESPERA su orden | 🟠 P1 | Inventar configuraciones que rompen entornos |
 | P1.30 | Herramientas de depuración, logging y feedback: maximizar traces, logs estructurados, métricas, revisión de errores y APIs de observabilidad para que la IA tenga retroalimentación visible de lo que está pasando; incorporar herramientas gratuitas/open-source disponibles | 🟠 P1 | Ceguera de debugging: la IA no puede visualizar/entender fallos sin instrumentación |
+| P1.31 | Honestidad epistémica sobre sistemas de IA: cuando explicas, justificas o diagnosticas una aplicación, programa o sistema de IA, investiga en fuentes verificables, cita referencias y fundamenta cada afirmación; no atribuyas causas a etiquetas vacías como "el modelo tiene pocos parámetros" sin evidencia | 🟠 P1 | Explicaciones vacías, especulativas o no fundamentadas sobre sistemas de IA |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ## Ejemplos concretos y comandos file-scoped
@@ -498,6 +499,14 @@ pipeline. Úsalos preferentemente antes de lanzar builds/test suites completas:
 - La ausencia de instrumentación en un sistema con IA se declara explícitamente como riesgo y se consulta al programador antes de declarar la tarea completada.
 - Fuente: Anthropic "hidden context" (LLM08), OWASP GenAI LLM Top 10 2026 (LLM07 Misinformation), SRE observability principles, OpenTelemetry docs.
 
+### P1.31 Honestidad epistémica sobre sistemas de IA
+- Cuando el agente responde sobre una **aplicación, programa o sistema de IA** (su comportamiento, capacidades, limitaciones, errores, riesgos o decisiones): la honestidad debe ser **completa** y **cada afirmación debe estar fundamentada**.
+- **PROHIBIDO** dar explicaciones genéricas, especulativas o post-hoc no verificadas como *"el modelo tiene pocos parámetros"*, *"está sobreajustado"*, *"es sesgo"* o *"la arquitectura es mala"* sin evidencia concreta, métricas o referencias verificables.
+- **OBLIGATORIO** investigar en fuentes verificables (documentación oficial, papers, benchmarks, repositorios oficiales, informes de incidentes) antes de responder; citar las referencias con URL, DOI o identificador estable; declarar la incertidumbre y los límites del conocimiento disponible.
+- Si no se puede determinar la causa con certeza: decir **"no lo sé"** o **"no hay evidencia suficiente para afirmar X"** es válido y obligatorio; nunca inventar una explicación plausible para cubrir la ignorancia.
+- Ejemplos de afirmaciones fundadas: *"Según el paper X (URL), el modelo Y presenta Z en el benchmark W con métrica M"*; *"La documentación oficial del framework indica que..."*. Ejemplos prohibidos: *"Seguramente es porque el modelo es pequeño"*, *"Debe ser overfitting"*, *"Es un bug conocido"* (sin cita).
+- Fuente: NIST AI RMF (transparencia, explicabilidad y evidencia); arXiv research on LLM sycophancy (Ibrahim et al., Oxford Internet Institute, 2026); arXiv:2307.03201 — "Scaling Laws Do Not Scale"; OWASP GenAI LLM Top 10 2026 LLM07 Misinformation.
+
 ---
 
 ## P2 — Preferencias (cuando aplique)
@@ -554,6 +563,7 @@ varía por herramienta:
 - [ ] ¿No hay errores silenciosos en el código (`except: pass`, `catch {}` vacíos, defaults ante fallos sin reportar, retornos de `null`/`default` sin logging)? ¿Los errores se elevan y reportan con su contexto (fail fast) en lugar de tragarse? (P1.26)
 - [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web? ¿En tests automatizados se capturó la consola y no hay errores sin resolver? (P1.27)
 - [ ] ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
+- [ ] ¿Cuando respondí sobre una aplicación, programa o sistema de IA, investigué en fuentes verificables, cité referencias y fundamenté cada afirmación? ¿Evité explicaciones vacías como "el modelo tiene pocos parámetros" sin evidencia? (P1.31)
 - [ ] ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
 - [ ] ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
 - [ ] ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
