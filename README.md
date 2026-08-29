@@ -29,7 +29,7 @@ confiar solo en que el modelo "recuerde" las reglas, define:
 
 | Archivo | Qué es |
 |---|---|
-| `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode y kilocode lo cargan automáticamente en cada sesión. |
+| `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode y kilocode lo cargan automáticamente en cada sesión. Incluye una sección de **ejemplos concretos good/bad** y **comandos file-scoped** (type-check/lint/test por archivo) siguiendo las mejores prácticas de Builder.io/agents.md. |
 | `.docs/requirements/` | **Contrato de requisitos**. Cada requisito `REQ-XXX` define alcance, prioridad, estado y criterios de aceptación; `scripts/doc_validator.py` comprueba su coherencia y trazabilidad desde el código. |
 | `opencode.json` | **Guardarraíles deterministas** para opencode: 268 patrones bash (182 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; incluye variantes con rutas absolutas (`*/rm -rf *`, `*/git reset --hard*`, `*/sqlite3 *DROP*`, etc.) para cerrar evasiones directas detectadas por `scripts/fuzz-denies.py`; `read`/`edit` deniegan también rutas de claves y credenciales; `experimental.policies` (deny all + allow `opencode`, `opencode-go`, `kilo`, `deepseek`) solo permite los proveedores de modelos autorizados (decisión de coste) y `agent` define perfiles deterministas de muestreo (`temperature`/`top_p`). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
 | `kilo.json` | **Guardarraíles deterministas** para kilocode: 268 patrones bash (182 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `experimental.policies` (deny all + allow `kilo`, `deepseek`, `openrouter`). Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
@@ -266,7 +266,10 @@ AGENTS.md, formatters, agents, permissions.
 
 ### Reglas propias del proyecto
 Añade al `AGENTS.md` solo lo que evita errores: comandos de build/test, convenciones,
-gotchas. Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
+gotchas. Usa **ejemplos concretos good/bad** y **comandos file-scoped** (p. ej.
+`ruff check src/foo.py`, `pytest tests/test_bar.py`, `npm test -- src/baz.test.js`)
+para que el agente verifique archivos individuales antes de lanzar builds completas.
+Las reglas largas se ignoran: mejor un `AGENTS.md` corto y referencias
 (en opencode: campo `instructions` en `opencode.json`; en kilocode: campo `instructions`
 en `kilo.json`).
 

@@ -719,6 +719,7 @@ operativa para probar futuras mitigaciones.
 | 164 | Patrones deny `*/<cmd>` añadidos a `opencode.json` y `kilo.json` para cerrar evasiones directas con `/bin/` y `/usr/bin/` (`*/rm -rf *`, `*/git reset --hard*`, `*/sqlite3 *DROP*`, etc.) | ✅ Fuzzer reporta 0 evasiones directas sin mitigar; conteos actualizados a 268 patrones (182 `deny`, 85 `ask`, 1 `allow`) |
 | 165 | `scripts/analyze_shell.py` extiende detección a subcomandos destructivos (`rm -rf`, `git reset --hard`, `docker compose down -v`, `sqlite3/psql/mysql DROP/TRUNCATE/DELETE/ALTER`, `redis-cli FLUSHALL/FLUSHDB`) en comandos compuestos y dentro de `sh -c`/`bash -c` | ✅ `python3 scripts/check-shell-pipes.py` sigue pasando 34/34; el fuzzer marca shell-c/compound como mitigados |
 | 166 | Verificador integra `fuzz-denies.py` y valida conteos de patrones en `README.md` | ✅ `bash scripts/verificar-proyecto.sh --pre-commit` pasa todos los checks de reglas/config/seguridad/supply-chain |
+| 167 | `AGENTS.md` incluye sección de ejemplos concretos good/bad y comandos file-scoped; `README.md` describe la sección y las buenas prácticas de Builder.io/agents.md | ✅ Verificador cuenta 20 P0 / 31 P1 sin cambios; sección añadida antes de `## P0` |
 
 **Conclusión técnica**: los patrones deny por comodines bloquean variantes con rutas
 absolutas, pero no pueden cubrir encadenamientos (`;`, `&&`, `|`) ni subcomandos en

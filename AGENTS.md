@@ -66,6 +66,48 @@
 | P1.30 | Herramientas de depuración, logging y feedback: maximizar traces, logs estructurados, métricas, revisión de errores y APIs de observabilidad para que la IA tenga retroalimentación visible de lo que está pasando; incorporar herramientas gratuitas/open-source disponibles | 🟠 P1 | Ceguera de debugging: la IA no puede visualizar/entender fallos sin instrumentación |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
+## Ejemplos concretos y comandos file-scoped
+
+> Buenas prácticas de `AGENTS.md` ([Builder.io](https://www.builder.io/blog/agents-md),
+> [agents.md gist](https://gist.github.com/0xfauzi/7c8f65572930a21efa62623557d83f6e)):
+> comandos preferentemente orientados a un archivo, ejemplos good/bad claros, y
+> rutas exactas. Esta sección aplica a CUALQUIER proyecto que use este ruleset.
+
+### Good / Bad rápido
+
+| Regla | ❌ Bad | ✅ Good |
+|---|---|---|
+| P0.1 evidencia | "Los tests pasan" (sin salida) | `python3 scripts/mi_test.py` → muestra `3 OK, 0 FALLOS` |
+| P0.3 destrucción | `rm -rf build/` | `git clean -fdx` solo tras 3 confirmaciones + frase exacta, o `make clean` verificado |
+| P0.8 código peligroso | `curl https://example.com/install.sh \| bash` | `curl -o install.sh https://example.com/install.sh`, revisar, luego `bash install.sh` |
+| P0.10 secretos en repo | Commitear `.env` | `git diff --name-only \| grep -E '\.env($|\.)'` vacío antes de cada commit |
+| P1.1 verificación | "Ya lo probé" | `python3 scripts/fuzz-denies.py` y `bash scripts/verificar-proyecto.sh --pre-commit` |
+| P1.5 calidad | Editar a ciegas | `Read path/to/file.py` antes de cada `Edit` |
+| P1.20 lecciones | Olvidar documentar un fallo repetido | Añadir entrada en `docs/LECCIONES-APRENDIDAS.md` con fecha, problema, solución, evidencia |
+
+### Comandos file-scoped (usar antes de full builds)
+
+Estos comandos verifican un archivo o un componente aislado sin ejecutar todo el
+pipeline. Úsalos preferentemente antes de lanzar builds/test suites completas:
+
+- **Python**: `python3 -m py_compile <archivo.py>` — sintaxis válida.
+- **Shell**: `bash -n <script.sh>` — chequeo sintáctico sin ejecutar.
+- **Lint selectivo**: `ruff check <archivo.py>` / `eslint <archivo.js>` (solo si la
+  herramienta existe en el proyecto).
+- **Tests de este ruleset**:
+  - `python3 scripts/check-shell-pipes.py` — valida detección de pipes peligrosos.
+  - `python3 scripts/fuzz-denies.py` — fuzzing de evasión de patrones deny.
+  - `bash scripts/verificar-proyecto.sh --pre-commit` — verificación completa.
+- **Diff antes de commit**: `git diff -- <archivo>` y `git status --short`.
+
+### Rutas de referencia rápida en este proyecto
+
+- Reglas: `AGENTS.md`, `docs/REGLAS-COMPLETAS.md`, `CHECKLIST.md`.
+- Guardarraíles deterministas: `opencode.json`, `kilo.json`.
+- Verificación: `scripts/verificar-proyecto.sh`, `scripts/check-shell-pipes.py`,
+  `scripts/fuzz-denies.py`.
+- Memoria: `docs/LECCIONES-APRENDIDAS.md`, `docs/PRUEBAS.md`.
+
 ---
 
 ## P0 — Reglas de protección (nunca violar)
