@@ -22,7 +22,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-DEFAULT_LOG_DIR = Path("/tmp/opencode")
+DEFAULT_LOG_DIR = Path(os.environ.get("OPENCODE_COST_LOG_DIR", "/tmp/opencode"))
 DEFAULT_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = DEFAULT_LOG_DIR / f"cost-tracker-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.jsonl"

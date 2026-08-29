@@ -721,6 +721,7 @@ operativa para probar futuras mitigaciones.
 | 166 | Verificador integra `fuzz-denies.py` y valida conteos de patrones en `README.md` | ✅ `bash scripts/verificar-proyecto.sh --pre-commit` pasa todos los checks de reglas/config/seguridad/supply-chain |
 | 167 | `AGENTS.md` incluye sección de ejemplos concretos good/bad y comandos file-scoped; `README.md` describe la sección y las buenas prácticas de Builder.io/agents.md | ✅ Verificador cuenta 20 P0 / 31 P1 sin cambios; sección añadida antes de `## P0` |
 | 168 | Tests unitarios para `fuzz-denies.py` y cobertura ampliada de `analyze_shell.py` | ✅ `python3 scripts/test-fuzz-denies.py` pasa 3/3; `check-shell-pipes.py` alcanza 54 casos |
+| 169 | Skill `cost-tracker` operativo con tests funcionales: soporta `OPENCODE_COST_LOG_DIR`, start/log/report y umbrales | ✅ `python3 scripts/test-cost-tracker.py` pasa 2/2; verificador valida el skill |
 
 **Conclusión técnica**: los patrones deny por comodines bloquean variantes con rutas
 absolutas, pero no pueden cubrir encadenamientos (`;`, `&&`, `|`) ni subcomandos en
