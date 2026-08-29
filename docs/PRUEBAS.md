@@ -760,3 +760,16 @@ system prompt (el runtime controla la salida), pero sí se puede **detectar** la
 comparando la salida contra el prompt. El nuevo detector es offline, no consume API y
 se integra en CI, cumpliendo la recomendación de OWASP LLM07: auditar y monitorizar el
 system prompt leakage en lugar de asumir que el system prompt es un secreto.
+
+## Ronda 48 — Ampliación de patrones deny `sh -c`/`bash -c` a docker, redis y eval/curl (28-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 177 | Patrones deny exactos para envoltorias `sh -c`/`bash -c` de `docker compose down -v`, `redis-cli FLUSHALL/FLUSHDB` y `eval $(curl ...)` añadidos a `opencode.json` y `kilo.json` | ✅ Fuzzer reporta 8 shell-c en total (solo SQL con comillas anidadas sigue mitigado por analyzer); docker/redis/eval ahora bloqueados por deny; conteos actualizados a 304 patrones (218 `deny`, 85 `ask`, 1 `allow`) |
+
+**Conclusión técnica**: se cierra otra franja de vectores `sh -c`/`bash -c` cuya sintaxis es
+lo suficientemente específica como para no generar falsos positivos. Los comandos SQL
+con comillas anidadas (`sqlite3 db.db 'DROP TABLE...'`) siguen dependiendo de
+`analyze_shell.py` porque un patrón por comodines capturaría también consultas
+legítimas que contengan la palabra clave. La combinación deny+analyzer sigue siendo la
+estrategia correcta según la semántica de comodines documentada por OpenCode.

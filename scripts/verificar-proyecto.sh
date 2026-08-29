@@ -97,11 +97,11 @@ otel_start_span "verificar.config"
 echo "== 2. Config =="
 check "kilo.json es JSON valido" python3 -c "import json; json.load(open('kilo.json'))"
 check "opencode.json es JSON valido (compatibilidad)" python3 -c "import json; json.load(open('opencode.json'))"
-check "288 patrones de permisos bash (202 deny, 85 ask, 1 allow)" python3 -c "
+check "304 patrones de permisos bash (218 deny, 85 ask, 1 allow)" python3 -c "
 import json
 b = json.load(open('kilo.json'))['permission']['bash']
-assert len(b) == 288, len(b)
-assert sum(1 for v in b.values() if v == 'deny') == 202
+assert len(b) == 304, len(b)
+assert sum(1 for v in b.values() if v == 'deny') == 218
 assert sum(1 for v in b.values() if v == 'ask') == 85
 assert sum(1 for v in b.values() if v == 'allow') == 1
 "

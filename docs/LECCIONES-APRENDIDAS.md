@@ -124,6 +124,34 @@ LLM07 y con la postura de "asumir que el system prompt es público".
 
 ---
 
+## 2026-08-28 — Ampliación controlada de denies shell-c a docker, redis y eval/curl
+
+**Problema**: tras cerrar `rm`/`git` en envoltorias `sh -c`/`bash -c`, quedaban
+vectores de igual riesgo (`docker compose down -v`, `redis-cli FLUSHALL/FLUSHDB`,
+`eval $(curl ...)`) que solo el análisis semántico mitigaba. Depender de una sola
+capa para vectores específicos es una deuda de defensa.
+**Solución**:
+- Añadir 16 patrones deny exactos en `opencode.json` y `kilo.json` para
+  `sh -c`/`bash -c` con `docker compose down -v`, `redis-cli FLUSHALL/FLUSHDB` y
+  `eval $(curl*` (comillas simples y dobles).
+- Verificar con `python3 scripts/fuzz-denies.py` que docker/redis/eval pasan de
+  "mitigados por analyzer" a "bloqueados por deny".
+- Dejar SQL con comillas anidadas bajo `analyze_shell.py` porque un patrón
+  `*DROP*` en shell-c capturaría consultas legítimas (falsos positivos).
+- Actualizar conteos (304 patrones, 218 `deny`, 85 `ask`, 1 `allow`), `README.md`,
+  verificador y baseline.
+**Evidencia**: prueba 177 de `docs/PRUEBAS.md`; salida de
+`python3 scripts/fuzz-denies.py` (8 shell-c, 0 sin mitigar, SQL bajo analyzer);
+`bash scripts/verificar-proyecto.sh --pre-commit` pasa tras actualizar baseline.
+**Lección**: no todos los vectores shell-c pueden ni deben cerrarse con comodines.
+La regla de decisión es: si el comando tiene una forma fija y de bajo riesgo de
+falsos positivos, usar deny; si la sintaxis es variable o una palabra clave aparece
+en contextos legítimos, mantener el analyzer como capa semántica. Documentar el
+límite explícitamente sube la calidad más que añadir patrones que luego se retractan.
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — Mejora sistemática hasta calificación 9.5/9.0
 
 **Problema**: la primera evaluación del proyecto obtuvo 8.5/10 global con notas
