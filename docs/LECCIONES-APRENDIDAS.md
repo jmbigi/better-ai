@@ -46,12 +46,13 @@ por comodines no pueden cubrir las familias 2 y 3 sin falsos positivos masivos.
   evasiones directas no mitigadas; delegar vectores semánticos a `analyze_shell.py`.
 - Integrar el fuzzer en `scripts/verificar-proyecto.sh` y actualizar conteos en
   `README.md` (268 patrones, 182 `deny`, 85 `ask`, 1 `allow`).
-**Evidencia**: pruebas 163–169 de `docs/PRUEBAS.md`; salida de
+**Evidencia**: pruebas 163–170 de `docs/PRUEBAS.md`; salida de
 `python3 scripts/fuzz-denies.py` (0 evasiones directas sin mitigar);
 `python3 scripts/check-shell-pipes.py` (54/54 OK);
 `python3 scripts/test-fuzz-denies.py` (3/3 OK);
 `python3 scripts/test-cost-tracker.py` (2/2 OK); verificador mantiene
-20 P0 / 31 P1 tras añadir la sección de ejemplos concretos.
+20 P0 / 31 P1 tras añadir la sección de ejemplos concretos; README.md incluye
+diagrama de defensa en profundidad.
 **Lección**: un solo mecanismo de protección no basta. Los denies deterministas
 funcionan para vectores directos, pero los comandos compuestos requieren análisis
 semántico. La defensa en profundidad (policy + parser + reglas de texto P0.8) es

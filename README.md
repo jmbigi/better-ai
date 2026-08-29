@@ -290,6 +290,47 @@ continúa disponible para entornos Unix; consulta `docs/INTEGRACION-ASISTENTES.m
    (pruebas 15 y 29 de `docs/PRUEBAS.md`).
 4. Si algo falla, el problema está en tu copia, no en el ruleset.
 
+## Arquitectura de defensa en profundidad
+
+Este ruleset no depende de una sola capa de seguridad. Las capas se refuerzan
+mutuamente y cada una tiene un límite conocido documentado con evidencia:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Capa 1 — Reglas de texto (AGENTS.md)                           │
+│  51 reglas P0/P1 inyectadas en el system prompt.                │
+│  Límite: el modelo puede ignorarlas o filtrar el system prompt. │
+├─────────────────────────────────────────────────────────────────┤
+│  Capa 2 — Guardarraíles deterministas (opencode.json/kilo.json) │
+│  268 patrones bash (182 deny), edit/read deny de secretos,      │
+│  experimental.policies de proveedores.                          │
+│  Límite: no cubre encadenamientos (;, &&, |) ni sh -c/bash -c   │
+│          sin falsos positivos masivos.                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Capa 3 — Análisis semántico de shell                           │
+│  scripts/analyze_shell.py detecta pipes peligrosos, eval,       │
+│  bash -c y subcomandos destructivos.                            │
+│  Límite: no es un parser Bash completo.                         │
+├─────────────────────────────────────────────────────────────────┤
+│  Capa 4 — Red-team y verificación continua                      │
+│  scripts/probar-denies.sh, scripts/fuzz-denies.py,              │
+│  scripts/redteam-prompt-injection.py y verificar-proyecto.sh.   │
+├─────────────────────────────────────────────────────────────────┤
+│  Capa 5 — Sandbox del sistema operativo (opcional)              │
+│  scripts/opencode-sandbox.sh con bubblewrap.                    │
+│  Límite: opencode 1.18.x crashea dentro de user namespaces      │
+│          en este kernel (documentado).                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Capa 6 — Auditoría humana y revisores                          │
+│  Subagentes security-auditor y code-reviewer, check pre-commit, │
+│  checklist pre-entrega y lecciones aprendidas.                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+La filosofía es la misma que proponen OWASP LLM Top 10 2025 y Anthropic:
+**no confiar en que el modelo respete las reglas**, sino poner invariantes de
+seguridad fuera de él (deny deterministas, sandbox, análisis estático).
+
 ## ¿Cómo se probó?
 
 Ver `docs/PRUEBAS.md` (informe de pruebas) y `docs/REGLAS-COMPLETAS.md` (sección 5: fuentes).
