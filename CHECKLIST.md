@@ -135,6 +135,37 @@
 - [ ] ¿Declaré la incertidumbre y los límites del conocimiento disponible?
 - [ ] ¿Evité explicaciones vacías como "el modelo tiene pocos parámetros", "está sobreajustado", "es sesgo" o "la arquitectura es mala" sin evidencia?
 
+## Arquitectura determinista para agentes autónomos (P1.32)
+
+- [ ] ¿Si diseñé un flujo de agente autónomo, usé una FSM explícita?
+- [ ] ¿La IA propone soluciones pero la capa determinista transiciona solo si las aserciones pasan?
+- [ ] ¿Valido las entradas/salidas del agente con esquemas formales (JSON Schema, Pydantic, Protobuf)?
+- [ ] ¿Ejecuto el código generado en un sandbox temporal antes de integrarlo al proyecto principal?
+- [ ] ¿Las transiciones son acíclicas y tienen un límite máximo de iteraciones (ej. 5 intentos)?
+
+## Código completo, portable y sin placeholders (P1.33)
+
+- [ ] ¿El código entregado está completo y libre de placeholders (`pass`, `...`, "tu código va aquí", TODO/FIXME como implementación)?
+- [ ] ¿Validé por AST o tests que no hay stubs ni retornos vacíos inesperados?
+- [ ] ¿Los recursos externos (rutas, URLs, credenciales) se inyectan por parámetro o `os.getenv`, nunca hardcodeados?
+- [ ] ¿Las rutas se construyen con `pathlib`/`os.path.join` de forma independiente del SO?
+- [ ] ¿La configuración está desacoplada en `.env`/YAML/JSON y no embebida en la lógica?
+
+## Operaciones resilientes e idempotentes (P1.34)
+
+- [ ] ¿Las operaciones con efectos secundarios son idempotentes (tokens de idempotencia, claves únicas, verificación previa)?
+- [ ] ¿Los reintentos usan backoff exponencial + jitter con un número máximo definido?
+- [ ] ¿Cada etapa del flujo tiene un timeout explícito?
+- [ ] ¿Al agotar reintentos o timeouts el sistema falla ruidosamente (fail-loud) sin silenciar el error?
+- [ ] ¿Para operaciones compuestas uso sagas o transacciones compensatorias?
+
+## Despliegue gradual y human-in-the-loop (P1.35)
+
+- [ ] ¿El código generado por IA pasa por staging aislado antes de producción?
+- [ ] ¿El despliegue productivo usa canary con monitoreo y rollback automático ante regresión?
+- [ ] ¿Las acciones de alto riesgo tienen aprobación humana explícita?
+- [ ] ¿Existe un circuit breaker manual de emergencia para pausar al agente?
+
 ## Obediencia y consulta (P1.8)
 
 - [ ] ¿NUNCA desobedecí una orden explícita del programador? ¿La cumplí al pie de la letra, sin reinterpretarla ni sustituirla por una "versión mejor" no pedida?

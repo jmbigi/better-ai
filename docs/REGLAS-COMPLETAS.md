@@ -63,6 +63,10 @@ limitaciones conocidas en **reglas operativas explícitas** que cualquier agente
 | **No adivinar configuraciones ni secretos** | Inventar, crear o adivinar secretos, `.env`, credenciales, API keys, tokens, passwords o configuraciones faltantes en lugar de reportar la falta al programador y esperar su orden (incidente interno: se inventó `DB_PASSWORD=<PASSWORD_INVENTADO>` porque faltaba en el `.env` recreado) | P1.29 |
 | **Ceguera de debugging sin instrumentación** | Los modelos de IA tienen limitaciones sistemáticas para visualizar problemas internos: sin traces, logs estructurados, métricas y APIs de observabilidad, la IA no puede diagnosticar fallos, entender por qué se produjeron ni en qué punto del flujo (Anthropic LLM08; OWASP GenAI LLM Top 10 2026 LLM07 Misinformation; SRE observability principles; OpenTelemetry docs) | P1.30 |
 | **Explicaciones vacías sobre sistemas de IA** | El agente responde sobre una aplicación, programa o sistema de IA con afirmaciones genéricas, especulativas o post-hoc no verificadas ("el modelo tiene pocos parámetros", "está sobreajustado", "es sesgo"), sin investigar fuentes, sin citar referencias y sin fundamentar las causas; la falta de honestidad epistémica genera diagnósticos falsos y decisiones basadas en creencias erróneas (NIST AI RMF; sycophancy research; OWASP LLM07 Misinformation) | P1.31 |
+| **Agentes autónomos sin FSM ni contratos** | El flujo del agente en producción carece de máquina de estado finita explícita, de esquemas formales para validar entradas/salidas y de sandbox temporal; la IA decide transiciones o ejecuta código sin una capa determinista que verifique aserciones, generando comportamientos impredecibles y bucles sin límite | P1.32 |
+| **Código con placeholders o acoplado al entorno** | El agente entrega código incompleto (stubs, `pass`, `...`, TODO/FIXME como implementación), con rutas/URLs/credenciales hardcodeadas o con configuración embebida en la lógica, produciendo código que no compila o que falla al cambiar de entorno | P1.33 |
+| **Operaciones no idempotentes ni sin timeouts** | Operaciones con efectos secundarios carecen de idempotencia, los reintentos son ilimitados o sin jitter, y las etapas no tienen timeouts; esto produce duplicación de efectos, bloqueos indefinidos o recuperaciones silenciosas que corrompen el estado | P1.34 |
+| **Despliegues directos sin salvaguardas** | El código generado por IA se despliega directamente a producción sin staging aislado, sin canary ni rollback automático, y sin circuit breaker o aprobación humana para acciones de alto riesgo | P1.35 |
 
 ## 2. Estructura de prioridades
 
@@ -737,6 +741,96 @@ que priorizan el acuerdo con el usuario sobre la veracidad); arXiv:2307.03201
 universal ni suficiente para explicar comportamientos concretos); OWASP GenAI
 LLM Top 10 2026 — LLM07 Misinformation.
 
+### P1.32 Arquitectura determinista para agentes autónomos
+**Error**: el agente en producción opera como un flujo libre donde la IA decide
+qué hacer a continuación, sin una capa determinista que gobierne las
+transiciones; no hay máquina de estado, no se validan las salidas contra un
+esquema formal, no hay sandbox previo y los bucles de corrección no tienen
+límite. El resultado es comportamiento impredecible, ejecución de código no
+verificado y bucles infinitos que consumen recursos.
+**Prevención**:
+- Gobernar el flujo del agente con una **Máquina de Estado Finita (FSM)**
+  explícita: la IA propone soluciones para el estado actual, pero la capa
+  determinista transiciona al siguiente estado **solo si todas las aserciones
+  pasan**.
+- Las transiciones dentro de una sesión deben ser **acíclicas** y tener un
+  **límite máximo de iteraciones** (por defecto 5 intentos) para prevenir bucles
+  infinitos (refuerza P1.6).
+- Toda comunicación agente-sistema debe validarse mediante **esquemas formales**
+  (JSON Schema, Pydantic, Protobuf). Salidas malformadas o que no cumplan el
+  esquema se rechazan inmediatamente.
+- Ejecutar el código generado primero en un **sandbox temporal** que simule el
+  entorno de destino (variables, dependencias, configuraciones) antes de
+  integrarlo al proyecto principal (refuerza P1.21 y P1.9).
+**Fuentes**: Manifiesto Definitivo para el Diseño de Programas Autónomos y
+Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción
+(PARTE I, secciones 1.1–1.3).
+
+### P1.33 Código completo, portable y sin placeholders
+**Error**: el agente entrega código incompleto con placeholders (*"tu código va
+aquí"*, `pass`, `...`, comentarios `TODO`/`FIXME` usados como implementación
+pendiente), o con rutas, URLs y credenciales hardcodeadas, o con configuración
+embebida en la lógica. El código no compila, no es portable y falla al cambiar
+ de entorno.
+**Prevención**:
+- **Cero placeholders**: si se modifica una función, debe emitirse completa y
+  ejecutable. Validar por AST que no haya nodos `Pass`, retornos vacíos
+  inesperados ni comentarios que indiquen código pendiente.
+- **Inyección de dependencias forzada**: cualquier recurso externo (rutas,
+  URLs, credenciales) debe pasarse como parámetro o leerse del entorno
+  (`os.getenv`), nunca como literal (Magic Strings/Numbers).
+- **Agnosticismo del SO**: construir rutas con `pathlib`/`os.path.join`, no
+  concatenando barras fijas (`C:\ruta\` o `/home/<usuario>/`).
+- **Configuración desacoplada**: separar configuración en `.env`, YAML o JSON,
+  usando el patrón de configuración por capas (defaults, entorno, override).
+**Fuentes**: Manifiesto Definitivo para el Diseño de Programas Autónomos y
+Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción
+(PARTE I, secciones 3.1–3.3 y 4.1–4.3).
+
+### P1.34 Operaciones resilientes e idempotentes
+**Error**: operaciones con efectos secundarios carecen de idempotencia, los
+reintentos son ilimitados o sin estrategia, no hay timeouts y las fallas se
+recuperan con valores vacíos o nulos. Esto produce duplicación de efectos,
+bloqueos indefinidos y corrupción silenciosa de estado.
+**Prevención**:
+- Diseñar operaciones con efectos secundarios como **idempotentes**: tokens de
+  idempotencia, claves únicas de operación o verificación previa del estado.
+- Los reintentos deben usar **backoff exponencial + jitter**, con un número
+  máximo definido (ej. 3). Al agotarse, el sistema debe **fallar ruidosamente**
+  (fail-loud), no retornar `None`/`[]` ni silenciar el error (refuerza P1.19 y
+  P1.26).
+- Cada etapa del flujo (generación de código, llamada a API, ejecución de
+  pruebas) debe tener un **timeout explícito**; si se supera, se aborta y se
+  transiciona a un estado de error.
+- Para operaciones compuestas usar **sagas o transacciones compensatorias**:
+  si un paso falla, ejecutar acciones de compensación deterministas para
+  revertir el estado parcial.
+**Fuentes**: Manifiesto Definitivo para el Diseño de Programas Autónomos y
+Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción
+(PARTE I, sección 2 y PARTE III, sección 12).
+
+### P1.35 Despliegue gradual y human-in-the-loop
+**Error**: el código generado por IA se despliega directamente a producción sin
+pasar por staging, sin canary, sin rollback automático y sin supervisión humana
+para acciones de alto riesgo. Un error del modelo afecta inmediatamente a
+usuarios reales y no hay mecanismo de parada.
+**Prevención**:
+- Todo código generado por IA debe ejecutarse primero en un **entorno de
+  staging aislado** que replique fielmente la configuración de producción
+  (refuerza P0.4: nunca tocar producción directamente).
+- El despliegue a producción debe ser **canary** (ej. 5% de tráfico) con
+  monitoreo de métricas clave; si se detecta regresión, ejecutar **rollback
+  automático** a la versión estable.
+- Las acciones de alto riesgo (eliminación de datos, despliegue productivo,
+  transferencias, cambios de red/seguridad) requieren **aprobación humana
+  explícita** (refuerza P1.23).
+- Debe existir un **circuit breaker manual** de emergencia que cualquier
+  operador humano pueda activar para pausar inmediatamente al agente y revertir
+  acciones pendientes.
+**Fuentes**: Manifiesto Definitivo para el Diseño de Programas Autónomos y
+Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción
+(PARTE III, secciones 13 y 15).
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres
@@ -755,9 +849,13 @@ Obligatorio al terminar cualquier tarea (versión imprimible: `CHECKLIST.md`):
 7. ¿Solo cambié lo necesario (alcance)?
 8. ¿Reporté qué falta y qué no pude verificar?
 9. ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
-10. ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
-11. ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
-12. ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
+10. ¿Si diseñé un flujo de agente autónomo, usé una FSM explícita, esquemas formales para validar entradas/salidas, sandbox temporal antes de integrar y límite de iteraciones? (P1.32)
+11. ¿El código que entregué está completo y libre de placeholders (`pass`, `...`, TODO/FIXME como implementación), validado por AST/tests, y desacoplado de rutas/URLs/credenciales hardcodeadas? (P1.33)
+12. ¿Las operaciones con efectos secundarios son idempotentes, los reintentos tienen backoff + jitter + límite, y cada etapa tiene timeout explícito? (P1.34)
+13. ¿Si hay despliegue a producción, usé staging aislado, canary con monitoreo y rollback automático; y las acciones de alto riesgo tienen aprobación humana + circuit breaker? (P1.35)
+14. ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
+15. ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
+16. ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
 
 ## 5. Fuentes de la investigación
 
@@ -977,6 +1075,14 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
       comportamientos concretos de un modelo; atribuir todo al tamaño del
       modelo es una simplificación incorrecta; base de P1.31.
 
+36. **Manifiesto Definitivo para el Diseño de Programas Autónomos y Flujos de
+    Trabajo Basados en Agentes de IA en Entornos de Producción**
+    - Documento compartido por el programador; principios arquitectónicos para
+      agentes autónomos en producción: FSM explícita, contratos de interfaz,
+      sandbox temporal, código sin placeholders, inyección de dependencias,
+      idempotencia, reintentos controlados, despliegue canary/rollback y
+      human-in-the-loop. Base de P1.32–P1.35.
+
 **Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
@@ -1028,14 +1134,14 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 |---|---|---|
 | LLM01 Prompt Injection | **P0.13** (contenido no confiable = dato, no orden), P0.8 (código peligroso), P0.2 (verificar procedencia) | deny de eval/pipes y de comandos destructivos |
 | LLM02 Sensitive Information Disclosure | **P0.6, P0.9, P0.10, P0.11** | deny de lectura de `.env`, `.ssh`, `.aws`, claves |
-| LLM03 Excessive Agency | **P0.3, P0.4, P1.8, P1.9, P1.11** | 159 deny de comandos destructivos + ask |
+| LLM03 Excessive Agency | **P0.3, P0.4, P1.8, P1.9, P1.11, P1.32** (FSM y contratos deterministas), **P1.35** (human-in-the-loop y circuit breakers) | 159 deny de comandos destructivos + ask |
 | LLM04 Supply Chain | **P0.18** (SBOM, SLSA, vuln scan), P1.18 (imports/dependencias), P1.2 | ask de `pip install`, `npm -g` + verificador SBOM |
 | LLM05 Data Model Poisoning | No aplicable a un ruleset (no se entrena el modelo) | — |
 | LLM06 Unbounded Consumption | **P0.19** (límites tokens/coste/tiempo, alertas, bloqueo), **P1.30** (instrumentación) | `experimental.policies` (modelos permitidos), cost-tracker skill |
 | LLM07 Misinformation | **P0.1** (evidencia), P1.1 (verificación), P1.6 (honestidad), P1.15 (revisión humana), **P1.30** (instrumentación: traces, logs, métricas para diagnosticar fallos sin ceguera), **P1.31** (honestidad epistémica sobre sistemas de IA) | — |
 | LLM08 Hidden Context Exposure | **P0.13** (contextos no confiables), P0.11 (reportar), **P1.30** (logging estructurado y APIs de feedback para exponer el estado interno del sistema) | deny de eval/pipes |
 | LLM09 Vector and Embedding Weaknesses | **P0.20** (validación integridad/procedencia/calidad embeddings/RAG), P1.21 (tests aislados) | — |
-| LLM10 Improper Output Handling | **P0.1, P1.1, P1.15, P1.19** (salidas no verificadas o con fallbacks silenciosos) | verificador del proyecto en el hook pre-commit |
+| LLM10 Improper Output Handling | **P0.1, P1.1, P1.15, P1.19** (salidas no verificadas o con fallbacks silenciosos), **P1.32** (validación por esquemas formales), **P1.33** (código completo sin placeholders) | verificador del proyecto en el hook pre-commit |
 
 ### MITRE ATLAS (tácticas)
 

@@ -65,6 +65,10 @@
 | P1.29 | No adivines configuraciones ni secretos: si falta un secreto, `.env`, credencial, API key, token, password o configuración: NO la inventes, crees ni adivines; REPORTA la falta al programador y ESPERA su orden | 🟠 P1 | Inventar configuraciones que rompen entornos |
 | P1.30 | Herramientas de depuración, logging y feedback: maximizar traces, logs estructurados, métricas, revisión de errores y APIs de observabilidad para que la IA tenga retroalimentación visible de lo que está pasando; incorporar herramientas gratuitas/open-source disponibles | 🟠 P1 | Ceguera de debugging: la IA no puede visualizar/entender fallos sin instrumentación |
 | P1.31 | Honestidad epistémica sobre sistemas de IA: cuando explicas, justificas o diagnosticas una aplicación, programa o sistema de IA, investiga en fuentes verificables, cita referencias y fundamenta cada afirmación; no atribuyas causas a etiquetas vacías como "el modelo tiene pocos parámetros" sin evidencia | 🟠 P1 | Explicaciones vacías, especulativas o no fundamentadas sobre sistemas de IA |
+| P1.32 | Arquitectura determinista para agentes autónomos: gobierna el flujo del agente con una FSM explícita, valida las salidas con esquemas formales, ejecuta en sandbox temporal antes de integrar y limita las iteraciones por sesión | 🟠 P1 | Agentes autónomos sin control determinista ni contratos de interfaz |
+| P1.33 | Código completo, portable y sin placeholders: prohibido entregar stubs, `pass`, `...` o comentarios tipo TODO/FIXME como implementación; usa inyección de dependencias, pathlib y configuración desacoplada | 🟠 P1 | Código incompleto, acoplado al entorno o con placeholders no validados |
+| P1.34 | Operaciones resilientes e idempotentes: las operaciones con efectos secundarios deben ser idempotentes; los reintentos usan backoff exponencial + jitter con límite máximo; timeouts explícitos en cada etapa | 🟠 P1 | Reintentos descontrolados, duplicación de efectos o bloqueos por falta de timeout |
+| P1.35 | Despliegue gradual y human-in-the-loop: staging aislado, canary con monitoreo y rollback automático; acciones de alto riesgo requieren aprobación humana y circuit breaker de emergencia | 🟠 P1 | Despliegues directos a producción sin salvaguardas ni supervisión humana |
 | P2.1–2.5 | Preferencias: open source, no duplicar archivos, cambios pequeños, nombres descriptivos, avisar antes de tareas amplias | 🟢 P2 | Fricción y decisiones contrarias al usuario |
 
 ## Ejemplos concretos y comandos file-scoped
@@ -507,6 +511,35 @@ pipeline. Úsalos preferentemente antes de lanzar builds/test suites completas:
 - Ejemplos de afirmaciones fundadas: *"Según el paper X (URL), el modelo Y presenta Z en el benchmark W con métrica M"*; *"La documentación oficial del framework indica que..."*. Ejemplos prohibidos: *"Seguramente es porque el modelo es pequeño"*, *"Debe ser overfitting"*, *"Es un bug conocido"* (sin cita).
 - Fuente: NIST AI RMF (transparencia, explicabilidad y evidencia); arXiv research on LLM sycophancy (Ibrahim et al., Oxford Internet Institute, 2026); arXiv:2307.03201 — "Scaling Laws Do Not Scale"; OWASP GenAI LLM Top 10 2026 LLM07 Misinformation.
 
+### P1.32 Arquitectura determinista para agentes autónomos
+- Los flujos de agentes en producción deben gobernarse mediante una **Máquina de Estado Finita (FSM)** explícita: la IA propone soluciones para el estado actual, pero la capa determinista transiciona al siguiente estado **solo si todas las aserciones pasan**.
+- Las transiciones dentro de una sesión deben ser **acíclicas** y tener un **límite máximo de iteraciones** (ej. 5 intentos) para prevenir bucles infinitos.
+- Toda comunicación entre el agente y el sistema debe validarse mediante **esquemas formales** (JSON Schema, Pydantic, Protobuf). Si la IA devuelve un JSON malformado o que no respeta el esquema, la capa determinista lo rechaza inmediatamente.
+- El código generado debe ejecutarse primero en un **sandbox temporal** que simule fielmente el entorno de destino antes de integrarse al proyecto principal (refuerza P1.21 y P1.9).
+- Fuente: Manifiesto Definitivo para el Diseño de Programas Autónomos y Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción.
+
+### P1.33 Código completo, portable y sin placeholders
+- **Prohibido** entregar código con placeholders: frases como *"tu código va aquí"*, bloques `pass`, `...` (Python), o comentarios `TODO`/`FIXME` usados como implementación pendiente.
+- Regla de oro: *si modificas una función, debes emitir su implementación completa y ejecutable*; el código generado debe ser validado por AST para detectar nodos `Pass`, retornos vacíos inesperados o stubs.
+- Cualquier acceso a recursos externos (rutas de archivos, URLs, credenciales) debe pasarse como parámetro o leerse del entorno (`os.getenv`), **nunca como literal** (Magic Strings/Numbers).
+- Las rutas deben construirse con `pathlib`/`os.path.join` de forma independiente del sistema operativo; queda prohibido concatenar rutas con barras fijas (`C:\ruta\` o `/home/<usuario>/`).
+- La configuración debe estar desacoplada en archivos `.env`, YAML o JSON, no embebida en la lógica central; usar el patrón de configuración por capas (defaults, entorno, override).
+- Fuente: Manifiesto Definitivo para el Diseño de Programas Autónomos y Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción.
+
+### P1.34 Operaciones resilientes e idempotentes
+- Cualquier operación con efectos secundarios (escritura en BD, llamada a API de pago, envío de correo) debe ser **idempotente** por diseño: tokens de idempotencia, claves únicas de operación o verificación previa del estado.
+- Los reintentos deben usar **backoff exponencial + jitter**, con un número máximo definido (ej. 3); tras agotarlo, el sistema debe **fallar ruidosamente** (fail-loud), no retornar `None`/`[]` ni silenciar el error (refuerza P1.19 y P1.26).
+- Cada etapa del flujo (generación de código, llamada a API, ejecución de pruebas) debe tener un **timeout explícito**; si se supera, se aborta y se transiciona a un estado de error.
+- Para operaciones compuestas usar **sagas o transacciones compensatorias**: si un paso falla, se ejecutan acciones de compensación deterministas para revertir el estado parcial.
+- Fuente: Manifiesto Definitivo para el Diseño de Programas Autónomos y Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción.
+
+### P1.35 Despliegue gradual y human-in-the-loop
+- El código generado por IA debe pasar por un **entorno de staging aislado** que replique fielmente la configuración de producción antes de cualquier despliegue productivo.
+- El despliegue a producción debe ser **canary** (ej. 5% de tráfico) con monitoreo de métricas clave; si se detecta regresión, el sistema debe ejecutar **rollback automático** a la versión estable.
+- Las acciones de alto riesgo (eliminación de datos, despliegue productivo, transferencias, cambios de configuración de red o seguridad) requieren **aprobación humana explícita** (refuerza P0.4 y P1.23).
+- Debe existir un **circuit breaker manual** de emergencia que cualquier operador humano pueda activar para pausar inmediatamente al agente y revertir acciones pendientes.
+- Fuente: Manifiesto Definitivo para el Diseño de Programas Autónomos y Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción.
+
 ---
 
 ## P2 — Preferencias (cuando aplique)
@@ -564,6 +597,10 @@ varía por herramienta:
 - [ ] ¿La consola del navegador está limpia de errores (`console.error`, `TypeError`, `ReferenceError`, `SyntaxError`, `NetworkError`, `CORS error`, `Uncaught (in promise)`) antes de entregar código web? ¿En tests automatizados se capturó la consola y no hay errores sin resolver? (P1.27)
 - [ ] ¿El sistema con IA cuenta con instrumentación suficiente (traces, logs estructurados, métricas, APIs de feedback) para que una IA pueda diagnosticar fallos sin acceso al código fuente? Si no existe, ¿se propusieron herramientas gratuitas/open-source al programador? (P1.30)
 - [ ] ¿Cuando respondí sobre una aplicación, programa o sistema de IA, investigué en fuentes verificables, cité referencias y fundamenté cada afirmación? ¿Evité explicaciones vacías como "el modelo tiene pocos parámetros" sin evidencia? (P1.31)
+- [ ] ¿Si diseñé un flujo de agente autónomo, usé una FSM explícita, esquemas formales para validar entradas/salidas, sandbox temporal antes de integrar y límite de iteraciones? (P1.32)
+- [ ] ¿El código que entregué está completo y libre de placeholders (`pass`, `...`, TODO/FIXME como implementación), validado por AST/tests, y desacoplado de rutas/URLs/credenciales hardcodeadas? (P1.33)
+- [ ] ¿Las operaciones con efectos secundarios son idempotentes, los reintentos tienen backoff + jitter + límite, y cada etapa tiene timeout explícito? (P1.34)
+- [ ] ¿Si hay despliegue a producción, usé staging aislado, canary con monitoreo y rollback automático; y las acciones de alto riesgo tienen aprobación humana + circuit breaker? (P1.35)
 - [ ] ¿Verifiqué integridad de dependencias (SBOM, SLSA, vulns) antes de usar? ¿Bloqueé si vulns CRITICAL/HIGH sin excepción documentada? (P0.18)
 - [ ] ¿Respeté límites de tokens/coste/tiempo por sesión? ¿Alerté/bloqueé al superar umbrales? (P0.19)
 - [ ] ¿Validé integridad, procedencia y calidad de embeddings/RAG antes de usar? (P0.20)
