@@ -3,6 +3,60 @@
 > Cada prueba, fallo o hallazgo relevante se documenta aquí con su solución.
 > Si algo falla 2+ veces, la lección pasa a ser regla en `AGENTS.md`.
 
+## 2026-08-28 — System Prompt Leakage: AGENTS.md es visible por defecto
+
+**Problema**: el análisis crítico avanzado identificó que better-ai no tenía
+mitigación específica para LLM07 (System Prompt Leakage) del OWASP Top 10 for LLM
+2025. Una regla de texto (P0.13) no impide que un modelo revele su system prompt
+cuando se le pide directamente.
+**Solución**:
+- Crear `scripts/redteam-prompt-injection.py` con payloads de system prompt leakage,
+  inyección directa e inyección indirecta.
+- Ejecutar el red-team contra `opencode/mimo-v2.5-free` con `AGENTS.md` cargado.
+- Documentar el hallazgo: 1/5 payloads exitosos (`system_leak` reveló el inicio de
+  `AGENTS.md`); los demás fueron bloqueados por P0.13.
+- Convertir la lección en regla P0/P1: no incluir secretos, credenciales ni lógica de
+  autorización en `AGENTS.md` ni en system prompts; tratar `AGENTS.md` como público.
+**Evidencia**: pruebas 159–162 de `docs/PRUEBAS.md`; salida de
+`python3 scripts/redteam-prompt-injection.py --out /tmp/redteam-prompt-injection-v2.json`.
+**Lección**: un system prompt no es un boundary de seguridad. La defensa no es
+"evitar que se filtre", sino "diseñarlo asumiendo que se filtrará". Esto es coherente
+con la recomendación de OWASP 2025 y con la propuesta de Anthropic de poner
+invariantes fuera del modelo.
+**Estado**: cerrada.
+
+---
+
+## 2026-08-28 — Evasión de patrones deny: rutas absolutas, sh -c y comandos compuestos
+
+**Problema**: `scripts/fuzz-denies.py` generó 75/111 variantes que evadían los
+patrones deny de `opencode.json`/`kilo.json`. Los vectores reales se dividen en tres
+familias: (1) rutas absolutas (`/bin/rm -rf /`), (2) subcomandos en `sh -c`/`bash -c`,
+y (3) comandos compuestos (`x=1; rm -rf /`, `cd / && rm -rf /`). Los patrones deny
+por comodines no pueden cubrir las familias 2 y 3 sin falsos positivos masivos.
+**Solución**:
+- Añadir patrones deny `*/<cmd>` para la familia 1 (rutas absolutas): `*/rm -rf *`,
+  `*/git reset --hard*`, `*/sqlite3 *DROP*`, `*/psql *DROP*`, `*/mysql *DROP*`,
+  `*/redis-cli FLUSHALL*`, etc. (21 patrones nuevos en `opencode.json` y `kilo.json`).
+- Extender `scripts/analyze_shell.py` para detectar subcomandos destructivos en
+  encadenamientos (`;`, `&&`, `||`) y dentro de `sh -c`/`bash -c` (`rm -rf`,
+  `git reset --hard`, `docker compose down -v`, `sqlite3/psql/mysql DROP/TRUNCATE/
+  DELETE/ALTER`, `redis-cli FLUSHALL/FLUSHDB`).
+- Refinar `scripts/fuzz-denies.py` para clasificar variantes y fallar solo ante
+  evasiones directas no mitigadas; delegar vectores semánticos a `analyze_shell.py`.
+- Integrar el fuzzer en `scripts/verificar-proyecto.sh` y actualizar conteos en
+  `README.md` (268 patrones, 182 `deny`, 85 `ask`, 1 `allow`).
+**Evidencia**: pruebas 163–166 de `docs/PRUEBAS.md`; salida de
+`python3 scripts/fuzz-denies.py` (0 evasiones directas sin mitigar);
+`python3 scripts/check-shell-pipes.py` (34/34 OK).
+**Lección**: un solo mecanismo de protección no basta. Los denies deterministas
+funcionan para vectores directos, pero los comandos compuestos requieren análisis
+semántico. La defensa en profundidad (policy + parser + reglas de texto P0.8) es
+necesaria incluso cuando el matcher de permisos es robusto.
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — Mejora sistemática hasta calificación 9.5/9.0
 
 **Problema**: la primera evaluación del proyecto obtuvo 8.5/10 global con notas

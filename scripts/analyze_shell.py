@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """Análisis estático de comandos shell para detectar patrones peligrosos.
 
-Usa únicamente la stdlib de Python (shlex) para no añadir dependencias externas
-(P0.18). Detecta:
+Usa únicamente la stdlib de Python (shlex, re) para no añadir dependencias
+externas (P0.18). Detecta:
 
 - Pipes donde una fuente de red (curl/wget/fetch) alimenta un intérprete shell.
 - Process substitution que alimenta un shell: bash <(curl ...).
 - Uso de eval/exec/source.
 - Command substitution $(...) o `...` con descargadores dentro.
-- bash -c con contenido peligroso.
+- bash -c / sh -c con contenido peligroso.
+- Subcomandos destructivos encadenados (;, &&, ||) o con rutas absolutas no
+  cubiertas por los patrones deny (rm -rf, git reset --hard, etc.).
 
 Limitaciones conocidas: no es un parser completo de Bash. Construcciones muy
 retorcidas pueden escapar, pero cubre las variantes documentadas en P0.8.
 """
 
+import re
 import shlex
 from typing import List, Set
 
@@ -21,6 +24,32 @@ DOWNLOADERS = {"curl", "wget", "fetch"}
 SHELL_NAMES = {"bash", "sh", "zsh", "ksh", "dash", "csh", "tcsh"}
 EVAL_LIKE = {"eval", "exec", "source", "."}
 SUDO = "sudo"
+
+# Subcomandos destructivos que los patrones deny de opencode.json no pueden
+# matchear cuando van encadenados (;, &&), dentro de sh -c / bash -c, o con
+# rutas absolutas no cubiertas. Se aplican a cada subcomando por separado.
+DANGEROUS_SUBCOMMAND_PATTERNS: List[tuple[str, str]] = [
+    (r"\brm\s+-rf\b", "rm-rf"),
+    (r"\brm\s+-r\b", "rm-r"),
+    (r"\brm\s+-f\b", "rm-f"),
+    (r"\bgit\s+reset\s+--hard\b", "git-reset-hard"),
+    (r"\bgit\s+push\s+--force\b", "git-push-force"),
+    (r"\bdocker\s+compose\s+down\s+-v\b", "docker-compose-down-v"),
+    (r"\bsqlite3\s+.*\bDROP\b", "sqlite3-drop"),
+    (r"\bsqlite3\s+.*\bTRUNCATE\b", "sqlite3-truncate"),
+    (r"\bsqlite3\s+.*\bDELETE\b", "sqlite3-delete"),
+    (r"\bsqlite3\s+.*\bALTER\b", "sqlite3-alter"),
+    (r"\bpsql\s+.*\bDROP\b", "psql-drop"),
+    (r"\bpsql\s+.*\bTRUNCATE\b", "psql-truncate"),
+    (r"\bpsql\s+.*\bDELETE\b", "psql-delete"),
+    (r"\bpsql\s+.*\bALTER\b", "psql-alter"),
+    (r"\bmysql\s+.*\bDROP\b", "mysql-drop"),
+    (r"\bmysql\s+.*\bTRUNCATE\b", "mysql-truncate"),
+    (r"\bmysql\s+.*\bDELETE\b", "mysql-delete"),
+    (r"\bmysql\s+.*\bALTER\b", "mysql-alter"),
+    (r"\bredis-cli\s+.*\bFLUSHALL\b", "redis-flushall"),
+    (r"\bredis-cli\s+.*\bFLUSHDB\b", "redis-flushdb"),
+]
 
 
 def tokenize(cmd: str) -> List[str]:
@@ -238,11 +267,28 @@ def _extract_bash_c_content(tokens: List[str]) -> List[str]:
     return result
 
 
+def _dangerous_subcommand_patterns() -> List[tuple[re.Pattern[str], str]]:
+    return [(re.compile(p, re.IGNORECASE), label) for p, label in DANGEROUS_SUBCOMMAND_PATTERNS]
+
+
+def check_dangerous_subcommand(text: str) -> Set[str]:
+    """Detecta subcomandos destructivos en texto shell ya normalizado."""
+    findings: Set[str] = set()
+    for pat, label in _dangerous_subcommand_patterns():
+        if pat.search(text):
+            findings.add(f"dangerous-subcommand:{label}: {text[:80]}")
+    return findings
+
+
 def analyze_stage(stage: List[str]) -> Set[str]:
     """Analiza una etapa de pipeline (sin pipes internos)."""
     findings: Set[str] = set()
     if not stage:
         return findings
+
+    # Subcomandos destructivos directos (p. ej. rm -rf, git reset --hard)
+    stage_text = " ".join(stage)
+    findings.update(check_dangerous_subcommand(stage_text))
 
     # eval / exec / source
     if is_eval_like(stage):
@@ -330,6 +376,10 @@ def analyze(cmd: str) -> List[str]:
     findings: Set[str] = set()
     for pipeline in commands:
         findings.update(analyze_pipeline(pipeline))
+        # Cada subcomando separado por ; / && / || se revisa tambien por patrones
+        # destructivos que el matcher de comodines no puede cubrir.
+        subcommand_text = " | ".join(" ".join(stage) for stage in pipeline)
+        findings.update(check_dangerous_subcommand(subcommand_text))
 
     return sorted(findings)
 
