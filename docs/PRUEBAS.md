@@ -723,6 +723,7 @@ operativa para probar futuras mitigaciones.
 | 168 | Tests unitarios para `fuzz-denies.py` y cobertura ampliada de `analyze_shell.py` | ✅ `python3 scripts/test-fuzz-denies.py` pasa 3/3; `check-shell-pipes.py` alcanza 54 casos |
 | 169 | Skill `cost-tracker` operativo con tests funcionales: soporta `OPENCODE_COST_LOG_DIR`, start/log/report y umbrales | ✅ `python3 scripts/test-cost-tracker.py` pasa 2/2; verificador valida el skill |
 | 170 | `README.md` incluye diagrama ASCII de arquitectura de defensa en profundidad con capas, límites conocidos y referencias a OWASP/Anthropic | ✅ Verificador pasa conteos de README; diagrama presente antes de advertencia de cobertura |
+| 171 | Tests unitarios independientes para `analyze_shell.py` | ✅ `python3 scripts/test-analyze-shell.py` pasa 7/7; verificador lo integra |
 
 **Conclusión técnica**: los patrones deny por comodines bloquean variantes con rutas
 absolutas, pero no pueden cubrir encadenamientos (`;`, `&&`, `|`) ni subcomandos en
