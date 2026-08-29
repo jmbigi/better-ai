@@ -26,29 +26,35 @@ Instrumenta y reporta métricas de consumo por sesión de opencode:
 ## Cómo usarme
 
 ```bash
-# Desde opencode (auto-ejecutado via hook pre-task)
-skill cost-tracker start
+# Al inicio de la sesion
+python3 .opencode/skills/cost-tracker/cost-tracker.py start
 
-# Durante la tarea: logging automático por cada llamada al modelo
+# Despues de cada llamada al modelo (manual o desde un script de instrumentacion)
+python3 .opencode/skills/cost-tracker/cost-tracker.py log \
+    --model opencode-go/deepseek-v4-flash \
+    --tokens-in 1500 \
+    --tokens-out 800 \
+    --latency-ms 1250
 
 # Al final de la tarea
-skill cost-tracker report
+python3 .opencode/skills/cost-tracker/cost-tracker.py report
 
-# Ver métricas acumuladas
+# Ver metricas acumuladas
 cat /tmp/opencode/cost-tracker-$(date +%F).jsonl
 ```
 
 ## Implementación (P0.19 + P1.30)
 
-### Hooks de instrumentación
-- `opencode.json` → `hooks` (pre-tool, post-tool para model calls)
-- Skills pueden registrar via `bash` tool calls a script collector
+### Script colector
+`.opencode/skills/cost-tracker/cost-tracker.py` es el colector operativo. Expone
+subcomandos `start`, `log`, `report` y `status`. No depende de hooks no documentados
+de opencode; puede invocarse manualmente o desde scripts de instrumentación.
 
-### Colector de métricas (JSONL)
+### Formato de registro (JSONL)
 ```json
 {
+  "event": "model_call",
   "timestamp": "2026-08-26T10:30:00Z",
-  "session_id": "abc123",
   "model": "opencode-go/deepseek-v4-flash",
   "tokens_in": 1500,
   "tokens_out": 800,
