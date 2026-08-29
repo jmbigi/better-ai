@@ -17,5 +17,18 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends bash git make python3 shellcheck uuid-runtime
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: docs/SBOM-ci.spdx.json
+
+      - name: Scan vulnerabilities
+        uses: anchore/scan-action@v3
+        with:
+          path: "."
+          output-format: table
+          severity-cutoff: high
+
       - name: Run local checks
         run: make check

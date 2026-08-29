@@ -7,10 +7,12 @@ SHELLCHECK_SEVERITY ?= error
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  make check         - Ejecuta lint + test + verificacion completa"
+	@echo "  make check         - Ejecuta lint + test + verificacion completa + SBOM/vuln scan si estan disponibles"
 	@echo "  make ci            - CI local pura sin Docker (lint opcional + test + verificar)"
 	@echo "  make lint          - shellcheck y validacion JSON"
 	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
+	@echo "  make sbom          - Genera SBOM SPDX con syft (requiere syft)"
+	@echo "  make vuln-scan     - Escanea vulnerabilidades con grype (requiere grype)"
 	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
 	@echo "  make hooks         - Instala el hook git pre-commit (legacy)"
 	@echo "  make hooks-lefthook - Instala hooks via Lefthook (recomendado)"
@@ -22,7 +24,7 @@ help:
 	@echo "  make install-ps DEST=/ruta - Instala better-ai en otro proyecto (PowerShell)"
 	@echo "  make update-ps DEST=/ruta  - Actualiza better-ai en otro proyecto (PowerShell)"
 
-check: lint test
+check: lint test sbom vuln-scan
 	bash scripts/verificar-proyecto.sh
 
 ci:
@@ -38,6 +40,21 @@ test:
 	python3 scripts/check-config-parity.py
 	bash scripts/check-symlinks.sh
 	python3 scripts/check-shell-pipes.py
+
+sbom:
+	@if command -v syft >/dev/null 2>&1; then \
+		bash scripts/generate-sbom.sh; \
+	else \
+		echo "[SKIP] syft no instalado; SBOM no regenerado"; \
+	fi
+
+vuln-scan:
+	@if command -v grype >/dev/null 2>&1; then \
+		echo "[INFO] Escaneando vulnerabilidades con grype..."; \
+		grype dir:. -o table; \
+	else \
+		echo "[SKIP] grype no instalado; vuln scan no ejecutado"; \
+	fi
 
 sync:
 	bash scripts/sync-agents.sh
