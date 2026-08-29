@@ -97,6 +97,33 @@ usar reemplazos atómicos; validar inmediatamente con el propio script.
 
 ---
 
+## 2026-08-28 — System prompt leakage (LLM07): de prevención normativa a detección técnica
+
+**Problema**: la ronda 44 demostró que un modelo puede revelar el inicio de
+`AGENTS.md` si se le pide directamente. Una regla de texto (P0.13) no impide la fuga;
+solo reacciona al intento de *obedecer* instrucciones maliciosas. OWASP LLM07 trata el
+system prompt leakage como un riesgo real, y la mitigación recomendada no es "hacer que
+el modelo no se filtre", sino diseñar el prompt asumiendo que puede filtrarse y auditar
+la salida.
+**Solución**:
+- Crear `scripts/detect-system-prompt-leak.py`, un detector offline que compara
+  salidas de agentes contra `AGENTS.md` usando secuencias de tokens (umbral 7 por
+  defecto).
+- Soportar entrada de texto plano, JSONL de opencode y reportes JSON del red-team.
+- Añadir tests unitarios (`scripts/test-system-prompt-leak.py`) e integrar el detector
+  en `scripts/verificar-proyecto.sh`.
+- Refrescar `README.md` para documentar la nueva capa de detección.
+**Evidencia**: pruebas 174–176 de `docs/PRUEBAS.md`; salida de
+`python3 scripts/test-system-prompt-leak.py` (5/5 OK);
+`bash scripts/verificar-proyecto.sh --pre-commit` pasa el nuevo check.
+**Lección**: cuando una amenaza no se puede prevenir deterministamente (el runtime
+controla la salida del LLM), la siguiente capa de defensa es la **detección**:
+comparar outputs contra el prompt, alertar y auditar. Esto es coherente con OWASP
+LLM07 y con la postura de "asumir que el system prompt es público".
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — Mejora sistemática hasta calificación 9.5/9.0
 
 **Problema**: la primera evaluación del proyecto obtuvo 8.5/10 global con notas

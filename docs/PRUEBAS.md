@@ -746,3 +746,17 @@ análisis semántico. Esto reduce la superficie de ataque de la familia shell-c 
 vectores más críticos (`rm` y `git`) y mantiene la dualidad deny+analyzer para otros
 comandos (SQL, docker, redis, eval/curl) donde los patrones exactos serían demasiado
 específicos y generarían falsos positivos.
+
+## Ronda 47 — Detector offline de system prompt leakage (LLM07) (28-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 174 | `scripts/detect-system-prompt-leak.py` creado: compara salidas de agentes contra `AGENTS.md`, extrae texto de JSON/JSONL de opencode y de reportes del red-team, y falla si encuentra secuencias de ≥7 tokens coincidentes | ✅ Compilado; `--help` funciona; tests unitarios pasan 5/5 |
+| 175 | Integración en `scripts/verificar-proyecto.sh`: el script de detección se valida con `py_compile`, `--help` y tests en cada ejecución | ✅ Verificador pasa el nuevo check de system prompt leakage |
+| 176 | README actualizado: tabla de scripts incluye `redteam-prompt-injection.py` y `detect-system-prompt-leak.py`; diagrama de arquitectura refleja la nueva capa de detección | ✅ Verificador pasa checks de referencias y conteos |
+
+**Conclusión técnica**: no se puede prevenir técnicamente que un modelo filtre su
+system prompt (el runtime controla la salida), pero sí se puede **detectar** la fuga
+comparando la salida contra el prompt. El nuevo detector es offline, no consume API y
+se integra en CI, cumpliendo la recomendación de OWASP LLM07: auditar y monitorizar el
+system prompt leakage en lugar de asumir que el system prompt es un secreto.

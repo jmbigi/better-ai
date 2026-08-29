@@ -298,6 +298,7 @@ fi
 check "test-determinism.py instalado y valido (sin llamadas LLM)" bash -c "python3 scripts/test-determinism.py --help >/dev/null 2>&1"
 check "skill cost-tracker operativo (py_compile, --help y tests funcionales OK)" bash -c "python3 -m py_compile .opencode/skills/cost-tracker/cost-tracker.py && python3 .opencode/skills/cost-tracker/cost-tracker.py --help >/dev/null 2>&1 && python3 scripts/test-cost-tracker.py"
 check "redteam prompt injection valido (py_compile y --help OK)" bash -c "python3 -m py_compile scripts/redteam-prompt-injection.py && python3 scripts/redteam-prompt-injection.py --help >/dev/null 2>&1"
+check "detector de system prompt leakage operativo (py_compile, --help y tests OK)" bash -c "python3 -m py_compile scripts/detect-system-prompt-leak.py && python3 scripts/detect-system-prompt-leak.py --help >/dev/null 2>&1 && python3 scripts/test-system-prompt-leak.py"
 check "fuzzing de evasion de denies sin fallos directos" bash -c "python3 scripts/fuzz-denies.py"
 otel_end_span "verificar.supply-chain"
 

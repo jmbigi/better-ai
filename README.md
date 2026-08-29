@@ -45,6 +45,8 @@ confiar solo en que el modelo "recuerde" las reglas, define:
 | `scripts/verificar-proyecto.sh` | Verificación de coherencia previa a cada commit: reglas, config, seguridad y repo. `bash scripts/verificar-proyecto.sh` |
 | `scripts/generate-sbom.sh` | Genera SBOM SPDX del proyecto con syft (P0.18). Uso: `bash scripts/generate-sbom.sh` |
 | `scripts/probar-denies.sh` | **Red-team de los guardarraíles**: prueba 154 variantes canónicas seguras de los `deny` de `opencode.json` contra el matcher REAL de opencode (config mínima aislada, sin AGENTS.md) y falla si alguna no bloquea. Las 159 reglas `deny` son idénticas en `kilo.json` (kilocode); 154 variantes fueron verificadas (15-08-2026). Uso: `bash scripts/probar-denies.sh` |
+| `scripts/redteam-prompt-injection.py` | **Red-team de prompt injection (LLM01/LLM07)**: prueba payloads directos, indirectos y de system prompt leakage contra un modelo opencode y reporta cuáles logran modificar o extraer comportamiento. Uso: `python3 scripts/redteam-prompt-injection.py` |
+| `scripts/detect-system-prompt-leak.py` | **Detección offline de system prompt leakage (LLM07)**: compara salidas de agentes contra `AGENTS.md` y falla si encuentra secuencias sustanciales del system prompt. No requiere API; útil en CI/post-procesamiento. Uso: `python3 scripts/detect-system-prompt-leak.py --file respuesta.txt` |
 | `scripts/opencode-sandbox.sh` | **Sandbox opcional con bubblewrap**: ejecuta opencode con toda la máquina en solo lectura salvo el workspace y las rutas de opencode (red bloqueada salvo `--net`). La capa determinista de sistema operativo por encima de los deny. Requiere `bwrap` y user namespaces habilitados. **Limitación verificada (15-08-2026)**: el runtime Bun de opencode 1.18.18 crashea (segfault) dentro de un user namespace en este kernel — el aislamiento de bwrap funciona (verificado con otros procesos: `/etc` ro, red aislada), pero opencode no arranca dentro del sandbox en esta máquina; queda documentado como defensa en profundidad pendiente de un runtime compatible. Uso: `bash scripts/opencode-sandbox.sh [--net] [comando...]` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
@@ -314,7 +316,8 @@ mutuamente y cada una tiene un límite conocido documentado con evidencia:
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 4 — Red-team y verificación continua                      │
 │  scripts/probar-denies.sh, scripts/fuzz-denies.py,              │
-│  scripts/redteam-prompt-injection.py y verificar-proyecto.sh.   │
+│  scripts/redteam-prompt-injection.py,                           │
+│  scripts/detect-system-prompt-leak.py y verificar-proyecto.sh.  │
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 5 — Sandbox del sistema operativo (opcional)              │
 │  scripts/opencode-sandbox.sh con bubblewrap.                    │
