@@ -732,3 +732,17 @@ absolutas, pero no pueden cubrir encadenamientos (`;`, `&&`, `|`) ni subcomandos
 semántico (`analyze_shell.py`) para vectores compuestos, documentados en la regla de
 texto P0.8. Esta dualidad es coherente con la investigación de Codex y OpenCode: la
 seguridad de agentes de código requiere sandbox + policy + análisis del comando real.
+
+## Ronda 46 — Cierre de evasiones `sh -c`/`bash -c` para `rm` y `git` (28-08-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 172 | Patrones deny exactos para envoltorias `sh -c`/`bash -c` de comandos destructivos (`rm -rf/-r/-f`, `git reset --hard`, `git push --force`) añadidos a `opencode.json` y `kilo.json` | ✅ Fuzzer reporta 0 evasiones directas y 0 shell-c sin mitigar para estas familias; conteos actualizados a 288 patrones (202 `deny`, 85 `ask`, 1 `allow`) |
+| 173 | Reparación de `scripts/verificar-proyecto.sh` tras daño accidental en la sección 2: se restauraron checks de JSON, conteos, permisos, policies, agente determinista y README | ✅ `bash scripts/verificar-proyecto.sh --pre-commit` pasa 43 OK, 1 FALLO (drift de baseline pendiente de actualizar) |
+
+**Conclusión técnica**: las envoltorias `sh -c 'rm -rf ...'` y `bash -c 'git reset --hard...'`
+ahora se bloquean directamente por deny determinista, sin depender exclusivamente del
+análisis semántico. Esto reduce la superficie de ataque de la familia shell-c para los
+vectores más críticos (`rm` y `git`) y mantiene la dualidad deny+analyzer para otros
+comandos (SQL, docker, redis, eval/curl) donde los patrones exactos serían demasiado
+específicos y generarían falsos positivos.

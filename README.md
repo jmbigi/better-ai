@@ -16,7 +16,7 @@ confiar solo en que el modelo "recuerde" las reglas, define:
 
 - `AGENTS.md` — 51 reglas de comportamiento (20 P0 de protección, 31 P1 de trabajo)
   que opencode/kilocode inyectan en cada sesión.
-- `opencode.json` / `kilo.json` — 268 patrones de permisos bash (182 `deny`,
+- `opencode.json` / `kilo.json` — 288 patrones de permisos bash (202 `deny`,
   85 `ask`, 1 `allow`) que bloquean comandos destructivos, acceso a secretos y
   modificaciones de producción independientemente de lo que el modelo decida.
 - Verificación automática — `scripts/verificar-proyecto.sh` comprueba coherencia
@@ -31,8 +31,8 @@ confiar solo en que el modelo "recuerde" las reglas, define:
 |---|---|
 | `AGENTS.md` | **El conjunto de reglas**. Cópialo a la raíz de cualquier proyecto: opencode y kilocode lo cargan automáticamente en cada sesión. Incluye una sección de **ejemplos concretos good/bad** y **comandos file-scoped** (type-check/lint/test por archivo) siguiendo las mejores prácticas de Builder.io/agents.md. |
 | `.docs/requirements/` | **Contrato de requisitos**. Cada requisito `REQ-XXX` define alcance, prioridad, estado y criterios de aceptación; `scripts/doc_validator.py` comprueba su coherencia y trazabilidad desde el código. |
-| `opencode.json` | **Guardarraíles deterministas** para opencode: 268 patrones bash (182 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; incluye variantes con rutas absolutas (`*/rm -rf *`, `*/git reset --hard*`, `*/sqlite3 *DROP*`, etc.) para cerrar evasiones directas detectadas por `scripts/fuzz-denies.py`; `read`/`edit` deniegan también rutas de claves y credenciales; `experimental.policies` (deny all + allow `opencode`, `opencode-go`, `kilo`, `deepseek`) solo permite los proveedores de modelos autorizados (decisión de coste) y `agent` define perfiles deterministas de muestreo (`temperature`/`top_p`). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
-| `kilo.json` | **Guardarraíles deterministas** para kilocode: 268 patrones bash (182 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `experimental.policies` (deny all + allow `kilo`, `deepseek`, `openrouter`). Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
+| `opencode.json` | **Guardarraíles deterministas** para opencode: 288 patrones bash (202 `deny`, 85 `ask`, 1 `allow` por defecto) que bloquean comandos destructivos, acceso a `.env`/`~/.ssh`/`~/.aws`/claves (`id_rsa`, `*.pem`, `*credentials*`) por comandos comunes (`cat`/`less`/`head`/`tail`/`grep`/redirecciones) y ediciones de `.env`; incluye variantes con rutas absolutas (`*/rm -rf *`, `*/git reset --hard*`, `*/sqlite3 *DROP*`, etc.) y envoltorias `sh -c`/`bash -c` para cerrar evasiones directas detectadas por `scripts/fuzz-denies.py`; `read`/`edit` deniegan también rutas de claves y credenciales; `experimental.policies` (deny all + allow `opencode`, `opencode-go`, `kilo`, `deepseek`) solo permite los proveedores de modelos autorizados (decisión de coste) y `agent` define perfiles deterministas de muestreo (`temperature`/`top_p`). A diferencia de las reglas de texto, un `deny` no se puede ignorar. |
+| `kilo.json` | **Guardarraíles deterministas** para kilocode: 288 patrones bash (202 `deny`, 85 `ask`, 1 `allow` por defecto) idénticos a `opencode.json` pero con `experimental.policies` (deny all + allow `kilo`, `deepseek`, `openrouter`). Los archivos config son equivalentes por herramienta; copia el que corresponda al agente que uses. |
 | `.opencode/agents/` | Subagentes de solo lectura (`edit: deny`) para revisión cruzada antes de entregar: `security-auditor.md` audita secretos/datos personales/riesgos (P0.6, P0.9, P0.10, P0.11) y `code-reviewer.md` revisa alcance, coherencia y verificabilidad (P1.2, P1.5, P1.6, P1.10, P1.11, P1.18, P1.19). Se invocan con `@security-auditor` / `@code-reviewer`. Complementan (no sustituyen) al verificador determinista. Compartidos con kilocode vía `.kilo/agents/` (symlink). |
 | `CHECKLIST.md` | Checklist de verificación pre-entrega (imprimible). Herramienta operativa de uso diario, por eso vive en la raíz. |
 | `docs/REGLAS-COMPLETAS.md` | Normativa detallada: regla por regla, qué error del LLM previene, cómo verificarla, y las fuentes de la investigación. |
@@ -302,7 +302,7 @@ mutuamente y cada una tiene un límite conocido documentado con evidencia:
 │  Límite: el modelo puede ignorarlas o filtrar el system prompt. │
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 2 — Guardarraíles deterministas (opencode.json/kilo.json) │
-│  268 patrones bash (182 deny), edit/read deny de secretos,      │
+│  288 patrones bash (202 deny), edit/read deny de secretos,      │
 │  experimental.policies de proveedores.                          │
 │  Límite: no cubre encadenamientos (;, &&, |) ni sh -c/bash -c   │
 │          sin falsos positivos masivos.                          │

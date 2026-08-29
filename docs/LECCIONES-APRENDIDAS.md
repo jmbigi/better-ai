@@ -62,6 +62,41 @@ necesaria incluso cuando el matcher de permisos es robusto.
 
 ---
 
+## 2026-08-28 — Cierre de evasiones `sh -c`/`bash -c` exactas para `rm`/`git`
+
+**Problema**: aunque `analyze_shell.py` mitigaba `sh -c 'rm -rf ...'` y
+`bash -c 'git reset --hard...'`, estas envoltorias seguían siendo técnicamente
+evasiones de los patrones deny deterministas. Depender de una sola capa (parser
+semántico) para vectores tan comunes y críticos deja una ventana si el parser falla
+o se actualiza.
+**Solución**:
+- Añadir patrones deny exactos en `opencode.json` y `kilo.json` para
+  `sh -c`/`bash -c` con `rm -rf/-r/-f` y `git reset --hard`/`git push --force`,
+  en comillas simples y dobles (20 patrones nuevos).
+- Verificar con `python3 scripts/fuzz-denies.py` que estas variantes pasan de
+  "mitigadas por analyzer" a "bloqueadas por deny".
+- Actualizar conteos (288 patrones, 202 `deny`, 85 `ask`, 1 `allow`), `README.md`
+  y el verificador para reflejar el nuevo estado.
+
+Durante la actualización de conteos se truncó accidentalmente
+`scripts/verificar-proyecto.sh` al aplicar un `Edit` con `new_string` vacío. Se
+reparó restaurando la sección 2 desde `git HEAD`, reescribiéndola con los nuevos
+conteos y añadiendo validaciones JSON, policies, agente determinista y coherencia
+con `README.md`.
+**Evidencia**: pruebas 172–173 de `docs/PRUEBAS.md`; salida de
+`python3 scripts/fuzz-denies.py` (0 evasiones directas, 0 shell-c sin mitigar
+para rm/git); `bash scripts/verificar-proyecto.sh --pre-commit` 43 OK tras
+reparación.
+**Lección**: cuando un vector de evasión es común y crítico, cerrarlo con deny
+determinista es preferible a confiar solo en análisis semántico, siempre que los
+patrones exactos no generen falsos positivos. El analyzer sigue siendo necesario
+para vectores más variables (SQL, docker, redis, eval/curl). Además: antes de
+sobrescribir una sección entera de un script crítico, leer el contenido actual y
+usar reemplazos atómicos; validar inmediatamente con el propio script.
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — Mejora sistemática hasta calificación 9.5/9.0
 
 **Problema**: la primera evaluación del proyecto obtuvo 8.5/10 global con notas

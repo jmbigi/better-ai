@@ -97,12 +97,13 @@ otel_start_span "verificar.config"
 echo "== 2. Config =="
 check "kilo.json es JSON valido" python3 -c "import json; json.load(open('kilo.json'))"
 check "opencode.json es JSON valido (compatibilidad)" python3 -c "import json; json.load(open('opencode.json'))"
-check "268 patrones de permisos bash" python3 -c "
+check "288 patrones de permisos bash (202 deny, 85 ask, 1 allow)" python3 -c "
 import json
 b = json.load(open('kilo.json'))['permission']['bash']
-assert len(b) == 268, len(b)
-assert sum(1 for v in b.values() if v == 'deny') == 182
+assert len(b) == 288, len(b)
+assert sum(1 for v in b.values() if v == 'deny') == 202
 assert sum(1 for v in b.values() if v == 'ask') == 85
+assert sum(1 for v in b.values() if v == 'allow') == 1
 "
 check "kilo.json y opencode.json tienen los mismos permisos bash" python3 -c "
 import json
@@ -113,9 +114,8 @@ assert a == b, 'permisos bash difieren entre kilo.json y opencode.json'
 check "edit/read bloquean claves y credenciales" python3 -c "
 import json
 p = json.load(open('kilo.json'))['permission']
-# deny: patrones de claves y credenciales (listados para el scan de seguridad)
 for sec in ('edit', 'read'):
-    for pat in ('~/.ssh/*', '*.ssh/*', '~/.aws/*', '*.aws/*', '*.pem', '*id_rsa*', '*id_ed25519*', '*credentials*'):  # deny: patrones
+    for pat in ('~/.ssh/*', '*.ssh/*', '~/.aws/*', '*.aws/*', '*.pem', '*id_rsa*', '*id_ed25519*', '*credentials*'):
         assert p[sec].get(pat) == 'deny', (sec, pat)
 "
 check "experimental.policies en kilo.json: deny all + allow kilo, deepseek, openrouter" python3 -c "
