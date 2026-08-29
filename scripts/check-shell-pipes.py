@@ -53,6 +53,28 @@ CASES = [
     ("bash <(cat file.txt)", False, "bash process substitution cat"),
     ("cat file.txt | bash", False, "cat | bash no es descargador"),
     ("echo x", False, "echo simple"),
+    # Subcomandos destructivos (Fase 4.3)
+    ("/bin/rm -rf /tmp/test", True, "rm con ruta absoluta"),
+    ("/usr/bin/git reset --hard HEAD", True, "git reset con ruta absoluta"),
+    ("sh -c 'rm -rf /tmp/test'", True, "sh -c con rm -rf"),
+    ('bash -c "git reset --hard HEAD"', True, "bash -c con git reset --hard"),
+    ("x=1; rm -rf /tmp/test", True, "comando compuesto con rm -rf"),
+    ("cd / && rm -r /tmp/test", True, "comando compuesto con rm -r"),
+    ("sqlite3 db.db 'DROP TABLE users;'", True, "sqlite3 DROP"),
+    ("psql -c 'TRUNCATE TABLE users;'", True, "psql TRUNCATE"),
+    ("mysql -e 'DELETE FROM users;'", True, "mysql DELETE"),
+    ("redis-cli FLUSHALL", True, "redis FLUSHALL"),
+    ("bash -c 'redis-cli FLUSHDB'", True, "bash -c con redis FLUSHDB"),
+    # Negativos: comandos legitimos que no deben disparar
+    ("/bin/ls /tmp", False, "ls con ruta absoluta"),
+    ("sh -c 'echo hello'", False, "sh -c con echo"),
+    ("bash -c 'git status'", False, "bash -c con git status"),
+    ("x=1; echo done", False, "comando compuesto legitimo"),
+    ("cd / && pwd", False, "cd && pwd legitimo"),
+    ("sqlite3 db.db 'SELECT * FROM users;'", False, "sqlite3 SELECT"),
+    ("psql -c 'SELECT * FROM users;'", False, "psql SELECT"),
+    ("mysql -e 'SHOW TABLES;'", False, "mysql SHOW TABLES"),
+    ("redis-cli PING", False, "redis PING"),
 ]
 
 

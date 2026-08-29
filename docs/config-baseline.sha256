@@ -1,4 +1,4 @@
-# Config Baseline - Generated 2026-08-29T02:39:08Z
+# Config Baseline - Generated 2026-08-29T02:44:42Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
@@ -6,7 +6,7 @@
 5d701e80ae9fa44b55e0808c7e8104f97cebdc271869a80ec487f74c3a1b2333  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
 781fabee99467032041bcc7c9762b0c7fcd7dc9cc4d6ba838c87155ac0d9fbd8  AGENTS.md
-829556694652336964c71a2d70c89ca955f0a775a796980663b10bf47bf844e1  scripts/verificar-proyecto.sh
+e9fe7cf3dbb27ad7439d96786ca2caeb07bfd7fd4f665da0cd826e4b501784c4  scripts/verificar-proyecto.sh
 fce9f9a63c5ba58efd11281d0a50dc57090ac836b51e3e84004a2743e7ef8dd5  scripts/probar-denies.sh
 bf4f1d220b041c496a562a6c3af25f5d4dc76472a098b194e1cefd89962a8986  scripts/rotate-secret.sh
 a71999bae3a923d5378690339a16d1cf1ff6738fb6ed03a3fb57e82df93da665  scripts/opencode-sandbox.sh
@@ -17,4 +17,4 @@ d86835642cc651654461a42b2afa56f57658b0b3554112c2d4692cb84d70a607  scripts/update
 29615d4d029ae6e77a1e701a6b72c4ece3e6b39782cbcbb92a7b924b971e129a  scripts/test-installer.sh
 7441abde3500fa7ad5d4fa22d0b913f5eed51d68f6b611c109ac8427e71fa272  scripts/ci-local-pure.sh
 bf05736f62d13b5629e0634a2a10ce845c643439de5b51c7a53d50ddfd136cf4  scripts/analyze_shell.py
-54ae490db02533c3d1998544248162dd5c9cae3e29a3100880e339c703b49580  scripts/check-shell-pipes.py
+71babaad53d81d5f661b49927a0a165d02bb04877bb994ebcd296d080252aa3d  scripts/check-shell-pipes.py
