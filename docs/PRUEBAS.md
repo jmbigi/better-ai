@@ -773,3 +773,129 @@ con comillas anidadas (`sqlite3 db.db 'DROP TABLE...'`) siguen dependiendo de
 `analyze_shell.py` porque un patrón por comodines capturaría también consultas
 legítimas que contengan la palabra clave. La combinación deny+analyzer sigue siendo la
 estrategia correcta según la semántica de comodines documentada por OpenCode.
+
+## Ronda 49 — Plugin guard-shell: enforcement de pipes peligrosos en runtime (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 178 | `.opencode/plugins/guard-shell.js` implementa el hook `tool.execute.before` (doc oficial https://opencode.ai/docs/plugins/): para cada comando bash ejecuta `python3 scripts/analyze_shell.py` con el comando como argumento (nunca interpolado) y lanza Error si el analizador reporta peligro; fail-closed si faltan `python3`/script o el analisis no puede completarse (REQ-003) | ✅ 13/13 aserciones PASS en tests aislados con Node v22 (`/tmp/test-guard-shell.mjs`): pipes peligrosos bloqueados, subcomandos destructivos bloqueados, comandos seguros no afectados, fail-closed verificado. Limitacion declarada: NO se verifico end-to-end con el runtime Bun real |
+
+**Conclusion tecnica**: la limitacion del matcher de permisos con `|` (ronda 27)
+queda mitigada en opencode por enforcement en runtime: los pipes peligrosos y
+subcomandos destructivos ahora se BLOQUEAN en cada ejecucion de bash, no solo se
+detectan en tests. La mitigacion la aporta el plugin, no el matcher — que sigue
+sin entender pipes. Port del plugin a kilocode (`.kilo/plugin/`, soportado por
+Kilo CLI) pendiente.
+
+## Ronda 50 — Sandbox Docker de opencode: Capa 5 restaurada (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 179 | `Containerfile.opencode` (Bun 1.2.21-slim + opencode-ai 1.18.18 pineado) + `scripts/opencode-docker.sh [--net] [comando...]`: red off por defecto, fs raiz ro, tmpfs en rutas de datos, `--cap-drop ALL`, `no-new-privileges`, workspace ro y binds rw solo en rutas de datos de opencode (REQ-004) | ✅ 4/4 pruebas aisladas PASS: arranque de `opencode --version` con red off; `touch /x` falla (fs raiz ro); DNS off sin `--net`; DNS on con `--net`. Pre-flight fail-fast verificado |
+
+**Conclusion tecnica**: la Capa 5 (sandbox de sistema operativo) queda restaurada
+via Docker tras el segfault de Bun en user namespaces que inutilizaba bwrap
+(documentado en rondas anteriores). Tres fallos de entorno se corrigieron con
+pruebas aisladas (BUN_INSTALL global, HOME del usuario, tmpfs con uid/gid del
+host) antes de integrar — ver leccion 2026-09-04 en
+`docs/LECCIONES-APRENDIDAS.md`.
+
+## Ronda 51 — Cierre documental del 2026-09-04: requisitos y verificacion
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 180 | `python3 scripts/doc_validator.py --root .` valida frontmatter y trazabilidad de los requisitos REQ-001 a REQ-004 (Cline/Roo Code, plugin guard-shell, sandbox Docker) | ✅ 4 requisitos OK |
+| 181 | `bash scripts/verificar-proyecto.sh --pre-commit` ejecutado por los agentes que cerraron los cambios del 2026-09-04 | ✅ 45 OK, 0 FALLOS (x3 agentes, resultados coincidentes) |
+| 182 | Investigacion web del ecosistema 2026-09-04 con fuentes primarias citadas (plugins kilocode/Kilo CLI, Kimi Code CLI 0.41.0, OWASP Top 10 for Agentic Applications 2026 + Agent Control Standard, benchmark Agents4D, USENIX Sec '26, hoophq/fence) | ✅ Fuentes primarias citadas; hallazgos registrados en `docs/LECCIONES-APRENDIDAS.md` (entrada 2026-09-04) |
+
+**Conclusion tecnica**: los tres requisitos del 2026-09-04 (REQ-002 compatibilidad
+Cline/Roo Code, REQ-003 plugin guard-shell, REQ-004 sandbox Docker) quedan
+implementados y trazados. Quedan pendientes y declarados: verificacion
+end-to-end del plugin con Bun real, port del plugin a `.kilo/plugin/`, purga del
+historial git (pendiente de confirmacion del programador) y actualizacion del
+mapeo OWASP (ASI01-ASI10).
+
+
+## Ronda 52 — Paridad kilocode del guard-shell (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 183 | `.kilo/plugin/guard-shell.js` portado con ruta de autodescubrimiento `.kilo/plugin/` (singular, confirmada en doc oficial kilo.ai), forma de modulo descriptor `{id, server}` (export directo = legacy en kilo) y `.kilo/package.json` con `"type": "module"` para eliminar ambiguedad ESM (REQ-003) | ✅ 12/12 PASS en tests aislados con Node v22 (`/tmp/test-guard-shell-kilo.mjs`). Limitacion declarada: carga real en runtime kilocode no verificable en esta maquina |
+| 184 | `python3 scripts/doc_validator.py --root .` tras los cambios del 2026-09-04 | ✅ 4 requisitos OK |
+| 185 | `bash scripts/verificar-proyecto.sh --pre-commit` | ✅ 47 OK, 1 FALLO (drift intencional de baseline; sin errores de las comprobaciones) |
+
+**Conclusion tecnica**: kilocode queda con la misma proteccion de runtime que
+opencode para pipes peligrosos y subcomandos destructivos. `make sync`
+(sync-agents.sh) NO sincroniza plugins — extension del sync con exclusion o
+sync manual queda como decision pendiente del programador.
+
+## Ronda 53 — Escanners opcionales en el verificador (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 186 | Seccion 7 de `scripts/verificar-proyecto.sh` con patron `check_optional`: gitleaks (`gitleaks git . --redact --no-banner`), trufflehog (`git file://. --only-verified --fail`; version minima 3.90.3 por CVE-2025-41390; sin `--fail` sale exit 0 aunque encuentre secretos — verificado) y mcp-scan pasado a Snyk (`mcp-scan` o `snyk-agent-scan`), sin `--dangerously-run-mcp-servers` (P0.8) | ✅ 3 checks SKIP correctos con herramientas no instaladas; conteo coherente 44 OK + 3 SKIP = 47; `bash -n scripts/verificar-proyecto.sh` OK |
+
+**Conclusion tecnica**: los escanners de secretos se integran sin violar P0.5
+(instalacion solo con confirmacion del programador): ausente = SKIP contado y
+reportado, presente = ejecucion real con fail explicito. El flag `--fail` de
+trufflehog es obligatorio; su valor por defecto convertiria el check en un
+test que no puede fallar (P1.1).
+
+## Ronda 54 — Regla de modelos relajada: excepcion para modelos locales (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 187 | Excepcion aprobada por el programador documentada en `AGENTS.md` (~linea 200) y `README.md`: modelos locales gratuitos (Ollama/llama.cpp localhost) SOLO para la matriz de pruebas P0/P1, nunca modelo principal | ✅ `doc_validator` OK; verificador 44 OK + drift AGENTS.md (intencional, baseline pendiente) |
+
+**Conclusion tecnica**: la regla de texto habilita el uso, pero la activacion
+practica requiere anadir el provider local a `experimental.policies` de
+`opencode.json`/`kilo.json` (baseline firmada — el cambio se detectara como
+drift hasta regenerarla con aprobacion). La prohibicion de modelos pro/de pago
+sin permiso se mantiene.
+
+## Ronda 55 — Adaptador Kimi Code CLI (REQ-005) (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 188 | `.kimi-code/local.toml` port 100% de reglas desde `opencode.json` reordenadas para primer-match-gana (inverso a opencode last-match-wins: allow ANTES de denies): 218 deny Bash + 12 Edit + 12 Read, 85 ask, 6 allow, 1 hook | ✅ TOML validado con `tomllib`: conteos exactos, sin placeholders |
+| 189 | `.kimi-code/hooks/pre_bash_analyze.py` probado simulando stdin JSON | ✅ Bloquea `rm -rf`, `curl \| bash`, `/bin/rm -rf`, `sh -c git reset --hard` y stdin invalido; permite `ls`, `git status`, `make check`, `docker compose up -d` |
+| 190 | `python3 scripts/doc_validator.py --root .` | ✅ 5 requisitos OK (REQ-001 a REQ-005) |
+
+**Conclusion tecnica**: el adaptador Kimi queda trazado, pero con limitaciones
+declaradas: (1) hooks PreToolUse fail-open por diseno — la barrera principal
+son los deny declarativos; (2) 4 familias de patrones con semantica pendiente
+de verificacion empirica (comillas embebidas, globs `*/`, globs con `*` al
+inicio, `npx -g`); (3) issue upstream MoonshotAI/kimi-cli#2508 reporta posible
+prioridad por clase (deny>ask>allow) que podria contradecir la doc de
+primer-match; (4) `local.toml` documentado solo para `[workspace]` — si el
+runtime ignora `permission.rules`/`hooks` ahi, copiar a
+`~/.kimi-code/config.toml`. kimi-code no instalado: sin verificacion
+end-to-end (P0.1).
+
+## Ronda 56 — Purga de historial git ejecutada (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 191 | Backup previo del repo como bundle en `~/.secrets-backup/` antes de cualquier reescritura | ✅ Bundle creado y verificado (contiene refs completas) |
+| 192 | Purga con `git filter-repo` en 2 pasadas: `--replace-text` para blobs + `--message-callback` para mensajes de commit (leccion: `--replace-text` NO toca mensajes), `--mailmap` para autoria; ANONIMIZADO conforme a P0.9 | ✅ 0 coincidencias restantes en blobs, mensajes y autores |
+| 193 | Force-push a GitHub y Codeberg | ✅ Ambos remotos actualizados (commit 786b315); rama `master` local eliminada tras el push |
+| 194 | Limpieza posterior: `git gc` y verificacion de objetos dangling; stash restaurado intacto | ✅ 0 objetos dangling; stash preservado |
+| 195 | `bash scripts/verificar-proyecto.sh --pre-commit` tras la purga | ✅ 45 OK, 0 FALLOS |
+
+**Conclusion tecnica**: la entrada ABIERTA de auditoria de historial queda
+RESUELTA. Limitacion persistente declarada: GitHub/Codeberg conservan commits
+antiguos accesibles por hash via API (estudio "oops commits") — la rotacion de
+la credencial sigue siendo necesaria si estaba viva.
+
+## Ronda 57 — Mapeo OWASP Agentic Top 10 2026 (ASI01-ASI10) + ACS (04-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 196 | Nombres y alcance de ASI01-ASI10 confirmados via 4 fuentes cruzadas; "Agent Control Standard" (ACS) donado a OWASP el 2-sep-2026 | ✅ 10/10 confirmados; seccion 7 nueva en `docs/REGLAS-COMPLETAS.md` con cobertura honesta: Cubiertos ASI02/04/05/09; Parciales ASI01/03/06/08/10; Sin cobertura ASI07 (agente unico sin canal A2A); alineacion ACS marcada como NO certificacion |
+| 197 | `python3 scripts/doc_validator.py --root .` | ✅ OK |
+| 198 | `bash scripts/verificar-proyecto.sh --pre-commit` | ✅ 47 OK, 0 FALLOS |
+
+**Conclusion tecnica**: el mapeo OWASP del proyecto queda al dia con el estado
+del arte agentico 2026. Declarar "sin cobertura" en ASI07 es deliberado
+(P1.31): evita vender garantia falsa y deja el hueco visible como trabajo
+pendiente.

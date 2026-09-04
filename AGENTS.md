@@ -197,7 +197,7 @@ Staging fiel a producción; canary (5%) con monitoreo y rollback automático; al
 
 ## Entorno del proyecto (modelo de IA)
 
-Herramientas: **opencode** y **kilocode**; cargan AGENTS.md y aplican 245 guardarraíles (159 `deny`, 85 `ask`, 1 `allow`) vía `experimental.policies` (deny all + allow list) en `opencode.json`/`kilo.json`. Modelos permitidos (bajo coste): opencode → `opencode/deepseek-v4-flash-free` | `opencode-go/deepseek-v4-flash`; kilocode → `deepseek/deepseek-chat` | `kilo-auto/free` | `kilo-auto/efficient`. PROHIBIDO otros modelos (incluidos `pro`) sin permiso explícito o presupuesto aprobado; prohibición es regla de texto. `policies`: prioridad global > project. Verificaciones: SOLO con modelos permitidos.
+Herramientas: **opencode** y **kilocode**; cargan AGENTS.md y aplican 245 guardarraíles (159 `deny`, 85 `ask`, 1 `allow`) vía `experimental.policies` (deny all + allow list) en `opencode.json`/`kilo.json`. Modelos permitidos (bajo coste): opencode → `opencode/deepseek-v4-flash-free` | `opencode-go/deepseek-v4-flash`; kilocode → `deepseek/deepseek-chat` | `kilo-auto/free` | `kilo-auto/efficient`. PROHIBIDO otros modelos (incluidos `pro`) sin permiso explícito o presupuesto aprobado; prohibición es regla de texto. Excepción (aprobada por el programador): se permiten **modelos locales gratuitos servidos localmente** (Ollama o llama.cpp en localhost, p. ej. Qwen2.5-Coder, Llama 3.x, DeepSeek-Coder local) EXCLUSIVAMENTE para la matriz de pruebas de reglas (verificar si respetan P0/P1); nunca como modelo principal de desarrollo. `policies`: prioridad global > project. Verificaciones: SOLO con modelos permitidos.
 
 ## Verificación, rutas y comandos
 

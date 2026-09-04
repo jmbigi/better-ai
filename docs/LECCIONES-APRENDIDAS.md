@@ -1269,3 +1269,344 @@ multiplataforma, PowerShell nativo y paths con espacios no son opcionales.
 
 **Estado**: implementadas mejoras A+B+C; pendiente commit y push.
 
+
+
+---
+
+## 2026-09-04 — Plugin guard-shell: enforcement en runtime de pipes peligrosos (REQ-003)
+
+**Problema**: la limitacion del matcher de permisos de opencode con `|` (ronda 27)
+dejaba los pipes peligrosos (`curl ... | bash`) protegidos solo por la regla de
+texto P0.8: `scripts/analyze_shell.py` los detectaba en tests, pero NADA los
+bloqueaba en runtime. Los hooks declarativos nativos de opencode fueron
+descartados upstream (RFC issue 33054 cerrada como not_planned), asi que no
+habia punto de enforcement oficial.
+
+**Solucion**: plugin local `.opencode/plugins/guard-shell.js` con hook
+`tool.execute.before` (doc oficial https://opencode.ai/docs/plugins/): para
+cada comando bash (`input.tool === "bash"`) ejecuta
+`python3 scripts/analyze_shell.py <comando>` pasando el comando como argumento
+(nunca interpolado en un string de shell, para evitar inyeccion) desde el
+directorio de trabajo; si el analizador reporta peligro (exit != 0), el plugin
+lanza Error y bloquea la ejecucion. Fail-closed (P1.19): si faltan `python3`,
+el script o el analisis no puede completarse, el comando se bloquea con mensaje
+explicito; sin fallbacks silenciosos. Los plugins cubren tambien subagentes:
+el bypass de subagentes se corrigio en opencode 1.18.x (issue 5894 completed).
+`permission.ask` sigue roto (issue 7006 abierto) — no usar.
+
+**Evidencia**: 13/13 aserciones PASS en tests aislados con Node v22
+(`/tmp/test-guard-shell.mjs`), incluyendo fail-closed y comandos seguros no
+afectados. Limitacion declarada: NO se verifico end-to-end con el runtime Bun
+real; la verificacion fue con Node aislado (P0.1).
+
+**Leccion**: deteccion en tests no es enforcement. La conversion de un
+analizador estatico en bloqueo de runtime cierra la brecha entre "detectado"
+y "bloqueado", y los plugins locales son el mecanismo soportado para ello (los
+hooks declarativos estan descartados upstream).
+
+**Estado**: implementado (REQ-003); verificacion end-to-end con Bun pendiente.
+
+---
+
+## 2026-09-04 — Sandbox Docker de opencode: tres fallos de entorno (REQ-004)
+
+**Problema**: la Capa 5 con bubblewrap quedo inutilizable con opencode (el
+runtime Bun crashea con segfault en user namespaces en este kernel,
+documentado en README y PRUEBAS). Se restaura la capa con Docker, pero
+construir el contenedor expuso tres fallos de entorno consecutivos.
+
+**Solucion**: `Containerfile.opencode` (imagen reproducible:
+`oven/bun:1.2.21-slim` + `opencode-ai@1.18.18` pineado, P0.18) y
+`scripts/opencode-docker.sh` con interfaz `[--net] [comando...]`: `--network
+none` por defecto, filesystem raiz `--read-only`, tmpfs en `/tmp` y rutas
+`.local`/`.config`/`.cache`, `--cap-drop ALL`, `no-new-privileges`, workspace
+montado ro y binds rw solo en rutas de datos de opencode. Tres correcciones de
+entorno:
+1. `bun install -g` como root instalaba en `/root/.bun`, ilegible para el
+   usuario sin privilegios -> `ENV BUN_INSTALL=/usr/local/bun` + `chmod a+rX`.
+2. Con `--user <uid>` Bun resolvia HOME a `/home/bun` (usuario de la imagen
+   base) -> `--env HOME=/home/opencode`.
+3. Con `--read-only`, los directorios padre de los mountpoints se creaban como
+   root al no existir -> tmpfs individuales con `uid`/`gid` del host.
+
+**Evidencia**: 4/4 pruebas aisladas PASS: arranque de `opencode --version` con
+red off, `touch /x` falla (fs raiz ro), DNS off sin `--net`, DNS on con
+`--net`; pre-flight fail-fast verificado (falla explicito si falta Docker o la
+imagen).
+
+**Leccion**: los sandbox de contenedor fallan mas por detalles de entorno
+(HOME, rutas de instalacion globales, propiedad de directorios de mountpoint
+en fs raiz ro) que por la politica de seguridad; cada fallo se aislo y se
+corrigio con prueba aislada antes de integrar (P1.21).
+
+**Estado**: implementado (REQ-004); pendiente commit.
+
+---
+
+## 2026-09-04 — Auditoria de historial git: HEAD limpio no basta (ANONIMIZADO, P0.9)
+
+**Problema**: P0.10 exige auditar el historial completo del repo, pero el
+proyecto no tenia herramienta para ello. La auditoria manual del historial
+(2026-09-04) encontro **4 commits ya publicados** que referencian un proyecto
+privado del programador, un host de produccion y un string de password de
+ejemplo. HEAD esta limpio; el historial NO lo esta.
+
+**Solucion**: purga planificada con `git filter-repo --replace-text` +
+force-push, **pendiente de confirmacion explicita del programador** (P0.3
+destruccion remota, P0.7 comitear/pushear solo con orden). Propuesta de
+herramientas para que no se repita: gitleaks (hook pre-commit) +
+`trufflehog --verified` (CI), fijando version parcheada — CVE-2025-41390
+afecta a trufflehog <= 3.90.2.
+
+**Evidencia**: hallazgo registrado de forma anonimizada conforme a P0.9: sin
+nombre del proyecto privado, sin dominio, sin el string de password. Detalle
+completo solo en manos del programador.
+
+**Leccion**: (1) "HEAD limpio" no implica "historial limpio" — la auditoria
+P0.10 requiere tooling (gitleaks/trufflehog), no revision manual ocasional.
+(2) GitHub conserva commits force-pushed accesibles via API/eventos (estudio
+"oops commits"): la purga reduce la exposicion pero NO la anula, asi que la
+**rotacion de credenciales es obligatoria aunque se purgue el historial**.
+(3) Un password de ejemplo en un commit sigue siendo dato sensible: los
+scanners lo reportan como secreto real y el host de produccion no debe aparecer
+en repos publicos (P0.9).
+
+**Estado**: **RESUELTA el 2026-09-04** (purga ejecutada con confirmacion del
+programador). Detalle: backup previo como bundle en `~/.secrets-backup/`;
+purga con `git filter-repo` en 2 pasadas — `--replace-text` para blobs y
+`--message-callback` para mensajes de commit (leccion tecnica: `--replace-text`
+NO toca mensajes de commit; hay que limpiarlos por separado); `--mailmap` para
+la autoria; force-push a GitHub y Codeberg (commit 786b315); verificacion
+posterior: 0 coincidencias en blobs/mensajes/autores y 0 objetos dangling tras
+`gc`. **Limitacion persistente**: GitHub/Codeberg conservan commits antiguos
+accesibles por hash via API (estudio "oops commits") — la rotacion de la
+credencial sigue siendo necesaria si estaba viva. Registro mantenido
+ANONIMIZADO (P0.9): sin nombre de proyecto, dominio ni strings.
+
+---
+
+## 2026-09-04 — Ecosistema de agentes estatico del arte (investigacion web)
+
+**Problema**: el ecosistema de agentes de coding evoluciona rapido (plugins,
+estandares, benchmarks, competidores) y el proyecto debe saber donde esta
+bien posicionado y donde queda desactualizado.
+
+**Hallazgos** (investigacion web con fuentes primarias citadas, 2026-09-04):
+- **kilocode**: reconstruido sobre Kilo CLI, soporta plugins
+  `tool.execute.before` en `.kilo/plugin/` — el port de `guard-shell.js` es
+  viable y queda PENDIENTE (hoy la proteccion contra pipes en kilocode sigue
+  siendo solo regla de texto P0.8 + matcher).
+- `experimental.policies` (deny all + allow list) confirmado en schema vivo.
+- **Kimi Code CLI 0.41.0** viable como tercer adaptador: `AGENTS.md` +
+  `[[permission.rules]]` deny/ask con primer-match-gana + `[[hooks]]`
+  PreToolUse (formato TOML).
+- **OWASP** publico "Top 10 for Agentic Applications 2026" (ASI01-ASI10) y
+  "Agent Control Standard" (2-sep-2026): el mapeo del proyecto esta
+  desactualizado (solo cubre LLM Top 10).
+- Benchmark **Agents4D** reporta ~66-68% de runs inseguros en coding agents
+  comerciales; las defensas in-band se rompen en 90-99% ante ataques
+  adaptativos (USENIX Sec '26; TAP 99.8%).
+- Competidor tecnico mas serio: **hoophq/fence** (motor semantico AST;
+  critica explicita a las denylists).
+- Hueco de mercado: nadie mantiene un corpus de payloads contra configs de
+  coding agents (el fuzzer/red-team interno apunta ahi).
+
+**Evidencia**: fuentes primarias consultadas y citadas en la investigacion del
+2026-09-04 (docs oficiales, issues upstream, publicaciones USENIX, repos de
+competidores).
+
+**Leccion**: NUNCA afirmar que el red-team interno demuestra "resistencia a la
+inyeccion" (P0.1): con el estado del arte rompiendo defensas in-band en
+90-99% de los ataques adaptativos, el red-team interno solo demuestra que los
+vectores concretos probados estan cubiertos HOY. La humildad epistemica es
+coherente con P1.31.
+
+**Estado**: investigacion cerrada; port a `.kilo/plugin/` y mapeo ASI01-ASI10
+RESUELTOS el 2026-09-04 (ver entradas siguientes). Pendiente solo: corpus de
+payloads.
+
+---
+
+## 2026-09-04 — Paridad kilocode del guard-shell: `.kilo/plugin/` y forma de modulo (REQ-003)
+
+**Problema**: el plugin `guard-shell.js` protegia pipes peligrosos solo en
+opencode (`.opencode/plugins/`). En kilocode la proteccion seguia siendo solo
+regla de texto P0.8 + matcher, y el port no era una copia directa: kilo tiene
+convenciones distintas de autodescubrimiento y de formato de modulo.
+
+**Solucion**: plugin `.kilo/plugin/guard-shell.js` (misma logica: hook
+`tool.execute.before`, ejecuta `python3 scripts/analyze_shell.py` con el
+comando como argumento, fail-closed). Tres lecciones de integracion
+verificadas contra la doc oficial de kilo.ai:
+- La ruta de autodescubrimiento es `.kilo/plugin/` (singular), confirmada en
+  la doc oficial — `.kilo/plugins/` (plural) NO se carga.
+- La forma de modulo descriptor es `{id, server}`; el export directo de
+  funciones es legacy en kilo.
+- Se anadio `.kilo/package.json` con `"type": "module"` para eliminar la
+  ambiguedad ESM (el plugin usa `export default`).
+
+**Evidencia**: 12/12 PASS en tests aislados con Node v22
+(`/tmp/test-guard-shell-kilo.mjs`), incluyendo la forma `{id, server}` y el
+fail-closed. Limitacion declarada: la carga real en el runtime de kilocode no
+es verificable en esta maquina (kilo-code no instalado aqui) — misma
+limitacion honesta que el plugin de opencode (P0.1).
+
+**Leccion**: un port entre runtimes del "mismo" ecosistema no es una copia:
+hay que verificar ruta de autodescubrimiento, formato de modulo y resolucion
+ESM en la doc oficial de cada herramienta, no asumir paridad con opencode.
+
+**Limitacion de sincronizacion**: `make sync` (`sync-agents.sh`) NO sincroniza
+plugins (solo agentes). Decision pendiente del programador: extender el sync
+con exclusion de plugins o mantener sync manual.
+
+**Estado**: implementado; verificacion end-to-end con runtime kilocode
+pendiente; decision de sync pendiente del programador.
+
+---
+
+## 2026-09-04 — Escanners opcionales en el verificador (seccion 7): SKIP contado como OK
+
+**Problema**: herramientas de escaneo de secretos (gitleaks, trufflehog,
+mcp-scan/snyk) no estaban en el verificador, y su instalacion requiere
+confirmacion del programador (P0.5 — no instalar paquetes de sistema sin
+orden). El verificador no debe fallar por una herramienta ausente, pero tampoco
+puede dar por verificado lo no ejecutado sin declararlo.
+
+**Solucion**: patron `check_optional` en la seccion 7 de
+`scripts/verificar-proyecto.sh`: si la herramienta no esta instalada, el check
+se cuenta como SKIP y se suma al total de OK de forma coherente (los SKIP se
+explican en el resumen); si esta instalada, se ejecuta y falla explicito ante
+hallazgos:
+- gitleaks: `gitleaks git . --redact --no-banner` (redacta secretos en la
+  salida).
+- trufflehog: `trufflehog git file://. --only-verified --fail`. **Leccion
+  verificada**: sin `--fail` trufflehog sale con exit 0 aunque encuentre
+  secretos — el flag es obligatorio para que el check signifique algo.
+  Version minima 3.90.3 por CVE-2025-41390 (RCE con repo git malicioso).
+- mcp-scan paso a Snyk como `snyk-agent-scan`: se buscan ambos binarios
+  (`mcp-scan` o `snyk-agent-scan`).
+- Nunca se ejecutan MCP servers reales: sin `--dangerously-run-mcp-servers`
+  (P0.8 — ejecutar codigo no verificado).
+
+**Evidencia**: 3 checks SKIP correctos con herramientas ausentes; conteo
+coherente (44 OK + 3 SKIP = 47); `bash -n` OK; con herramientas presentes el
+check ejecuta el escanner real y falla ante hallazgos.
+
+**Leccion**: "opcional" no puede significar "silencioso": el SKIP se cuenta y
+se reporta (sin errores silenciosos, P1.26), y los flags que cambian el exit
+code (`--fail`) se verifican leyendo la salida real, no asumiendo el
+comportamiento por defecto.
+
+**Estado**: implementado; gitleaks/trufflehog/snyk-agent-scan no instalados en
+esta maquina (instalacion pendiente de confirmacion del programador, P0.5).
+
+---
+
+## 2026-09-04 — Regla de modelos relajada: excepcion para modelos locales gratuitos
+
+**Problema**: la prohibicion de modelos fuera de la lista permitida
+(opencode/kilocode) era absoluta, sin via para probar modelos locales gratuitos
+(Ollama/llama.cpp en localhost) en la matriz de pruebas de reglas P0/P1.
+
+**Solucion**: excepcion aprobada por el programador, documentada en
+`AGENTS.md` (seccion de entorno del proyecto, linea ~200) y `README.md`: se
+permiten modelos locales gratuitos servidos localmente (p. ej. Qwen2.5-Coder,
+Llama 3.x, DeepSeek-Coder local) EXCLUSIVAMENTE para la matriz de pruebas de
+reglas (verificar si respetan P0/P1); nunca como modelo principal de
+desarrollo. La prohibicion de modelos de pago/pro sin permiso o presupuesto
+se mantiene intacta.
+
+**Evidencia**: `doc_validator` OK tras la sincronizacion documental;
+`verificar-proyecto.sh` en verde salvo drift intencional de baseline
+(AGENTS.md modificado).
+
+**Leccion**: usar la excepcion en la practica requerira anadir el provider
+local (p. ej. `ollama`) a `experimental.policies` de `opencode.json`/`kilo.json`
+(la baseline esta firmada — `config-baseline.sha256` — y cualquier cambio a la
+config se detecta como drift hasta regenerarla con aprobacion). La regla de
+texto habilita el uso; la config determinista es la que lo permite de verdad.
+
+**Estado**: regla aprobada y documentada; activacion practica pendiente de
+decision sobre la baseline de config.
+
+---
+
+## 2026-09-04 — Adaptador Kimi Code CLI (REQ-005): primer-match-gana y hooks fail-open
+
+**Problema**: Kimi Code CLI era el tercer adaptador viable detectado en la
+investigacion del 2026-09-04, pero su semantica de permisos es distinta a
+opencode: usar la misma orden de reglas sin verificar podria dejar excepciones
+`allow` inalcanzables (regla critica de seguridad silenciosamente anulada).
+
+**Solucion**: adaptador en `.kimi-code/local.toml` + hook
+`.kimi-code/hooks/pre_bash_analyze.py`, port 100% de reglas desde
+`opencode.json`: 218 deny Bash + 12 Edit + 12 Read, 85 ask, 6 allow, 1 hook.
+Lecciones de integracion:
+- **Kimi usa primer-match-gana** (inverso a opencode, last-match-wins): las
+  excepciones `allow` deben ir ANTES de los `deny` generales o nunca se
+  alcanzan. Todo el port reordeno las reglas en consecuencia.
+- 4 familias de patrones quedan con semantica pendiente de verificacion
+  empirica: comillas embebidas, globs `*/`, globs con `*` al inicio y
+  `npx -g`. La doc de Kimi no especifica el matching exacto; quedan marcados
+  para probar contra el runtime real.
+- Issue upstream MoonshotAI/kimi-cli#2508 reporta una posible prioridad por
+  clase (deny > ask > allow) que podria contradecir la doc de primer-match;
+  si se confirma, habria que reordenar el adaptador (declarado como riesgo).
+- Los hooks PreToolUse son **fail-open por diseno** (si el hook falla, la
+  herramienta se ejecuta): el hook `pre_bash_analyze.py` es defensa en
+  profundidad, pero la barrera principal son los deny declarativos.
+- `local.toml` esta documentado solo para `[workspace]`: si el runtime ignora
+  `permission.rules`/`hooks` ahi, hay que copiar la config a
+  `~/.kimi-code/config.toml` (documentado en el adaptador).
+
+**Evidencia**: TOML validado con `tomllib` (218/12/12 deny, 85 ask, 6 allow,
+1 hook, sin placeholders); hook probado simulando stdin JSON: bloquea
+`rm -rf`, `curl | bash`, `/bin/rm -rf`, `sh -c git reset --hard` y stdin
+invalido; permite `ls`, `git status`, `make check`, `docker compose up -d`.
+**Limitacion**: kimi-code no esta instalado en esta maquina — sin verificacion
+end-to-end; la semantica de matching queda pendiente de prueba empirica
+(P0.1: lo no verificado se declara, no se afirma).
+
+**Leccion**: portar un ruleset entre asistentes exige verificar la SEMANTICA
+del matcher (orden de evaluacion, prioridad por clase, comportamiento del hook
+ante fallo), no solo traducir la sintaxis. Un allow inalcanzable por orden es
+una regla muerta que da falsa sensacion de cobertura.
+
+**Estado**: implementado (REQ-005); verificacion end-to-end y semantica de
+matching pendientes de runtime Kimi real.
+
+---
+
+## 2026-09-04 — Mapeo OWASP Agentic Top 10 2026 (ASI01-ASI10) + Agent Control Standard
+
+**Problema**: la cobertura OWASP del proyecto estaba desactualizada: solo
+mapeaba el LLM Top 10 2025. La investigacion del 2026-09-04 confirmo que OWASP
+publico el "Top 10 for Agentic Applications 2026" (ASI01-ASI10) y el "Agent
+Control Standard" (ACS, donado a OWASP el 2-sep-2026), y el proyecto necesitaba
+un mapeo honesto de su cobertura real (P0.1 — sin sobrevender).
+
+**Solucion**: nueva seccion 7 en `docs/REGLAS-COMPLETAS.md` con el mapeo
+ASI01-ASI10 confirmado via 4 fuentes cruzadas, y alineacion conceptual con el
+ACS marcada explicitamente como **NO certificacion**:
+- Cubiertos: ASI02 (Memory Poisoning — detector de system prompt leak +
+  tratamiento de contenido como dato), ASI04 (Insecure Tool Integrations —
+  deny/ask + guard-shell + analyzer), ASI05 (Excessive Agency — P0/P1 de
+  alcance/autorizacion), ASI09 (Misaligned Incentives — determinismo P1.9).
+- Parciales: ASI01 (Prompt Injection), ASI03 (Misinformation), ASI06
+  (Resource Exhaustion), ASI08 (Human Agency Erosion), ASI10 (Unsafe Agent
+  Design).
+- Sin cobertura: ASI07 (Multi-Agent Systems / canal A2A) — el proyecto es
+  agente unico sin comunicacion agente-a-agente; se declara como hueco real.
+
+**Evidencia**: 10/10 nombres ASI01-ASI10 confirmados con 4 fuentes cruzadas
+(doc OWASP, publicaciones, repositorios); `doc_validator` OK;
+`verificar-proyecto.sh` en verde (47 OK) tras la sincronizacion.
+
+**Leccion**: un mapeo de cumplimiento honesto vale mas que uno optimista:
+declarar "sin cobertura" en ASI07 evita vender una garantia falsa y convierte
+el hueco en trabajo pendiente visible (P1.31 — honestidad epistemica). La
+alineacion con el ACS es conceptual: el proyecto NO esta certificado contra el
+standard, y decirlo explicitamente previene malentendidos.
+
+**Estado**: mapeo documentado y sincronizado; cobertura ASI07 pendiente
+(diseno multi-agente fuera de alcance actual).

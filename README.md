@@ -48,6 +48,7 @@ confiar solo en que el modelo "recuerde" las reglas, define:
 | `scripts/redteam-prompt-injection.py` | **Red-team de prompt injection (LLM01/LLM07)**: prueba payloads directos, indirectos y de system prompt leakage contra un modelo opencode y reporta cuáles logran modificar o extraer comportamiento. Uso: `python3 scripts/redteam-prompt-injection.py` |
 | `scripts/detect-system-prompt-leak.py` | **Detección offline de system prompt leakage (LLM07)**: compara salidas de agentes contra `AGENTS.md` y falla si encuentra secuencias sustanciales del system prompt. No requiere API; útil en CI/post-procesamiento. Uso: `python3 scripts/detect-system-prompt-leak.py --file respuesta.txt` |
 | `scripts/opencode-sandbox.sh` | **Sandbox opcional con bubblewrap**: ejecuta opencode con toda la máquina en solo lectura salvo el workspace y las rutas de opencode (red bloqueada salvo `--net`). La capa determinista de sistema operativo por encima de los deny. Requiere `bwrap` y user namespaces habilitados. **Limitación verificada (15-08-2026)**: el runtime Bun de opencode 1.18.18 crashea (segfault) dentro de un user namespace en este kernel — el aislamiento de bwrap funciona (verificado con otros procesos: `/etc` ro, red aislada), pero opencode no arranca dentro del sandbox en esta máquina; queda documentado como defensa en profundidad pendiente de un runtime compatible. Uso: `bash scripts/opencode-sandbox.sh [--net] [comando...]` |
+| `scripts/opencode-docker.sh` | **Sandbox con Docker (Capa 5 restaurada)**: ejecuta opencode en el contenedor `better-ai-opencode` (Bun 1.2.21-slim + opencode-ai 1.18.18 pineado) con red deshabilitada por defecto (`--net` para habilitarla), filesystem raíz en solo lectura, tmpfs en rutas de datos, `--cap-drop ALL` y `no-new-privileges`; el workspace se monta ro y los binds rw son solo de rutas de datos de opencode. Sustituye funcionalmente al sandbox bwrap, cuyo runtime Bun sigue crasheando (segfault) en user namespaces en este kernel. Uso: `bash scripts/opencode-docker.sh [--net] [comando...]` |
 | `scripts/hooks/pre-commit` | Hook git local que ejecuta la verificación antes de cada commit (sin CI/GitHub). Instalación: `cp scripts/hooks/pre-commit .git/hooks/pre-commit` |
 
 ## Instalación en otro proyecto
@@ -179,6 +180,11 @@ Elige la opción que se ajuste a tu entorno; ninguna requiere cuenta en la nube:
      ejecuta `make sync` para sincronizarlo con `.opencode/agents/` de forma
      multiplataforma, sin depender de symlinks).
    - **opencode**: copia `opencode.json` y el directorio `.opencode/`.
+   - **Cline y Roo Code** (extensiones de VS Code): reutilizan `AGENTS.md`
+     como fuente de reglas vía `.clinerules/` (archivo o directorio) y
+     `.roo/rules/` (o `.roorules` legacy) respectivamente. Son instrucciones
+     de texto, sin bloqueo determinista equivalente a los `deny`. Detalle en
+     [`docs/INTEGRACION-ASISTENTES.md`](docs/INTEGRACION-ASISTENTES.md).
 2. Abre kilocode o opencode en ese proyecto: las reglas se cargan automáticamente.
 3. Al terminar cada tarea, el agente debe completar el checklist pre-entrega.
 4. Para una segunda capa de revisión antes de entregar, invoca `@security-auditor`
@@ -312,7 +318,12 @@ mutuamente y cada una tiene un límite conocido documentado con evidencia:
 │  Capa 3 — Análisis semántico de shell                           │
 │  scripts/analyze_shell.py detecta pipes peligrosos, eval,       │
 │  bash -c y subcomandos destructivos.                            │
-│  Límite: no es un parser Bash completo.                         │
+│  Enforcement en runtime: .opencode/plugins/guard-shell.js       │
+│  (hook tool.execute.before) bloquea cada comando bash de        │
+│  opencode que el analizador marque como peligroso.              │
+│  Límite: no es un parser Bash completo; en kilocode el          │
+│  analizador sigue siendo solo detección en tests (port del      │
+│  plugin a .kilo/plugin/ pendiente).                             │
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 4 — Red-team y verificación continua                      │
 │  scripts/probar-denies.sh, scripts/fuzz-denies.py,              │
@@ -320,9 +331,11 @@ mutuamente y cada una tiene un límite conocido documentado con evidencia:
 │  scripts/detect-system-prompt-leak.py y verificar-proyecto.sh.  │
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 5 — Sandbox del sistema operativo (opcional)              │
-│  scripts/opencode-sandbox.sh con bubblewrap.                    │
-│  Límite: opencode 1.18.x crashea dentro de user namespaces      │
-│          en este kernel (documentado).                          │
+│  scripts/opencode-docker.sh con Docker: red off por defecto,    │
+│  fs raíz ro, tmpfs, --cap-drop ALL, no-new-privileges.          │
+│  scripts/opencode-sandbox.sh (bwrap) sigue limitado: el         │
+│  runtime Bun de opencode crashea (segfault) dentro de user      │
+│  namespaces en este kernel (documentado).                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Capa 6 — Auditoría humana y revisores                          │
 │  Subagentes security-auditor y code-reviewer, check pre-commit, │
@@ -347,12 +360,21 @@ permitidos por precio bajo**: `opencode/deepseek-v4-flash-free`,
 NO se han verificado otros modelos (claude, gpt, gemini, `pro`, etc.), y está
 **prohibido** usarlos en este proyecto sin orden explícita. La prohibición de
 PROVEEDORES es determinista (`experimental.policies` en `kilo.json` / `opencode.json`);
-la prohibición del modelo `pro` (mismo proveedor) es regla de texto. El cumplimiento
+la prohibición del modelo `pro` (mismo proveedor) es regla de texto. Excepción
+(aprobada por el programador): se permiten **modelos locales gratuitos servidos
+localmente** (Ollama o llama.cpp en localhost, p. ej. Qwen2.5-Coder, Llama 3.x,
+DeepSeek-Coder local) EXCLUSIVAMENTE para la matriz de pruebas de reglas
+(verificar si respetan P0/P1); nunca como modelo principal de desarrollo. El cumplimiento
 de las reglas de texto (AGENTS.md) puede variar entre modelos; por eso la capa de
 protección real son los `deny` deterministas de la config, que se aplican en runtime
 sin depender del modelo. **Limitación verificada (ronda 27, opencode 1.18.10)**:
-los patrones de permisos con `|` (pipes, p. ej. `curl * | bash*`) NO matchean; la
-protección contra pipes a `sh`/`bash` es la regla de texto P0.8. Antes de usar este
+los patrones de permisos con `|` (pipes, p. ej. `curl * | bash*`) NO matchean.
+En **opencode** esta limitación queda mitigada por enforcement en runtime:
+`.opencode/plugins/guard-shell.js` (hook `tool.execute.before`) ejecuta
+`scripts/analyze_shell.py` sobre cada comando bash y bloquea los pipes
+peligrosos y subcomandos destructivos, fail-closed (REQ-003). En **kilocode**
+la protección contra pipes sigue siendo la regla de texto P0.8 más el matcher
+(port del plugin a `.kilo/plugin/` pendiente). Antes de usar este
 ruleset con otro modelo, se recomienda re-ejecutar la suite de pruebas de
 `docs/PRUEBAS.md`.
 

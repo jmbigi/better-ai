@@ -1083,6 +1083,35 @@ Investigación realizada en julio 2026 para el diseño de este conjunto:
       idempotencia, reintentos controlados, despliegue canary/rollback y
       human-in-the-loop. Base de P1.32–P1.35.
 
+37. **OWASP GenAI Security Project — Top 10 for Agentic Applications 2026**
+    (publicado 09-12-2025; ASI01–ASI10)
+    https://genai.owasp.org/
+    - Primera taxonomía OWASP dedicada a aplicaciones agenticas (agentes con
+      objetivos, memoria, herramientas y autonomía delegada): ASI01 Agent Goal
+      Hijack ... ASI10 Rogue Agents. Base de la subsección "OWASP Top 10 for
+      Agentic Applications 2026" en la sección 7.
+
+38. **Cycode — OWASP Top 10 for Agentic Applications 2026 Explained (21-07-2026)**
+    https://cycode.com/blog/owasp-top-10-agentic-applications/
+    - Análisis riesgo a riesgo de ASI01–ASI10 con incidentes reales (EchoLeak,
+      Amazon Q, Replit) y mitigaciones por familia de controles. Confirma los
+      nombres exactos de los diez riesgos.
+
+39. **PR Newswire / Morningstar — OWASP GenAI Security Project anuncia LLM Top 10
+    2026 y Agent Control Standard (02-09-2026)**
+    https://www.morningstar.com/news/pr-newswire/20260902la38909/owasp-genai-security-project-releases-2026-top-10-for-llm-applications-debuts-agent-control-standard-and-new-resources-for-securing-generative-and-agentic-ai
+    - Nota de prensa oficial: el Agent Control Standard (ACS) fue donado al
+      proyecto OWASP GenAI Security, extendiendo su guía de riesgos agenticos
+      hacia el enforcement práctico en runtime. Base de la nota ACS en la
+      sección 7.
+
+40. **Lokalaise — OWASP Top 10 for agentic AI 2026 (26-06-2026)**
+    https://lokalaise.de/en/blog/owasp-agentic-top-10-local-ai
+    - Confirma de forma independiente la lista ASI01–ASI10 y la fecha de
+      publicación (09-12-2025, London Agentic Security Summit). Análisis honesto
+      de los límites de mitigación de ASI01 (no hay prevención fool-proof del
+      prompt injection).
+
 **Verificación HTTP de las fuentes (31-07-2026, re-ejecutada en rondas 14 y 19)**: las 10
 URLs se comprobaron con `curl -L -o /dev/null -w "%{http_code}" --max-time 20`:
 **9 × HTTP 200** y **1 × HTTP 403** (Medium, bloqueo de bots Cloudflare; accesible en
@@ -1106,6 +1135,11 @@ Las fuentes 29–32 (P1.21 mocks/stubs y evidencia, añadidas el 16-08-2026) se 
 con `curl -L -o /dev/null -w "%{http_code}" --max-time 20 -A <UA navegador>`: **todas ×
 HTTP 200** (Martin Fowler Mocks Aren't Stubs, NASA SWEHB SWE-062, NASA JPL F Prime,
 NASA NTRS; verificado 16-08-2026).
+Las fuentes 37–40 (mapeo agentico ASI + ACS, añadidas el 04-09-2026) se
+verificaron con la herramienta de fetch del agente: **todas × HTTP 200** (genai.owasp.org,
+Cycode, Morningstar/PR Newswire, Lokalaise; verificado 04-09-2026). La lista ASI01–ASI10
+se confirmó además en dos fuentes independientes más (modulos.ai, CSA research note)
+cruzadas el mismo día.
 
 ## 6. Cómo extender este conjunto
 
@@ -1127,6 +1161,8 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 > que la cobertura sea auditable. El mapeo muestra qué regla previene cada riesgo
 > declarado por la industria; "determinista" indica además que la capa de
 > config (`opencode.json` / `kilo.json`) refuerza la regla de texto.
+> Añadido el 04-09-2026: OWASP Top 10 for Agentic Applications 2026
+> (fuentes 37–40) y nota sobre el Agent Control Standard (fuente 39).
 
 ### OWASP GenAI LLM Top 10 2026
 
@@ -1142,6 +1178,41 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 | LLM08 Hidden Context Exposure | **P0.13** (contextos no confiables), P0.11 (reportar), **P1.30** (logging estructurado y APIs de feedback para exponer el estado interno del sistema) | deny de eval/pipes |
 | LLM09 Vector and Embedding Weaknesses | **P0.20** (validación integridad/procedencia/calidad embeddings/RAG), P1.21 (tests aislados) | — |
 | LLM10 Improper Output Handling | **P0.1, P1.1, P1.15, P1.19** (salidas no verificadas o con fallbacks silenciosos), **P1.32** (validación por esquemas formales), **P1.33** (código completo sin placeholders) | verificador del proyecto en el hook pre-commit |
+
+### OWASP Top 10 for Agentic Applications 2026
+
+> Añadido el 04-09-2026 (fuentes 37–40). OWASP publicó el 09-12-2025 la primera
+> taxonomía dedicada a aplicaciones agenticas: agentes con objetivos, memoria,
+> herramientas y autonomía delegada (complementaria del LLM Top 10, que cubre
+> riesgos del modelo). El estado de cobertura es honesto: **cubierto** indica una
+> regla P0/P1 que previene el riesgo con capa determinista; **parcial** indica
+> cobertura de las consecuencias pero no del vector completo; **sin cobertura**
+> se declara explícitamente en vez de ocultarse (P1.6).
+
+| Riesgo ASI 2026 | Reglas better-ai | Capa determinista | Estado |
+|---|---|---|---|
+| ASI01 Agent Goal Hijack | **P0.13** (contenido no confiable = dato, no orden), **P1.8** (la orden del programador gana sobre el contexto), **P1.32** (FSM y contratos deterministas) | deny de comandos destructivos | Parcial (OWASP declara que no hay prevención fool-proof del prompt injection; el ruleset limita el daño, no elimina el riesgo — fuente 40) |
+| ASI02 Tool Misuse and Exploitation | **P0.3, P0.4, P1.4, P1.9** | 159 deny + 85 ask sobre comandos y herramientas | Cubierto |
+| ASI03 Identity and Privilege Abuse | **P0.5** (sin `sudo`/toque de SO), **P0.12** (sin cambio de credenciales), **P1.2** (alcance mínimo) | allow-list de modelos permitidos | Parcial (no gestiona identidades de agente ni credenciales short-lived; fuera del alcance de un ruleset de texto, señalado como hueco) |
+| ASI04 Agentic Supply Chain Vulnerabilities | **P0.18** (SBOM, SLSA, escaneo), P1.18 | ask de `pip install`/`npm -g` + verificador SBOM | Cubierto (misma cobertura que LLM04) |
+| ASI05 Unexpected Code Execution (RCE) | **P0.8** (deny de eval/pipes a `bash`), P1.9 (sandbox Docker) | deny de eval/pipes + hooks `analyze_shell`/`guard-shell` | Cubierto |
+| ASI06 Memory and Context Poisoning | **P0.13**, **P0.20** (procedencia e integridad de embeddings/RAG) | — | Parcial / no aplica (el ruleset no mantiene memoria persistente entre sesiones; en proyectos anfitriones con memoria/RAG, P0.20 cubre procedencia y calidad) |
+| ASI07 Insecure Inter-Agent Communication | Sin cobertura: es un ruleset de agente único; no hay canal agente-a-agente que autenticar | — | Sin cobertura (declarado; no aplica al alcance actual) |
+| ASI08 Cascading Failures | **P1.32** (límite de transiciones FSM: 5), **P1.34** (reintentos con límite y fallo ruidoso), **P1.35** (circuit breaker), **P0.19** (límites de consumo) | experimental.policies | Parcial |
+| ASI09 Human-Agent Trust Exploitation | **P1.23** (confirmación explícita), **P1.22** (autorización gráfica), **P1.15** (revisión humana), **P1.6** (honestidad) | — | Cubierto |
+| ASI10 Rogue Agents | **P0.19** (bloqueo por límites de consumo), **P1.30** (trazabilidad), **P1.35** (circuit breaker manual) | allow-list de modelos permitidos | Parcial (no hay kill switch probado ni línea de base conductual; pendiente) |
+
+**Sobre el OWASP Agent Control Standard (ACS)**: el 02-09-2026 el OWASP GenAI
+Security Project anunció que el ACS fue donado al proyecto, extendiendo su guía
+de riesgos agenticos hacia el **enforcement práctico en runtime** (fuente 39).
+better-ai ya opera bajo ese principio desde su diseño: enforcement de runtime
+determinista en la capa de config (245 guardarraíles: 159 `deny`, 85 `ask`,
+1 `allow` en `opencode.json`/`kilo.json`), análisis de comandos fuera del modelo
+(`scripts/analyze_shell.py`, hooks y plugin `guard-shell`) y sandbox Docker en
+CI (`Containerfile`). Esto es una **alineación conceptual verificable** con el
+espíritu del ACS (controles enforceables fuera del modelo estocástico), no una
+certificación: el proyecto no ha auditado su config contra el texto oficial del
+ACS, que se documenta aquí como limitación.
 
 ### MITRE ATLAS (tácticas)
 

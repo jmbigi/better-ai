@@ -1,0 +1,25 @@
+# Imagen para ejecutar opencode aislado (REQ-004, Capa 5 sandbox de SO).
+# Uso:
+#   docker build -t better-ai-opencode -f Containerfile.opencode .
+#   bash scripts/opencode-docker.sh [--net] [comando...]
+#
+# Procedencia (P0.18): base oven/bun:1.2.21-slim (Docker Hub, oficial de Oven)
+# y opencode-ai@1.18.18 desde npmjs.org (paquete oficial de anomalyco,
+# https://opencode.ai/docs/). Versiones fijas para reproducibilidad.
+
+FROM oven/bun:1.2.21-slim
+
+# Instalacion global via npm de Bun (metodo documentado en opencode.ai/docs).
+# BUN_INSTALL fijo en ruta legible por el usuario no-root (el default ~/.bun
+# de root no es transitable por uid 10001 y rompe la resolucion del binario).
+ENV BUN_INSTALL=/usr/local/bun
+RUN bun install -g opencode-ai@1.18.18 && chmod -R a+rX /usr/local/bun
+
+# Usuario por defecto sin privilegios; el wrapper scripts/opencode-docker.sh
+# lo sobrescribe con el uid/gid del host para poder escribir los binds rw.
+RUN useradd --create-home --uid 10001 opencode
+
+WORKDIR /workspace
+USER opencode
+
+ENTRYPOINT ["opencode"]

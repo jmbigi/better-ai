@@ -320,6 +320,57 @@ else
 fi
 otel_end_span "verificar.repositorio"
 
+otel_start_span "verificar.escaneres"
+echo "== 7. Escaneres opcionales (P0.10/P0.18) =="
+# Escaneres de secretos y de servidores MCP. Son OPCIONALES: si la herramienta no
+# esta instalada, el check reporta SKIP y cuenta como OK (la instalacion requiere
+# la frase de confirmacion del ruleset: "Confirmo instalacion paquetes sistema",
+# P0.5; el agente NO instala nada por su cuenta). Si la herramienta existe y el
+# escaneo falla, es un FALLO real (posibles secretos o riesgos detectados).
+#
+# Instalacion (solo con confirmacion del programador, P0.5):
+#   gitleaks:    brew install gitleaks | go install github.com/zricethezav/gitleaks/v8@latest
+#   trufflehog:  brew install trufflesecurity/trufflehog/trufflehog | go install github.com/trufflesecurity/trufflehog/v3@latest
+#   mcp-scan:    pipx install mcp-scan | uvx mcp-scan@latest (o uvx snyk-agent-scan@latest;
+#                el proyecto mcp-scan paso a Snyk y el binario vigente es snyk-agent-scan)
+check_optional() {
+    local desc="$1"
+    local tool="$2"
+    shift 2
+    if command -v "$tool" >/dev/null 2>&1; then
+        check "$desc" "$@"
+    else
+        echo "  [SKIP] $desc (SKIP: $tool no instalada; instalacion requiere confirmacion P0.5)"
+        PASS=$((PASS + 1))
+    fi
+}
+# gitleaks: escanea el historial git completo en busca de secretos (P0.10/P0.11).
+check_optional "gitleaks: sin secretos en historial git" gitleaks gitleaks git . --redact --no-banner
+# trufflehog: deep scan de historial git con secretos VERIFICADOS (--only-verified
+# reduce falsos positivos; --fail hace que hallazgos verificados => exit != 0).
+# OJO: fijar version >= 3.90.3 por CVE-2025-41390 (RCE con repositorio git
+# malicioso; afecta a <= 3.90.2).
+check_optional "trufflehog: sin secretos verificados en historial" trufflehog trufflehog git file://. --only-verified --fail
+# mcp-scan (Invariant Labs/Snyk): escanea los 4 MCPs declarados en opencode.json y
+# kilo.json (inyeccion de prompt, tool poisoning, toxic flows). Notas: el binario
+# vigente es snyk-agent-scan (el antiguo mcp-scan sigue en PyPI); puede requerir
+# SNYK_TOKEN y, sin --dangerously-run-mcp-servers, pide consentimiento interactivo
+# antes de arrancar los servidores stdio (no se usa ese flag aqui).
+MCPSCAN_BIN=""
+for c in mcp-scan snyk-agent-scan; do
+    if command -v "$c" >/dev/null 2>&1; then
+        MCPSCAN_BIN="$c"
+        break
+    fi
+done
+if [ -n "$MCPSCAN_BIN" ]; then
+    check "mcp-scan: servidores MCP de opencode.json/kilo.json sin riesgos" "$MCPSCAN_BIN" scan opencode.json kilo.json
+else
+    echo "  [SKIP] mcp-scan: servidores MCP sin escanear (SKIP: mcp-scan/snyk-agent-scan no instalado; instalacion requiere confirmacion P0.5)"
+    PASS=$((PASS + 1))
+fi
+otel_end_span "verificar.escaneres"
+
 otel_end_span "verificar.total"
 otel_export
 
