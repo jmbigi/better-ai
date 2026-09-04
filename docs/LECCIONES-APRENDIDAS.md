@@ -1610,3 +1610,43 @@ standard, y decirlo explicitamente previene malentendidos.
 
 **Estado**: mapeo documentado y sincronizado; cobertura ASI07 pendiente
 (diseno multi-agente fuera de alcance actual).
+
+## Verificacion end-to-end de adaptadores: kimi no carga local.toml; kilo inconcluso (2026-09-04)
+
+**Problema**: tras crear el adaptador Kimi Code CLI (REQ-005) y el port del
+plugin guard-shell a kilocode (REQ-003), faltaba la verificacion end-to-end
+con los runtimes reales.
+
+**Solucion/resultado**: pruebas controladas con payloads inocuos por diseno
+(ningun dano posible si TODAS las capas fallaban):
+- **Kimi CLI 0.40.1 (`kimi -p`)**: FALLO de la capa declarativa — un comando
+  cubierto por un deny de `.kimi-code/local.toml` (`chmod 777` sobre ruta
+  inexistente) se ejecuto sin bloqueo ni pregunta. Confirma empiricamente la
+  sospecha documental: `local.toml` solo carga `[workspace]`; las
+  `permission.rules` y `hooks` deben copiarse a `~/.kimi-code/config.toml`.
+  `docs/INTEGRACION-ASISTENTES.md` actualizado con el hallazgo.
+- **Kilo CLI 7.5.9 (`kilo run`, modelo kilo/kilo-auto/free)**: INCONCLUSO —
+  el modelo rechazo `curl | bash` citando la regla P0.8 (la capa de texto
+  funciono) y ante una orden explicita reformulo el comando a una variante
+  segura (descarga + revision), sin invocar nunca la tool bash con el pipe,
+  por lo que el plugin no llego a ejercitarse. Los logs DEBUG no muestran
+  lineas de carga de plugins locales. El formato del plugin se re-verifico
+  contra la doc oficial (`.kilo/plugin/`, `export default { id, server }`) y
+  es correcto; queda pendiente una prueba que alcance la capa de tool.
+
+**Evidencia**: salidas reales de `kimi -p` (comando ejecutado, exit 1 por
+ruta inexistente, sin deny) y `kilo run --format json` (reformulacion del
+comando, eventos de permission sin pipe); revision de
+`~/.local/share/kilo/log/*.log` sin lineas de carga de plugins.
+
+**Leccion**: (1) la conformidad documental NO es evidencia de enforcement —
+la prueba empirica con payload inocuo revelo en minutos que el adaptador Kimi
+no protegia (P0.1, P1.21); (2) probar guardias de ejecucion requiere payloads
+que el modelo intente de verdad: si la capa de texto es fuerte, puede impedir
+que la prueba alcance la capa tecnica (problema de observabilidad del propio
+test); (3) regla P1.6 aplicada: tras 2 resultados fallidos/inconclusos se
+detuvo la investigacion y se reporto en lugar de seguir reintentando.
+
+**Estado**: adaptador Kimi requiere copiar reglas a `~/.kimi-code/config.toml`
+(pendiente, config global del usuario — no se modifica sin orden); plugin
+kilo pendiente de verificacion end-to-end.

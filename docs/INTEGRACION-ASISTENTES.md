@@ -43,12 +43,22 @@ que INVIERTE el orden de `opencode.json`/`kilo.json` (last-match-wins): las
 excepciones allow van antes que los denies y el allow comodin al final.
 Ademas, los hooks son fail-open por diseno (un fallo del hook permite el
 comando), asi que el bloqueo real depende de las reglas deny declarativas,
-no del hook. Pendiente: verificacion empirica (kimi-code no instalado aqui)
-y confirmar si `local.toml` carga `permission.rules`/`hooks` o solo
-`[workspace]` (la doc oficial solo menciona lo segundo; si no carga, copiar
-el contenido a `~/.kimi-code/config.toml`). Fuente:
+no del hook. VERIFICADO empiricamente (2026-09-04, kimi 0.40.1): las
+`permission.rules` de `.kimi-code/local.toml` NO se aplican — una prueba
+controlada con un deny inocuo (`chmod 777` sobre ruta inexistente) se
+ejecuto sin bloqueo ni pregunta. Para que el adaptador funcione, copia
+`permission.rules` y `hooks` al config global `~/.kimi-code/config.toml`.
+Fuente:
 [Kimi Code - Configuration files](https://www.kimi.com/code/docs/en/kimi-code-cli/configuration/config-files.html)
 y [Kimi Code - Hooks](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/hooks.html).
+
+Nota kilocode (2026-09-04, CLI 7.5.9): el plugin `.kilo/plugin/guard-shell.js`
+cumple el formato oficial (`.kilo/plugin/`, `export default { id, server }`),
+pero la verificacion end-to-end quedo INCONCLUSA: el modelo (kilo-auto/free)
+rechazo o reformulo los comandos de prueba antes de invocar la tool bash
+(la capa de reglas de texto actuo primero), y los logs DEBUG no muestran
+lineas de carga de plugins locales. La proteccion por plugin en kilocode
+sigue pendiente de verificacion; las capas de texto y matcher si respondieron.
 
 ### Cline y Roo Code (extensiones de VS Code)
 
