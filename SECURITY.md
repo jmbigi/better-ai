@@ -17,10 +17,14 @@ estados antiguos del historial se aceptan pero pueden tener menor prioridad.
 1. **Preferred: GitHub private vulnerability reporting.**
    [PENDIENTE (manual step for the repo owner): enable "Private vulnerability
    reporting" in Settings > Code security and analysis. This cannot be enabled
-   by contributors; until it is enabled, use the email channel below.]
+   by contributors; until it is enabled, use the interim channel below.]
    See: <https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository>
 
-2. **Alternative: email.** [PENDIENTE: email de contacto]
+2. **Interim channel (until private reporting is enabled).** Open a public
+   issue that says ONLY that you have a security report (title:
+   "Security report — request private channel"), with NO payload, NO details
+   and NO affected files. A maintainer will contact you to arrange a private
+   channel. Never include the vulnerability details in the public issue.
 
 We follow coordinated vulnerability disclosure (CVD):
 <https://github.blog/security/vulnerability-research/coordinated-vulnerability-disclosure-cvd-open-source-projects/>
@@ -101,8 +105,10 @@ credited here (with their consent) after coordinated disclosure.
 ## Resumen en español
 
 - Reporta vulnerabilidades por el canal PRIVADO (private vulnerability reporting
-  de GitHub — pendiente activarlo en Settings, paso manual del dueno — o email:
-  [PENDIENTE: email de contacto]). No abras issues publicos para seguridad.
+  de GitHub — pendiente activarlo en Settings, paso manual del dueno). Canal
+  provisional hasta activarlo: abre un issue publico que diga SOLO que tienes
+  un reporte de seguridad ("Security report — request private channel"), SIN
+  payload ni detalles; un mantenedor te contactara por via privada.
 - SLA: acuse en 72 h, divulgacion coordinada por defecto a 90 dias.
 - Severidades: Critical = evasion de denies P0 con ejecucion destructiva;
   High = evasion de deny determinista; Medium = bypass de reglas de texto;
