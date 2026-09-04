@@ -1650,3 +1650,31 @@ detuvo la investigacion y se reporto en lugar de seguir reintentando.
 **Estado**: adaptador Kimi requiere copiar reglas a `~/.kimi-code/config.toml`
 (pendiente, config global del usuario — no se modifica sin orden); plugin
 kilo pendiente de verificacion end-to-end.
+
+## Kimi CLI: las permission.rules no se evaluan en modo -p (0.40.1) (2026-09-04)
+
+**Problema**: la ronda 58 habia mostrado que `.kimi-code/local.toml` no aplica
+`permission.rules` (solo carga `[workspace]`). Quedaba la hipotesis de que el
+config global `~/.kimi-code/config.toml` si las aplicaria.
+
+**Solucion/resultado**: se copiaron las 333 reglas + 1 hook al config global
+(con backup) y se probaron 3 sondas con payloads inocuos (`chmod 777` a ruta
+inexistente; regla temporal `deny Bash(echo PING*)`; y con
+`KIMI_CODE_LEGACY_FLAG=0`). Las tres ejecutaron el comando: el modo `-p` de
+kimi 0.40.1 NO evalua permission.rules, ni de proyecto ni globales. La regla
+temporal se elimino; las 333 reglas quedan instaladas para el modo
+interactivo (la doc oficial las describe como "initial permission rules" de
+sesion; verificacion en TUI pendiente, manual).
+
+**Evidencia**: salidas reales de `kimi -p` en las 3 sondas (comando ejecutado
+en todas); doc oficial de config-files (seccion permission y local.toml).
+
+**Leccion**: la cadena de confianza "doc oficial → config escrita →
+enforcement" fallo DOS veces seguidas en esta herramienta (local.toml y modo
+-p). Para CLI de agentes, el enforcement determinista solo se puede dar por
+verificado con una sonda empirica de payload inocuo por modo de ejecucion
+(interactivo, -p, ACP, CI). Mientras tanto, la unica barrera fiable para
+ejecuciones no interactivas es externa al CLI (sandbox Docker, Capa 5).
+
+**Estado**: reglas instaladas en config global; enforcement en TUI pendiente
+de verificacion manual; modo -p sin enforcement declarativo (documentado).

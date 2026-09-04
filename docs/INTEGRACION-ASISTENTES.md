@@ -23,7 +23,7 @@ En Windows tambien se incluyen `scripts/verificar-requisitos.ps1` y
 |---|---|---|
 | opencode | `AGENTS.md` + `opencode.json` + `.opencode/` | Reglas de texto y permisos deterministas del runtime. |
 | kilocode | `AGENTS.md` + `kilo.json` + `.kilo/` | Reglas de texto y permisos deterministas del runtime. |
-| Kimi Code CLI | `AGENTS.md` + `.kimi-code/local.toml` + `.kimi-code/hooks/` | Reglas de texto + permisos declarativos + hook PreToolUse; pendiente verificacion empirica. |
+| Kimi Code CLI | `AGENTS.md` + `~/.kimi-code/config.toml` + `.kimi-code/hooks/` | Reglas de texto; permisos declarativos SOLO en modo interactivo (el modo `-p` no los evalua en 0.40.1, verificado); hook PreToolUse fail-open. |
 | GitHub Copilot | `AGENTS.md` + `.github/copilot-instructions.md` | Instrucciones de trabajo; no sustituye un sandbox ni bloquea comandos por si solo. |
 | Cline | `AGENTS.md` + `.clinerules/` en la raiz del proyecto | Instrucciones de texto; sin deny determinista estilo `opencode.json`. |
 | Roo Code | `AGENTS.md` + `.roo/rules/` (o `.roorules` legacy) | Instrucciones de texto; sin deny determinista estilo `opencode.json`. |
@@ -46,8 +46,14 @@ comando), asi que el bloqueo real depende de las reglas deny declarativas,
 no del hook. VERIFICADO empiricamente (2026-09-04, kimi 0.40.1): las
 `permission.rules` de `.kimi-code/local.toml` NO se aplican — una prueba
 controlada con un deny inocuo (`chmod 777` sobre ruta inexistente) se
-ejecuto sin bloqueo ni pregunta. Para que el adaptador funcione, copia
-`permission.rules` y `hooks` al config global `~/.kimi-code/config.toml`.
+ejecuto sin bloqueo ni pregunta. Por eso las `permission.rules` y `hooks`
+viven en el config global `~/.kimi-code/config.toml` (merge aplicado el
+2026-09-04; el `.kimi-code/local.toml` del repo se conserva como fuente
+canonica para copiar a otras maquinas). Segunda verificacion (ronda 59): en
+0.40.1 el modo no interactivo `kimi -p` NO evalua permission.rules aunque
+esten en el global (3 sondas inocuas, todas ejecutadas); el enforcement
+declarativo aplica solo a sesiones interactivas (TUI). Para ejecuciones no
+interactivas la unica barrera fiable es externa al CLI (sandbox Docker).
 Fuente:
 [Kimi Code - Configuration files](https://www.kimi.com/code/docs/en/kimi-code-cli/configuration/config-files.html)
 y [Kimi Code - Hooks](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/hooks.html).
