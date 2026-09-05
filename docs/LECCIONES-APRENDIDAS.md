@@ -1678,3 +1678,35 @@ ejecuciones no interactivas es externa al CLI (sandbox Docker, Capa 5).
 
 **Estado**: reglas instaladas en config global; enforcement en TUI pendiente
 de verificacion manual; modo -p sin enforcement declarativo (documentado).
+
+## Proveedores seguros: sincronizacion multi-repo y duplicados ocultos (2026-09-05)
+
+**Problema**: al ampliar la lista de proveedores seguros (`kilo`, `kimi`, `deepseek`,
+`opencode`) en 3 subproyectos independientes (`apiweb2`, `desktop-demo-web`,
+`visorweb2`), se detectaron dos errores ocultos:
+1. `desktop-demo-web/opencode.json` tenia reglas duplicadas en `permission.edit`
+   (las mismas 13 reglas aparecian dos veces).
+2. `desktop-demo-web/kilo.json` tenia reglas duplicadas en `permission.bash`
+   (`rm -rf`, `rm -r`, `rm -f`, `pip install --user` aparecian dos veces).
+3. `visorweb2/opencode.json` tenia `kimi` en `enabled_providers` pero faltaba en
+   `experimental.policies`.
+
+**Solucion/resultado**: se corrigieron los duplicados, se alinearon las listas de
+proveedores y se actualizaron los verificadores `scripts/verificar-proyecto.sh`
+de cada subproyecto para reflejar las nuevas listas. Se commitearon y pushearon
+los cambios en los 3 repositorios.
+
+**Evidencia**: diffs de git en cada subproyecto; verificadores actualizados;
+commits: apiweb2 `da8912a`, desktop-demo-web `d5da2db`, visorweb2 `15e05d6`.
+
+**Leccion**: cuando se modifica una config compartida en multiples repositorios,
+siempre verificar:
+- Listas exactas en `enabled_providers` (no solo presencia de elementos).
+- Secciones `experimental.policies` vs `enabled_providers` (pueden divergir).
+- Reglas duplicadas en `permission.bash`, `edit` y `read` (aparecen al copiar
+  configs entre proyectos sin limpiar).
+- Verificadores locales hardcodeados (`scripts/verificar-proyecto.sh`) que
+  fallan si no se actualizan junto con la config.
+
+**Estado**: cambios integrados en los 3 subproyectos; verificadores alineados;
+push completado.
