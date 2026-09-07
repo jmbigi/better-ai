@@ -97,6 +97,13 @@ max_context_size = 32768
 capabilities = [ "tool_use" ]
 display_name = "Qwen2.5 Coder 7B Q4_K_M local (base, matriz pruebas)"
 
+[models."local/qwen2.5-coder-7b-q5"]
+provider = "local:ollama"
+model = "hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M"
+max_context_size = 32768
+capabilities = [ "tool_use" ]
+display_name = "Qwen2.5 Coder 7B Q5_K_M local (calidad, HF/bartowski, matriz pruebas)"
+
 [models."local/qwen2.5-coder-14b"]
 provider = "local:ollama"
 model = "qwen2.5-coder:14b"

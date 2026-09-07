@@ -963,3 +963,24 @@ provider `ollama` con los dos modelos Qwen2.5-Coder. El config global de kimi
 lleva de nuevo las 333 reglas + hook entre marcadores gestionados por
 `deploy-kimi-config.sh`. Modelos grandes (14B/16B) quedan fuera por velocidad
 de CPU no verificada; pendiente medir 14B si se desea ampliar la matriz.
+
+## Ronda 62 — Matriz completa de modelos locales con cuantificacion (07-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 217 | Pull de tags de cuantificacion de Ollama Library (`7b-q5_K_M`, `7b-q8_0`) | ❌ Ambos inexistentes ("pull model manifest: file does not exist") — config previa tenia alias roto; corregido |
+| 218 | Pull Q5_K_M via HuggingFace (`hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M`) | ✅ 5.4 GB, sha256 verificado por Ollama; procedencia documentada |
+| 219 | Benchmark estandar (mismo prompt, 60 tokens) a 8 modelos | ✅ Medido: 1.3b 35.7 / 1.5b 14.8 / 3b 11.2 / starcoder2 7.3 / 7b 5.9 / 7b-Q5 5.1 / r1-7b 4.9 / 14b 1.8 tok/s |
+| 220 | `ollama show <modelo>` quantization en los 8 | ✅ 5x Q4_K_M, 2x Q4_0 (starcoder2, deepseek-1.3b), 1x Q5_K_M (HF) — coincide con docs |
+| 221 | `opencode models ollama` / `kilocode models ollama` tras matriz final | ✅ 8/8 modelos listados en ambos CLIs |
+| 222 | `kimi -p` con aliases `local/qwen2.5-coder-1.5b`, `local/qwen2.5-coder-7b-q5`, `local/qwen2.5-coder-14b` | ✅ Sesiones creadas sin error de provider (TOML valido, provider hf.co funcional) |
+| 223 | `bash scripts/deploy-kimi-config.sh` (bloque con 8 modelos) | ✅ 333 reglas + 1 hook + 8 aliases; idempotencia por hash confirmada en ronda previa |
+| 224 | Criterio "instalado vs listado" aplicado a configs | ✅ Los 8 modelos de opencode.json/kilo.json existen en `ollama list` |
+
+**Conclusion tecnica**: la matriz final tiene 8 modelos en 5 tiers (liviano,
+base 7B, calidad, razonamiento, avanzado), todos instalados, medidos y
+consistentes entre Ollama, opencode, kilocode y kimi. La documentacion
+previa con velocidades estimadas se corrigio con mediciones reales
+(diferencias: 14b 1.8 vs ~3 estimados; starcoder2 Q4_0 vs Q4_K_M
+documentado). Los modelos >7B quedan limitados a pruebas puntuales por
+velocidad (< 5.9 tok/s en todos los casos).

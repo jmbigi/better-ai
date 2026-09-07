@@ -194,19 +194,20 @@ localmente en un Mac mini i7 2018 (6核, 32GB RAM, Intel UHD 630, sin GPU dedica
 
 | Modelo | Params | Tamano | Cuantificacion | Velocidad CPU (medida 07-09-2026) | Uso principal |
 |---|---|---|---|---|---|
-| Modelo | Params | Tamano | Cuantificacion | Velocidad CPU (medida 07-09-2026) | Uso principal |
-|---|---|---|---|---|---|
 | `deepseek-coder:1.3b` | 1.3B | 776MB | Q4_0 | 35.7 tok/s | Minimo, sondas rapidas de reglas |
 | `qwen2.5-coder:1.5b` | 1.5B | 986MB | Q4_K_M | 14.8 tok/s | Ultra rapido, validacion de reglas |
 | `qwen2.5-coder:3b` | 3B | 1.9GB | Q4_K_M | 11.2 tok/s | Rapido, tareas ligeras |
 | `starcoder2:7b` | 7B | 4.0GB | Q4_0 | 7.3 tok/s | Codigo multi-lenguaje (Rust, Lua, Haskell); base FIM |
 | `qwen2.5-coder:7b` | 7B | 4.7GB | Q4_K_M | 5.9 tok/s | Codigo, asistente general de pruebas |
+| `hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M` | 7B | 5.4GB | Q5_K_M | 5.1 tok/s | Calidad (GGUF HuggingFace, sha256 verificado) |
+| `hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M` | 7B | 5.4GB | Q5_K_M | 5.2 tok/s | Calidad maxima por byte (mejor accuracy en CPU) |
 | `deepseek-r1:7b` | 7B | 4.7GB | Q4_K_M | 4.9 tok/s | Razonamiento (thinking largo; sin tool-calling fiable) |
 | `qwen2.5-coder:14b` | 14B | 9.0GB | Q4_K_M | 1.8 tok/s | Avanzado: SOLO pruebas puntuales, inviable para iterar |
 
 Notas de cuantificacion: Q4_K_M es el punto dulce estandar (Pareto accuracy/memoria en CPU,
-[arXiv 2510.21970](https://www.arxiv.org/pdf/2510.21970)); Q5_K_M ofrece la mayor accuracy por
-byte pero **no esta publicado** en la libreria de Ollama para qwen2.5-coder (tags `7b-q5_K_M`
+[arXiv 2510.21970](https://www.arxiv.org/pdf/2510.21970)); Q5_K_M se consigue via HF-GGUF
+(`hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M`, 5.4GB, ~5.2 tok/s) porque
+**no esta publicado** en la libreria de Ollama para qwen2.5-coder (tags `7b-q5_K_M`
 y `7b-q8_0` inexistentes, verificado por error de manifest 07-09-2026); starcoder2 y
 deepseek-coder:1.3b publican Q4_0 (perdida algo mayor que Q4_K_M, velocidad algo mayor).
 

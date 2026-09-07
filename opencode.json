@@ -8,52 +8,59 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen2.5-coder:7b": {
-          "id": "qwen2.5-coder:7b",
-          "name": "Qwen2.5 Coder 7B Q4_K_M (base, matriz pruebas P0/P1)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
-        },
-        "qwen2.5-coder:3b": {
-          "id": "qwen2.5-coder:3b",
-          "name": "Qwen2.5 Coder 3B (liviano, matriz pruebas P0/P1)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
-        },
-        "deepseek-r1:7b": {
-          "id": "deepseek-r1:7b",
-          "name": "DeepSeek R1 7B (razonamiento, matriz pruebas P0/P1)",
-          "family": "deepseek",
+        "deepseek-coder:1.3b": {
+          "id": "deepseek-coder:1.3b",
+          "name": "DeepSeek Coder 1.3B local (liviano, matriz pruebas P0/P1)",
+          "family": "local",
           "tool_call": true,
           "temperature": true
         },
         "qwen2.5-coder:1.5b": {
           "id": "qwen2.5-coder:1.5b",
-          "name": "Qwen2.5 Coder 1.5B (liviano, matriz pruebas P0/P1)",
-          "family": "qwen2",
+          "name": "Qwen2.5 Coder 1.5B local (liviano, matriz pruebas P0/P1)",
+          "family": "local",
+          "tool_call": true,
+          "temperature": true
+        },
+        "qwen2.5-coder:3b": {
+          "id": "qwen2.5-coder:3b",
+          "name": "Qwen2.5 Coder 3B local (liviano, matriz pruebas P0/P1)",
+          "family": "local",
           "tool_call": true,
           "temperature": true
         },
         "starcoder2:7b": {
           "id": "starcoder2:7b",
-          "name": "StarCoder2 7B (programación especializada, matriz pruebas P0/P1)",
-          "family": "starcoder",
+          "name": "StarCoder2 7B local (base 7B, matriz pruebas P0/P1)",
+          "family": "local",
+          "tool_call": true,
+          "temperature": true
+        },
+        "qwen2.5-coder:7b": {
+          "id": "qwen2.5-coder:7b",
+          "name": "Qwen2.5 Coder 7B Q4_K_M local (matriz pruebas P0/P1)",
+          "family": "local",
+          "tool_call": true,
+          "temperature": true
+        },
+        "hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M": {
+          "id": "hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M",
+          "name": "Qwen2.5 Coder 7B Q5_K_M local (calidad, HF/bartowski, matriz pruebas P0/P1)",
+          "family": "local",
+          "tool_call": true,
+          "temperature": true
+        },
+        "deepseek-r1:7b": {
+          "id": "deepseek-r1:7b",
+          "name": "DeepSeek R1 7B local (razonamiento, matriz pruebas P0/P1)",
+          "family": "local",
           "tool_call": true,
           "temperature": true
         },
         "qwen2.5-coder:14b": {
           "id": "qwen2.5-coder:14b",
-          "name": "Qwen2.5 Coder 14B Q4_K_M (avanzado, matriz pruebas P0/P1)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
-        },
-        "deepseek-coder:1.3b": {
-          "id": "deepseek-coder:1.3b",
-          "name": "DeepSeek Coder 1.3B (liviano, matriz pruebas P0/P1)",
-          "family": "deepseek",
+          "name": "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas P0/P1)",
+          "family": "local",
           "tool_call": true,
           "temperature": true
         }

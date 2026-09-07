@@ -2081,3 +2081,67 @@ Considerar anadir un check automatico a `verificar-proyecto.sh`.
 pero lento para interactivo. 1-3B son rapidos pero con calidad limitada.
 
 **Estado**: documentada.
+
+## 2026-09-07 (ronda 62) — Matriz completa de modelos locales: livianos, base, calidad, avanzado y razonamiento, con cuantificacion medida
+
+**Contexto**: ampliacion de la matriz de pruebas P0/P1 tras medir el hardware real
+(i7-8700B 6C/12T, 32 GB, CPU-only) y verificar que tags de cuantificacion
+existen realmente en los repositorios.
+
+**Resultados medidos (mismo prompt, 60 tokens, api/generate no-stream)**:
+
+| Modelo | Cuant. | tok/s medido | Tier |
+|---|---|---|---|
+| deepseek-coder:1.3b | Q4_0 | 35.7 | Liviano (sondas rapidas) |
+| qwen2.5-coder:1.5b | Q4_K_M | 14.8 | Liviano |
+| qwen2.5-coder:3b | Q4_K_M | 11.2 | Liviano |
+| starcoder2:7b | Q4_0 | 7.3 | Base 7B (familia distinta) |
+| qwen2.5-coder:7b | Q4_K_M | 5.9 | Base 7B (principal) |
+| qwen2.5-coder:7b Q5_K_M (HF/bartowski) | Q5_K_M | 5.1 | Calidad |
+| deepseek-r1:7b | Q4_K_M | 4.9 | Razonamiento |
+| qwen2.5-coder:14b | Q4_K_M | 1.8 | Avanzado (solo pruebas puntuales) |
+
+**Hallazgos concretos**:
+
+1. **Tags de cuantificacion NO verificados son un error silencioso en
+   potencia**: `qwen2.5-coder:7b-q5_K_M` y `qwen2.5-coder:7b-q8_0` NO existen
+   en la libreria de Ollama ("pull model manifest: file does not exist").
+   La config quedo un tiempo con un alias roto. Regla: todo modelo listado
+   en configs debe existir en `ollama list` (criterio "instalado vs
+   listado", ya aplicado por sesion paralela en 10784b7).
+2. **Q5_K_M solo fue obtainable via HuggingFace**:
+   `hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M` (Ollama verifico
+   sha256 en la descarga). Procedencia documentada: cuantizador comunitario
+   bartowski sobre pesos oficiales Qwen; alcance limitado a matriz de
+   pruebas. Q5_K_M es el mejor accuracy/memoria en Pareto CPU
+   ([arXiv 2510.21970](https://www.arxiv.org/pdf/2510.21970)); aqui cuesta
+   ~0.8 tok/s respecto a Q4_K_M (5.1 vs 5.9) por +0.7 GB.
+3. **14B en CPU-only: 1.8 tok/s medidos** — inviable para iterar; se mantiene
+   instalado y listado solo para pruebas puntuales (razonamiento complejo
+   aislado). Estimaciones previas "~2-3 tok/s" eran optimistas.
+4. **starcoder2:7b publica Q4_0** (no Q4_K_M como se habia documentado) y
+   deepseek-coder:1.3b tambien Q4_0: perdida algo mayor, velocidad algo
+   mayor. Diversidad de familias justificada: la matriz prueba COMPLIANCE
+   de reglas, no solo calidad de codigo; familias/sizes distintos fallan
+   distinto.
+5. **deepseek-r1:7b** (descargado por sesion paralela) añade el tier
+   razonamiento: thinking largo a 4.9 tok/s; sin tool-calling fiable — es
+   la dimensión de prueba (deteccion de prompt-injection requiere razonar).
+
+**Alcances e inconvenientes (explicitos)**:
+
+- 8 modelos = ~31 GB en disco; solo 1 cabe en RAM con margen comodo (14B
+  Q4 ~9.3 GB con contexto; 32 GB totales, ~22-24 utiles). Ollama descarga
+  de disco a RAM bajo demanda (memory-mapped), sin problema de convivencia.
+- Velocidades medidas con prompt corto y contexto casi vacio; con contexto
+  lleno (32k) la generacion puede degradarse hasta ~30%.
+- La matriz sigue siendo EXCLUSIVAMENTE para pruebas de reglas P0/P1;
+  ningun modelo local es apto como principal de desarrollo (~6 tok/s max).
+- Ollama debe estar en ejecucion; sin servicio, los tres CLIs fallan en
+  voz alta (correcto, sin fallback).
+
+**Leccion**: medir, no estimar: dos estimaciones de la sesion paralela
+("~3 tok/s" para 14B, "Q4_K_M" para starcoder2) resultaron incorrectas al
+medir. P0.1 aplica a las afirmaciones que EL PROPIO equipo documenta.
+
+**Estado**: integrado y verificado (ronda 62 en docs/PRUEBAS.md).
