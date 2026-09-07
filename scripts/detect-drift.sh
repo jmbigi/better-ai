@@ -74,14 +74,16 @@ generate_baseline() {
     echo "# Format: <sha256>  <relative-path>"
     echo
     for config in "${CRITICAL_CONFIGS[@]}"; do
-        local full_path="${PROJECT_ROOT}/${config}"
-        local hash=$(compute_hash "$full_path")
+        full_path="${PROJECT_ROOT}/${config}"
+        hash=$(compute_hash "$full_path")
         echo "${hash}  ${config}"
     done
 }
 
 load_baseline() {
-    declare -gA BASELINE_HASHES
+    # Use a temp file as associative array (declare -gA not supported on macOS bash 3.x)
+    BASELINE_TMP="${PROJECT_ROOT}/.baseline_tmp"
+    : > "$BASELINE_TMP"
     if [[ ! -f "$BASELINE_FILE" ]]; then
         log_audit "WARNING" "Baseline file not found: $BASELINE_FILE"
         return 1
@@ -92,9 +94,16 @@ load_baseline() {
         [[ -z "$line" ]] && continue
         local hash=$(echo "$line" | awk '{print $1}')
         local path=$(echo "$line" | awk '{print $2}')
-        BASELINE_HASHES["$path"]="$hash"
+        echo "${hash}  ${path}" >> "$BASELINE_TMP"
     done < "$BASELINE_FILE"
     return 0
+}
+
+get_baseline_hash() {
+    local path="$1"
+    if [[ -f "${PROJECT_ROOT}/.baseline_tmp" ]]; then
+        awk -v p="$path" '$2 == p {print $1}' "${PROJECT_ROOT}/.baseline_tmp"
+    fi
 }
 
 check_drift() {
@@ -117,9 +126,9 @@ check_drift() {
     for config in "${CRITICAL_CONFIGS[@]}"; do
         local full_path="${PROJECT_ROOT}/${config}"
         local current_hash=$(compute_hash "$full_path")
-        local baseline_hash="${BASELINE_HASHES[$config]:-NOT_IN_BASELINE}"
+        local baseline_hash=$(get_baseline_hash "$config")
         
-        if [[ "$baseline_hash" == "NOT_IN_BASELINE" ]]; then
+        if [[ -z "$baseline_hash" ]]; then
             echo -e "  [NEW]    $config (not in baseline)"
             drift_details+=("NEW: $config")
             drift_found=true
@@ -151,10 +160,12 @@ check_drift() {
         echo "  3. Si NO son autorizados: RESTAURA desde git (git checkout -- <config>)"
         echo "  4. Requiere autorización explícita del programador para actualizar baseline"
         log_audit "ALERT" "Drift detection completed - ${#drift_details[@]} drifts found"
+        rm -f "$BASELINE_TMP"
         return 1
     else
         echo -e "\033[0;32m✅ Sin drift detectado - Todas las configs coinciden con baseline\033[0m"
         log_audit "INFO" "Drift detection completed - no drifts found"
+        rm -f "$BASELINE_TMP"
         return 0
     fi
 }
