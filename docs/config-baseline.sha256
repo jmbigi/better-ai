@@ -1,9 +1,9 @@
-# Config Baseline - Generated 2026-09-07T23:19:10Z
+# Config Baseline - Generated 2026-09-07T23:21:08Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
-442de0f01054ce238236c7cbfbb8381dfb0e240765cc56ab6b33f61f0c4a86ba  opencode.json
-048354e82989f2932256d7be5b0ca7b59dea4cb4f68aba79ff395392ca753320  kilo.json
+89fbd71de882ee52b5d2b447f2879f33e894b58420d48f0a304de5eeca447daa  opencode.json
+543e491969b0a79de44ed1796d98db329f24cae45d319166557db03bcbac3bb2  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
 d6e281c16ca35fe9016925e5880849a3fd658d217da4c2be2c5372e12c32ba01  AGENTS.md
 f0619f0be503de3eb36184533c86ea2000297d72f43c1595728760480fef2116  scripts/verificar-proyecto.sh
