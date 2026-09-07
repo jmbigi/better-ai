@@ -126,13 +126,13 @@ assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '
 allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
 assert set(allowed) == {'kilo', 'deepseek', 'openrouter'}, allowed
 "
-check "experimental.policies en opencode.json: deny all + allow opencode, opencode-go, kilo, deepseek" python3 -c "
+check "experimental.policies en opencode.json: deny all + allow opencode, opencode-go, kilo, deepseek, ollama" python3 -c "
 import json
 c = json.load(open('opencode.json'))
 policies = c.get('experimental', {}).get('policies', [])
 assert policies[0] == {'effect': 'deny', 'action': 'provider.use', 'resource': '*'}, policies[0]
 allowed = [p['resource'] for p in policies if p['effect'] == 'allow']
-assert set(allowed) == {'opencode', 'opencode-go', 'kilo', 'deepseek'}, allowed
+assert set(allowed) == {'opencode', 'opencode-go', 'kilo', 'deepseek', 'ollama'}, allowed
 "
 check "agente determinista: temperature/top_p en build, plan y audit (sin seed, sin maxSteps)" python3 -c "
 import json

@@ -1077,6 +1077,37 @@ se declara en PRUEBAS + LECCIONES en lugar de inventar el EMR.
 **Estado**: configuración aplicada y verificada; ejecución del test PENDIENTE de
 servicio de modelos (re-ejecutar: `python3 scripts/test-determinism.py`).
 
+---
+
+## 2026-09-07 — Configuración de modelos locales Ollama en opencode.json
+
+**Problema**: el programador pidió configurar los mejores modelos IA locales en
+el proyecto better-ai para su uso con opencode. El proyecto ya tenía una excepción
+documentada en AGENTS.md para modelos locales gratuitos (Ollama/llama.cpp en
+localhost), pero la config `opencode.json` no tenía el provider configurado.
+
+**Solución**: (1) añadir provider `ollama` a `opencode.json` con `api: "ollama"`,
+`options.baseURL: "http://localhost:11434/v1"` y 3 modelos definidos
+(`qwen2.5-coder:7b`, `llama3.1:8b`, `deepseek-coder-v2:16b`); (2) añadir
+`ollama` a `experimental.policies` como provider permitido; (3) verificar que el
+JSON es válido y que Ollama responde correctamente en `localhost:11434/v1`.
+
+**Evidencia**: `python3 -m json.tool opencode.json` → válido; `curl` a
+`localhost:11434/v1/chat/completions` con `qwen2.5-coder:7b` → respuesta
+correcta ("OK") en 37 tokens totales; `ollama list` muestra el modelo cargado
+(Q4_K_M, 4.7GB).
+
+**Lección**: la configuración de providers locales en opencode.json requiere
+seguir el esquema `ProviderConfig` (api, name, options.baseURL, models con
+propiedades id/name/family/tool_call/temperature). El provider debe estar
+también en `experimental.policies` como allow para que el runtime lo permita.
+Los modelos locales son útiles para pruebas de reglas (P0/P1) sin coste de API,
+pero no deben usarse como modelo principal de desarrollo (decisión documentada
+en AGENTS.md).
+
+**Estado**: configuración implementada y verificada; modelos listos para uso
+local.
+
 
 ---
 

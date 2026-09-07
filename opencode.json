@@ -1,12 +1,45 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "api": "ollama",
+      "name": "Ollama Local",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:7b": {
+          "id": "qwen2.5-coder:7b",
+          "name": "Qwen2.5 Coder 7B",
+          "family": "qwen2",
+          "tool_call": true,
+          "temperature": true
+        },
+        "llama3.1:8b": {
+          "id": "llama3.1:8b",
+          "name": "Llama 3.1 8B",
+          "family": "llama3",
+          "tool_call": true,
+          "temperature": true
+        },
+        "deepseek-coder-v2:16b": {
+          "id": "deepseek-coder-v2:16b",
+          "name": "DeepSeek Coder V2 16B",
+          "family": "deepseek",
+          "tool_call": true,
+          "temperature": true
+        }
+      }
+    }
+  },
   "experimental": {
     "policies": [
       { "effect": "deny", "action": "provider.use", "resource": "*" },
       { "effect": "allow", "action": "provider.use", "resource": "opencode" },
       { "effect": "allow", "action": "provider.use", "resource": "opencode-go" },
       { "effect": "allow", "action": "provider.use", "resource": "kilo" },
-      { "effect": "allow", "action": "provider.use", "resource": "deepseek" }
+      { "effect": "allow", "action": "provider.use", "resource": "deepseek" },
+      { "effect": "allow", "action": "provider.use", "resource": "ollama" }
     ]
   },
   "mcp": {
