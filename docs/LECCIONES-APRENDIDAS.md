@@ -1710,3 +1710,27 @@ siempre verificar:
 
 **Estado**: cambios integrados en los 3 subproyectos; verificadores alineados;
 push completado.
+
+## Refuerzo de P1.10: coherencia y criterio en cada cambio (2026-09-07)
+
+**Problema**: el programador pidio una regla nueva o mejora: "todos los cambios en el
+repositorio o aplicacion deben ser consistentes, coherentes y con mucho criterio".
+
+**Solucion/resultado**: se refuerzo P1.10 (renombrada "Coherencia y criterio en cada
+cambio; muestra y explica contradicciones") en lugar de crear una regla nueva, por
+solape con P1.10/P1.5/P1.2/P1.11 y por los precedentes anti-dilucion (leccion
+2026-08-15: reforzar, no duplicar; decision 26-08-2026 en ARQUITECTURA-DETERMINISMO).
+Cambios: `AGENTS.md` y `docs/REGLAS-COMPLETAS.md` (titulo + Error/Prevencion,
+titulos identicos entre ambos), `CHECKLIST.md` (seccion P1.10 con 2 items nuevos).
+Sin cambios de conteo (20 P0 / 36 P1 intactos).
+
+**Evidencia**: `bash scripts/verificar-proyecto.sh --pre-commit` en verde tras el
+cambio; `git diff` limitado a los 4 archivos previstos.
+
+**Leccion**: ante una peticion de "regla nueva", primero mapear contra las reglas
+existentes; si el comportamiento ya tiene duena, reforzar esa regla. El verificador
+hardcodea conteos (20 P0, 36 P1, 52 limitaciones, 50 errores) y exige titulos
+identicos AGENTS.md <-> REGLAS-COMPLETAS.md: una regla nueva dispara una cascada de
+sincronizacion que hay que planificar entera antes de tocar nada.
+
+**Estado**: integrado y verificado.

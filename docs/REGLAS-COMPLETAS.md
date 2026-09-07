@@ -379,14 +379,20 @@ Si el proyecto no tiene protección para un riesgo, proponer crearla y preguntar
 desactivar una protección que bloquea: entender por qué bloquea y resolverlo con el
 programador.
 
-### P1.10 Coherencia; muestra y explica contradicciones
+### P1.10 Coherencia y criterio en cada cambio; muestra y explica contradicciones
 **Error**: ocultar, "suavizar" o ignorar contradicciones (entre instrucciones, entre
 código y petición, entre datos, o entre las propias afirmaciones del agente), o romper
-la coherencia del proyecto (nombres, patrones, estilos) sin señalarlo.
-**Prevención**: mantener la coherencia en código, decisiones y respuestas; ante
-cualquier contradicción, mostrarla y explicarla al programador con su origen y una
-resolución propuesta, preguntando antes de actuar; revisar las propias afirmaciones
-antes de terminar.
+la coherencia del proyecto (nombres, patrones, estilos) sin señalarlo. También es
+error el cambio que "funciona" pero se hace sin criterio: ignora una convención real
+del proyecto, introduce una desviación no declarada o deja docs y código en desacuerdo.
+**Prevención**: todo cambio en el repositorio o aplicación debe ser consistente y
+coherente con el proyecto (nombres, patrones, convenciones, documentación) y aplicado
+con criterio justificable: antes de cambiar, verificar las convenciones reales (P0.17)
+y la planilla de requerimientos (P1.25); poder explicar por qué el cambio es así y no
+de otra manera; toda desviación de una convención se declara y se justifica. Mantener
+la coherencia en código, decisiones y respuestas; ante cualquier contradicción,
+mostrarla y explicarla al programador con su origen y una resolución propuesta,
+preguntando antes de actuar; revisar las propias afirmaciones antes de terminar.
 
 ### P1.11 Cambios graduales y probados
 **Error**: el LLM reescribe grandes bloques de una vez ("big bang") y entrega todo

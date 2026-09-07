@@ -184,8 +184,10 @@
 - [ ] ¿Si configuré/ajusté patrones de permisos, los probé contra el comando real que deben bloquear? (lección: los patrones matchean por tokens, no por subcadenas)
 - [ ] ¿Los deny específicos quedan DESPUÉS de cualquier ask genérico de su familia en el archivo? (lección: last matching rule wins)
 
-## Consistencia y coherencia (P1.10)
+## Consistencia, coherencia y criterio (P1.10)
 
+- [ ] ¿Cada cambio es consistente y coherente con el proyecto (nombres, patrones, convenciones, docs) y puedo justificar el criterio aplicado?
+- [ ] ¿Declaré y justifiqué toda desviación de una convención del proyecto?
 - [ ] ¿Mis cambios mantienen los nombres, patrones y convenciones del proyecto?
 - [ ] ¿Mostré y expliqué las contradicciones detectadas (instrucciones, código, datos, mis propias afirmaciones) en lugar de ocultarlas?
 - [ ] ¿Propuse una resolución y pregunté antes de actuar ante cada contradicción?

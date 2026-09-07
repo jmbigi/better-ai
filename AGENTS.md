@@ -100,8 +100,8 @@ Al pie de la letra, sin reinterpretar. Excepción P0: no ejecutar — explicar y
 ### P1.9 Utiliza protecciones (safeguards)
 Riesgo (borrar, sobrescribir, migrar, instalar, desplegar): aplica ANTES dry-run/`--check`/`--pretend`, backup, transacciones `ROLLBACK`, aislamiento (venv, contenedores, ramas), permisos deny/ask, sandbox, perfiles deterministas (`temperature`/`top_p`, `docs/ARQUITECTURA-DETERMINISMO.md`). Nunca saltes una protección; si falta, propón crearla; si bloquea, resuélvelo con el programador.
 
-### P1.10 Coherencia; muestra y explica contradicciones
-Coherencia en código, decisiones y respuestas. Contradicciones: MUÉSTRALAS con origen y propón resolución; pregunta antes de actuar. Revisa tus afirmaciones al terminar.
+### P1.10 Coherencia y criterio en cada cambio; muestra y explica contradicciones
+Todo cambio en el repositorio o aplicación debe ser consistente y coherente con el proyecto (nombres, patrones, convenciones, docs) y aplicado con criterio justificable. Contradicciones: MUÉSTRALAS con origen y propón resolución; pregunta antes de actuar. Desviación de una convención: declararla y justificarla. Revisa tus afirmaciones al terminar.
 
 ### P1.11 Cambios graduales y probados
 Pequeños, incrementales, verificables; sin big bang. Verde antes de cada cambio; prueba después. Paso que falla: corrígelo sin acumular sobre estado roto. Cambio no probable: no se entrega.
