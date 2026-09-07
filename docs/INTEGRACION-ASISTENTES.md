@@ -197,6 +197,7 @@ localmente en un Mac mini i7 2018 (6核, 32GB RAM, Intel UHD 630, sin GPU dedica
 | `qwen2.5-coder:7b` | 7B | 4.7GB | Q4_K_M | ~5.2 tok/s | Codigo, asistente general |
 | `qwen2.5-coder:3b` | 3B | 1.9GB | Q4_K_M | ~10 tok/s | Rapido, tareas ligeras |
 | `deepseek-r1:7b` | 7B | 4.7GB | Q4_K_M | ~5 tok/s | Razonamiento, matematicas |
+| `qwen2.5-coder:1.5b` | 1.5B | 986MB | Q4_K_M | ~15 tok/s | Ultra rapido, validacion de reglas |
 
 ### Modelos recomendados segun tier (investigacion 2026-09-07)
 

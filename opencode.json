@@ -28,6 +28,13 @@
           "family": "deepseek",
           "tool_call": true,
           "temperature": true
+        },
+        "qwen2.5-coder:1.5b": {
+          "id": "qwen2.5-coder:1.5b",
+          "name": "Qwen2.5 Coder 1.5B (986MB, Q4_K_M)",
+          "family": "qwen2",
+          "tool_call": true,
+          "temperature": true
         }
       }
     }

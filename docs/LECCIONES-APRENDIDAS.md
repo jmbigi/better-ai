@@ -1941,3 +1941,34 @@ deploy repetible, y el wipe se descubre solo si se audita el archivo.
 "Se aplico en su dia" no es evidencia de que siga aplicado (P0.1).
 
 **Estado**: integrado y verificado (ronda 61 en docs/PRUEBAS.md).
+
+---
+
+## Modelo 1.5b instalado sin estar en configs + kilo.json con npm innecesario (2026-09-07)
+
+**Problema**: durante la revision del estado actual se detectaron dos errores:
+
+1. `qwen2.5-coder:1.5b` estaba instalado via `ollama pull` pero NO estaba
+   listado en `opencode.json` ni `kilo.json`. El modelo existia en el
+   sistema pero era invisible para los asistentes.
+2. `kilo.json` tenia `"npm": "@ai-sdk/openai-compatible"` en el provider
+   ollama, campo innecesario que podia causar confusion (el runtime de
+   kilocode usa el campo `api` o infiere el SDK, no `npm`).
+
+**Solucion**:
+- Anadir `qwen2.5-coder:1.5b` a ambos configs (`opencode.json` y `kilo.json`)
+  con metadata completa (id, name, family, tool_call, temperature).
+- Eliminar campo `npm` de `kilo.json` provider ollama (consistente con
+  `opencode.json` que ya lo habia eliminado).
+- Actualizar tabla de modelos en `docs/INTEGRACION-ASISTENTES.md`.
+- Regenerar `config-baseline.sha256`.
+
+**Evidencia**: `python3 -c "import json; ..."` valida ambos JSONs;
+`verificar-proyecto.sh` muestra 48 OK, 3 FALLOS (pre-existente).
+
+**Leccion**: cuando se instalen modelos via `ollama pull`, verificar
+siempre que queden listados en TODOS los configs (opencode.json,
+kilo.json). Un modelo instalado pero no listado es un modelo inutil
+para el workflow. Usar script de verificacion para detectar desfases.
+
+**Estado**: corregido y commiteado.
