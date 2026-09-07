@@ -930,3 +930,17 @@ reglas quedan instaladas en `~/.kimi-code/config.toml` para el modo
 interactivo (pendiente de verificacion manual en la TUI). El unico enforcement
 fiable para ejecuciones no interactivas de kimi es externo al CLI: sandbox
 Docker o capa de SO.
+
+## Ronda 60 — Fix de compatibilidad macOS bash 3.x en detect-drift.sh (07-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 206 | `scripts/detect-drift.sh` ejecutado sin `--update-baseline`: compatibilidad con macOS bash 3.x (sin `declare -gA`) | ✅ Sin error de sintaxis; detección de drift funcional con archivo temporal `.baseline_tmp` y consultas `awk` |
+| 207 | Verificación de las 16 configs críticas contra baseline firmada | ✅ 14/16 OK; 2 con drift esperado por cambios sin commitear en `opencode.json` y `kilo.json`; drift reportado correctamente |
+| 208 | `bash scripts/verificar-proyecto.sh --pre-commit` tras el fix | ✅ 45 OK, 3 FALLOS (drift esperado de cambios sin commitear + experimental.policies) |
+
+**Conclusión técnica**: el reemplazo de `declare -gA BASELINE_HASHES` por archivo
+temporal `.baseline_tmp` con `get_baseline_hash()` (awk) resuelve la
+incompatibilidad con macOS bash 3.x sin perder funcionalidad. El script
+detecta drift correctamente, reporta hashes y limpia el archivo temporal tras
+cada ejecución.

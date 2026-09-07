@@ -21,6 +21,11 @@
         "effect": "allow",
         "action": "provider.use",
         "resource": "openrouter"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "ollama"
       }
     ]
   },
@@ -71,6 +76,21 @@
         "kilo-auto/free",
         "kilo-auto/efficient"
       ]
+    },
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local, matriz de pruebas)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:7b": {
+          "name": "Qwen2.5 Coder 7B local (matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:3b": {
+          "name": "Qwen2.5 Coder 3B local (matriz pruebas P0/P1)"
+        }
+      }
     }
   },
   "permission": {

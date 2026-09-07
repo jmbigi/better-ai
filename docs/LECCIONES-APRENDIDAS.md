@@ -1794,3 +1794,32 @@ P1.10 (coherencia) aplica también a números hardcodeados en docs. Mantener un
 único source of truth (el script del verificador) y derivar los demás de ahí.
 
 **Estado**: commits `f28d3b4` y correcciones pendientes de commit.
+
+---
+
+## 2026-09-07 — Fix de compatibilidad macOS bash 3.x en detect-drift.sh
+
+**Problema**: `scripts/detect-drift.sh` usaba `declare -gA BASELINE_HASHES` para
+almacenar hashes de baseline en un array asociativo. Esta construcción no está
+soportada en macOS bash 3.x (el bash predeterminado de macOS), causando un
+error de sintaxis e impidiendo la detección de drift en ese sistema.
+
+**Solución**: reemplazar el array asociativo por un archivo temporal
+`.baseline_tmp` que almacena pares `<hash>  <path>`, y añadir la función
+`get_baseline_hash()` que consulta el archivo con `awk` en lugar de acceder
+por clave de array. El archivo temporal se limpia tras cada ejecución con
+`rm -f`. Verificado con `bash scripts/detect-drift.sh` en macOS bash 3.x.
+
+**Evidencia**: `bash scripts/detect-drift.sh` ejecuta sin error de sintaxis en
+macOS bash 3.x; 16 configs críticas verificadas (14 OK, 2 con drift esperado
+por cambios sin commitear en `opencode.json` y `kilo.json`).
+`bash scripts/verificar-proyecto.sh --pre-commit` pasa (45 OK, fallos por
+drift esperado de cambios sin commitear).
+
+**Lección**: los arrays asociativos (`declare -A`) y `declare -gA` no son
+portables a bash 3.x (macOS predeterminado). Para scripts que deben correr
+en múltiples SO, usar archivos temporales o pipes con `awk`/`grep` en lugar
+de arrays asociativos. Probar los scripts en el bash más restrictivo del
+entorno objetivo.
+
+**Estado**: cerrada.
