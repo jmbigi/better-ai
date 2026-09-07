@@ -8,52 +8,62 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen2.5-coder:7b": {
-          "id": "qwen2.5-coder:7b",
-          "name": "Qwen2.5 Coder 7B (4.7GB, Q4_K_M)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
-        },
-        "qwen2.5-coder:3b": {
-          "id": "qwen2.5-coder:3b",
-          "name": "Qwen2.5 Coder 3B (1.9GB, Q4_K_M)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
-        },
-        "deepseek-r1:7b": {
-          "id": "deepseek-r1:7b",
-          "name": "DeepSeek R1 7B (4.7GB, Q4_K_M)",
-          "family": "deepseek",
-          "tool_call": true,
-          "temperature": true
-        },
         "qwen2.5-coder:1.5b": {
-          "id": "qwen2.5-coder:1.5b",
-          "name": "Qwen2.5 Coder 1.5B (986MB, Q4_K_M)",
-          "family": "qwen2",
-          "tool_call": true,
-          "temperature": true
+          "name": "Qwen2.5 Coder 1.5B local (liviano, matriz pruebas P0/P1)"
+        },
+        "deepseek-coder:1.3b": {
+          "name": "DeepSeek Coder 1.3B local (liviano, matriz pruebas P0/P1)"
         },
         "starcoder2:7b": {
-          "id": "starcoder2:7b",
-          "name": "StarCoder2 7B (4.0GB, Q4_K_M)",
-          "family": "starcoder",
-          "tool_call": true,
-          "temperature": true
+          "name": "StarCoder2 7B local (programación especializada, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:3b": {
+          "name": "Qwen2.5 Coder 3B local (liviano, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:7b": {
+          "name": "Qwen2.5 Coder 7B Q4_K_M local (base, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:14b": {
+          "name": "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas P0/P1)"
+        },
+        "deepseek-r1:7b": {
+          "name": "DeepSeek R1 7B local (razonamiento, matriz pruebas P0/P1)"
         }
       }
     }
   },
   "experimental": {
     "policies": [
-      { "effect": "deny", "action": "provider.use", "resource": "*" },
-      { "effect": "allow", "action": "provider.use", "resource": "opencode" },
-      { "effect": "allow", "action": "provider.use", "resource": "opencode-go" },
-      { "effect": "allow", "action": "provider.use", "resource": "kilo" },
-      { "effect": "allow", "action": "provider.use", "resource": "deepseek" },
-      { "effect": "allow", "action": "provider.use", "resource": "ollama" }
+      {
+        "effect": "deny",
+        "action": "provider.use",
+        "resource": "*"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "opencode"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "opencode-go"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "kilo"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "deepseek"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "ollama"
+      }
     ]
   },
   "mcp": {
@@ -75,13 +85,21 @@
     },
     "verify-local": {
       "type": "local",
-      "command": ["bash", "scripts/verificar-proyecto.sh"],
+      "command": [
+        "bash",
+        "scripts/verificar-proyecto.sh"
+      ],
       "enabled": true,
       "cwd": "${workspace}"
     },
     "nemo-guardrails": {
       "type": "local",
-      "command": ["nemoguardrails", "server", "--config", ".opencode/guardrails"],
+      "command": [
+        "nemoguardrails",
+        "server",
+        "--config",
+        ".opencode/guardrails"
+      ],
       "enabled": false,
       "cwd": "${workspace}",
       "environment": {
