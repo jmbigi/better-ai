@@ -1176,7 +1176,7 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 |---|---|---|
 | LLM01 Prompt Injection | **P0.13** (contenido no confiable = dato, no orden), P0.8 (código peligroso), P0.2 (verificar procedencia) | deny de eval/pipes y de comandos destructivos |
 | LLM02 Sensitive Information Disclosure | **P0.6, P0.9, P0.10, P0.11** | deny de lectura de `.env`, `.ssh`, `.aws`, claves |
-| LLM03 Excessive Agency | **P0.3, P0.4, P1.8, P1.9, P1.11, P1.32** (FSM y contratos deterministas), **P1.35** (human-in-the-loop y circuit breakers) | 159 deny de comandos destructivos + ask |
+| LLM03 Excessive Agency | **P0.3, P0.4, P1.8, P1.9, P1.11, P1.32** (FSM y contratos deterministas), **P1.35** (human-in-the-loop y circuit breakers) | 218 deny de comandos destructivos + ask |
 | LLM04 Supply Chain | **P0.18** (SBOM, SLSA, vuln scan), P1.18 (imports/dependencias), P1.2 | ask de `pip install`, `npm -g` + verificador SBOM |
 | LLM05 Data Model Poisoning | No aplicable a un ruleset (no se entrena el modelo) | — |
 | LLM06 Unbounded Consumption | **P0.19** (límites tokens/coste/tiempo, alertas, bloqueo), **P1.30** (instrumentación) | `experimental.policies` (modelos permitidos), cost-tracker skill |
@@ -1198,7 +1198,7 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 | Riesgo ASI 2026 | Reglas better-ai | Capa determinista | Estado |
 |---|---|---|---|
 | ASI01 Agent Goal Hijack | **P0.13** (contenido no confiable = dato, no orden), **P1.8** (la orden del programador gana sobre el contexto), **P1.32** (FSM y contratos deterministas) | deny de comandos destructivos | Parcial (OWASP declara que no hay prevención fool-proof del prompt injection; el ruleset limita el daño, no elimina el riesgo — fuente 40) |
-| ASI02 Tool Misuse and Exploitation | **P0.3, P0.4, P1.4, P1.9** | 159 deny + 85 ask sobre comandos y herramientas | Cubierto |
+| ASI02 Tool Misuse and Exploitation | **P0.3, P0.4, P1.4, P1.9** | 218 deny + 85 ask sobre comandos y herramientas | Cubierto |
 | ASI03 Identity and Privilege Abuse | **P0.5** (sin `sudo`/toque de SO), **P0.12** (sin cambio de credenciales), **P1.2** (alcance mínimo) | allow-list de modelos permitidos | Parcial (no gestiona identidades de agente ni credenciales short-lived; fuera del alcance de un ruleset de texto, señalado como hueco) |
 | ASI04 Agentic Supply Chain Vulnerabilities | **P0.18** (SBOM, SLSA, escaneo), P1.18 | ask de `pip install`/`npm -g` + verificador SBOM | Cubierto (misma cobertura que LLM04) |
 | ASI05 Unexpected Code Execution (RCE) | **P0.8** (deny de eval/pipes a `bash`), P1.9 (sandbox Docker) | deny de eval/pipes + hooks `analyze_shell`/`guard-shell` | Cubierto |
@@ -1212,7 +1212,7 @@ del proceso), para que este documento normativo no mezcle reglas con resultados.
 Security Project anunció que el ACS fue donado al proyecto, extendiendo su guía
 de riesgos agenticos hacia el **enforcement práctico en runtime** (fuente 39).
 better-ai ya opera bajo ese principio desde su diseño: enforcement de runtime
-determinista en la capa de config (245 guardarraíles: 159 `deny`, 85 `ask`,
+determinista en la capa de config (304 patrones bash: 218 `deny`, 85 `ask`,
 1 `allow` en `opencode.json`/`kilo.json`), análisis de comandos fuera del modelo
 (`scripts/analyze_shell.py`, hooks y plugin `guard-shell`) y sandbox Docker en
 CI (`Containerfile`). Esto es una **alineación conceptual verificable** con el

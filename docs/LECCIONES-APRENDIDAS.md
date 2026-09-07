@@ -598,7 +598,7 @@ especializados ni scan de formatos de API keys.
 `code-reviewer.md` (`edit: deny`, bash restringido al verificador); (3) checks
 nuevos del verificador: formatos de API keys (`sk-`, `ghp_`, `AKIA`, `AIza`,
 `xoxb-`, `PRIVATE KEY`), `eval`/`exec` en scripts, y existencia de los agentes.
-Totales: 245 patrones bash (159 deny, 85 ask) + 14 edit + 14 read.
+Totales: 304 patrones bash (218 deny, 85 ask) + 14 edit + 14 read.
 **Evidencia**: pruebas 120-133 de `docs/PRUEBAS.md` — denies probados con config
 MÍNIMA aislada (matcher real, sin reglas de texto: `cat dummy-id_rsa-test.txt`,
 `cat dummy.ssh/control.txt`, `cat -n dummy.ssh/control.txt`, `read` de id_rsa → 4/4
@@ -952,8 +952,8 @@ variables de entorno; auditar historial si el repo llega a ser público).
 ## 2026-08-21 — Agregada kilocode como opción de IA de programación
 
 **Problema**: el ruleset better-ai estaba documentado solo para opencode. La config
-`kilo.json` (para kilocode) fue creada con los mismos 245 guardarraíles de permisos
-(159 `deny`, 85 `ask`, 1 `allow`) que `opencode.json`, pero con `enabled_providers:
+`kilo.json` (para kilocode) fue creada con los mismos 304 patrones de permisos
+(218 `deny`, 85 `ask`, 1 `allow`) que `opencode.json`, pero con `enabled_providers:
 ["kilo", "deepseek", "openrouter"]` y `$schema: https://app.kilo.ai/config.json`.
 La documentación (AGENTS.md, README, verificador) no reflejaba kilocode.
 
@@ -962,7 +962,7 @@ La documentación (AGENTS.md, README, verificador) no reflejaba kilocode.
 documenta ambas herramientas en la sección "Entorno del proyecto" con sus providers
 y modelos permitidos (precio bajo); (3) README agrega fila `kilo.json` y actualiza
 instrucciones de uso para ambas herramientas; (4) `scripts/verificar-proyecto.sh`
-verifica `kilo.json` (245 patrones, providers, edit/read deny) y comprueba que
+verifica `kilo.json` (304 patrones, providers, edit/read deny) y comprueba que
 `opencode.json` tiene los mismos permisos bash; (5) `.kilo/agents/` enlaza a
 `.opencode/agents/` (misma configuración de agentes subagente de solo lectura); (6)
 `.kilo/package.json` con `@kilocode/plugin` y `@kilocode/cli` v7.4.23.
@@ -1765,3 +1765,32 @@ identicos AGENTS.md <-> REGLAS-COMPLETAS.md: una regla nueva dispara una cascada
 sincronizacion que hay que planificar entera antes de tocar nada.
 
 **Estado**: integrado y verificado.
+
+---
+
+## Corrección de conteos obsoletos y proveedor kimi→ollama (2026-09-07)
+
+**Problema**: tras el commit `522b6ea` (feat: 50 nuevos patrones deny), los conteos
+de patrones en la documentación quedaron desactualizados (245→304 patrones totales,
+159→218 deny). Además, `README.md` y `kilo.json` referenciaban a `kimi` como
+proveedor permitido cuando ya fue reemplazado por `ollama`.
+
+**Solución**:
+- Corregir conteos en 10 archivos: `AGENTS.md`, `README.md`, `REGLAS-COMPLETAS.md`,
+  `PRUEBAS.md`, `LECCIONES-APRENDIDAS.md`, `INTEGRACION-ASISTENTES.md`,
+  `MIGRATION.md`, `red-team-denies/SKILL.md`, `owasp-mapping/SKILL.md`,
+  `security-audit/SKILL.md`.
+- Eliminar referencias a `kimi` en `README.md` (policies) y `kilo.json`.
+- Regenerar `config-baseline.sha256` con `scripts/detect-drift.sh --update-baseline`.
+- Commit `f28d3b4`: "feat: add local Ollama models configuration for rule testing"
+  (4 archivos, +70/-6).
+
+**Evidencia**: `git diff --stat` mostró 10 archivos, 23 insertions, 23 deletiones;
+`git log --oneline` confirmó commit `f28d3b4` push a `origin/main`.
+
+**Lección**: cuando se añaden patrones deny de forma masiva, hay que actualizar
+TODOS los conteos en la documentación de forma atómica (mismo commit). La regla
+P1.10 (coherencia) aplica también a números hardcodeados en docs. Mantener un
+único source of truth (el script del verificador) y derivar los demás de ahí.
+
+**Estado**: commits `f28d3b4` y correcciones pendientes de commit.

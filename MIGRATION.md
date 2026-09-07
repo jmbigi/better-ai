@@ -131,7 +131,7 @@ bash scripts/verificar-proyecto.sh
 
 | Aspecto | Otros rulesets | better-ai |
 |---------|----------------|-----------|
-| **Seguridad** | Solo reglas de texto | **Reglas de texto + deny deterministas** (245 patrones) |
+| **Seguridad** | Solo reglas de texto | **Reglas de texto + deny deterministas** (304 patrones) |
 | **Modelos** | Cualquier modelo | **Solo modelos permitidos** (experimental.policies) |
 | **Verificación** | Manual / CI externa | **verificar-proyecto.sh** + hook pre-commit |
 | **Red-team** | Opcional | **probar-denies.sh** (159 denies vs matcher real) |
@@ -160,7 +160,7 @@ bash scripts/verificar-proyecto.sh
 → Verifica que `AGENTS.md` esté en la raíz del proyecto (no en subdirectorio)
 
 ### "El deny no bloquea mi comando"
-→ Verifica que `opencode.json` tenga los 245 patrones y orden correcto (asks antes que denies)
+→ Verifica que `opencode.json` tenga los 304 patrones y orden correcto (asks antes que denies)
 
 ### "El agente usa modelo no permitido"
 → Verifica `experimental.policies` en config (deny all + allow list)

@@ -1,6 +1,6 @@
 ---
 name: red-team-denies
-description: Ejecuta red-team automatizado de los 159 deny patterns contra el matcher REAL de opencode
+description: Ejecuta red-team automatizado de los 218 deny patterns contra el matcher REAL de opencode
 license: CC BY-SA 4.0
 compatibility: opencode
 metadata:
@@ -10,7 +10,7 @@ metadata:
 
 ## Qué hace
 
-Ejecuta `scripts/probar-denies.sh` que prueba cada uno de los 159 patrones `deny` de `opencode.json`/`kilo.json` contra el **matcher real de opencode** (config mínima aislada, sin AGENTS.md) con variantes canónicas seguras (dummies en /tmp, --help/--version, puertos inexistentes).
+Ejecuta `scripts/probar-denies.sh` que prueba cada uno de los 218 patrones `deny` de `opencode.json`/`kilo.json` contra el **matcher real de opencode** (config mínima aislada, sin AGENTS.md) con variantes canónicas seguras (dummies en /tmp, --help/--version, puertos inexistentes).
 
 ## Cuándo usarme
 

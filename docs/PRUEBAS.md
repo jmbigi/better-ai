@@ -648,8 +648,8 @@ Playwright consoleMessages (200).
 
 ## Compatibilidad kilocode (agregado 2026-08-21)
 
-- `kilo.json` (config para kilocode) tiene **los mismos 245 patrones de permisos
-  bash** (159 `deny`, 85 `ask`, 1 `allow`) que `opencode.json` — verificado con
+- `kilo.json` (config para kilocode) tiene **los mismos 304 patrones de permisos
+  bash** (218 `deny`, 85 `ask`, 1 `allow`) que `opencode.json` — verificado con
   `python3 -c "import json; a=json.load(open('kilo.json'))['permission']['bash']; b=json.load(open('opencode.json'))['permission']['bash']; assert a==b"` (exit 0).
 - Los `deny` de `kilo.json` son idénticos a los de `opencode.json`; por tanto, el
   **red-team de `scripts/probar-denies.sh` (154/154 verificados)** aplica a kilocode

@@ -90,7 +90,7 @@ por modo: `.roo/rules-{modeSlug}/` y `.roorules-{modeSlug}`. Roo Code carga
 
 Garantia honesta: en ambas herramientas estas reglas son instrucciones de
 texto inyectadas en el system prompt. No hay bloqueo determinista equivalente
-a los 159 `deny` de `opencode.json` / `kilo.json`; el cumplimiento depende
+a los 218 `deny` de `opencode.json` / `kilo.json`; el cumplimiento depende
 del modelo y solo los permisos nativos de cada extension (aprobaciones de
 herramientas, auto-approve denylists, etc.) ofrecen control real de
 ejecucion, tal como se advierte en "Verificacion completa".

@@ -41,7 +41,7 @@ skill owasp-mapping
 |--------|------------------|-------------------|--------|
 | LLM01 Prompt Injection | P0.13, P0.8, P0.2 | deny eval/pipes | ✅ |
 | LLM02 Sensitive Info Disclosure | P0.6, P0.9, P0.10, P0.11 | deny .env/.ssh/.aws/claves | ✅ |
-| LLM03 Excessive Agency | P0.3, P0.4, P1.8, P1.9, P1.11 | 159 deny + ask | ✅ |
+| LLM03 Excessive Agency | P0.3, P0.4, P1.8, P1.9, P1.11 | 218 deny + ask | ✅ |
 | **LLM04 Supply Chain** | **P0.18, P1.18, P1.2** | ask pip/npm + verificador SBOM | ✅ |
 | LLM05 Data Model Poisoning | N/A (no entrena modelo) | — | N/A |
 | **LLM06 Unbounded Consumption** | **P0.19, P1.30** | experimental.policies + cost-tracker | ✅ |
@@ -57,7 +57,7 @@ Estado honesto de cobertura (detalle en REGLAS-COMPLETAS.md §7, fuentes 37-40):
 | Riesgo | Estado | Reglas principales |
 |--------|--------|--------------------|
 | ASI01 Agent Goal Hijack | Parcial | P0.13, P1.8, P1.32 (sin prevención fool-proof, declarado) |
-| ASI02 Tool Misuse and Exploitation | ✅ | P0.3, P0.4, P1.4, P1.9 + 159 deny |
+| ASI02 Tool Misuse and Exploitation | ✅ | P0.3, P0.4, P1.4, P1.9 + 218 deny |
 | ASI03 Identity and Privilege Abuse | Parcial | P0.5, P0.12, P1.2 (hueco: sin identidades de agente) |
 | ASI04 Agentic Supply Chain Vulnerabilities | ✅ | P0.18, P1.18 (misma cobertura que LLM04) |
 | ASI05 Unexpected Code Execution (RCE) | ✅ | P0.8 + sandbox Docker (P1.9) |
@@ -68,7 +68,7 @@ Estado honesto de cobertura (detalle en REGLAS-COMPLETAS.md §7, fuentes 37-40):
 | ASI10 Rogue Agents | Parcial | P0.19, P1.30, P1.35 (sin kill switch probado) |
 
 **ACS**: el Agent Control Standard (anunciado 02-09-2026) busca enforcement de
-runtime para agentes; la arquitectura del proyecto (245 guardarraíles deny/ask +
+runtime para agentes; la arquitectura del proyecto (304 patrones bash deny/ask +
 `analyze_shell.py` + plugin `guard-shell` + sandbox Docker) se alinea
 conceptualmente, sin certificación formal contra el texto del ACS.
 

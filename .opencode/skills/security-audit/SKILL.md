@@ -37,7 +37,7 @@ bash scripts/verificar-proyecto.sh
 ### Verificador determinista (verificar-proyecto.sh)
 - 20 reglas P0 / 31 reglas P1 en AGENTS.md
 - IDs coherentes entre AGENTS.md, REGLAS-COMPLETAS.md, README.md, CHECKLIST.md
-- 245 patrones de permisos bash (159 deny, 85 ask)
+- 304 patrones de permisos bash (218 deny, 85 ask)
 - experimental.policies: deny all + allow list
 - Sin .env versionado, sin IPs/emails/claves en archivos
 - SBOM generado, grype/syft disponibles
