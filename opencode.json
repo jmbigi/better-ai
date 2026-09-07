@@ -35,6 +35,13 @@
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
+        },
+        "starcoder2:7b": {
+          "id": "starcoder2:7b",
+          "name": "StarCoder2 7B (4.0GB, Q4_K_M)",
+          "family": "starcoder",
+          "tool_call": true,
+          "temperature": true
         }
       }
     }

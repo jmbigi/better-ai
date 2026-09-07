@@ -1972,3 +1972,40 @@ kilo.json). Un modelo instalado pero no listado es un modelo inutil
 para el workflow. Usar script de verificacion para detectar desfases.
 
 **Estado**: corregido y commiteado.
+
+---
+
+## Error recurrente: provider duplicado + modelo no instalado en kilo.json (2026-09-07)
+
+**Problema**: durante el merge con el remote, el mismo error de provider
+duplicado en `opencode.json` re-aparecio (remote anadio un segundo bloque
+`provider` con `npm` innecesario). Ademas, el remote agrego modelos no
+instalados (`deepseek-coder:1.3b`, `qwen2.5-coder:7b-q5_K_M`,
+`qwen2.5-coder:14b`) y un modelo instalado pero no listado (`starcoder2:7b`).
+
+**Errores detectados**:
+1. `opencode.json`: segundo bloque `provider` con `npm` innecesario
+2. `kilo.json`: `deepseek-coder:1.3b` listado pero NO instalado
+3. `kilo.json`: `starcoder2:7b` instalado pero NO listado
+4. `opencode.json`: `starcoder2:7b` instalado pero NO listado
+
+**Solucion**:
+- Eliminar segundo bloque `provider` de `opencode.json` (conservar solo el
+  primero con `api: "ollama"` y modelos reales)
+- Sincronizar ambos configs con `ollama list`:
+  - 5 modelos: qwen2.5-coder:7b, 3b, 1.5b, deepseek-r1:7b, starcoder2:7b
+  - Eliminar deepseek-coder:1.3b, qwen2.5-coder:7b-q5_K_M, 14b (no instalados)
+  - Anadir starcoder2:7b (instalado, faltaba)
+- Actualizar `docs/INTEGRACION-ASISTENTES.md` con los 5 modelos
+
+**Evidencia**: `python3 -c "import json; ..."` valida ambos JSONs;
+`ollama list | awk '{print $1}'` muestra 5 modelos; ambos configs listan
+los mismos 5 modelos.
+
+**Leccion**: el remote puede reintroducir errores que ya se corrigieron.
+Siempre hacer `git pull` y revisar los cambios antes de push. Usar un
+script de verificacion que compare `ollama list` contra los configs para
+detectar desfases automaticamente. Considerar anadir esta verificacion
+a `verificar-proyecto.sh`.
+
+**Estado**: corregido y commiteado.
