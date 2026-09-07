@@ -1879,3 +1879,65 @@ como check basico.
 - Descargas grandes (9GB+) son lentas por velocidad de red (~2.2 MB/s)
 
 **Estado**: documentada en `docs/INTEGRACION-ASISTENTES.md` (seccion "Modelos locales recomendados").
+
+---
+
+## 2026-09-07 — Actualizacion de kimi (0.41.0) borro las reglas del config global; deploy idempotente + modelos locales
+
+**Problema** (dos hallazgos durante la configuracion de modelos locales):
+
+1. El commit de la ronda 59 (reglas aplicadas a `~/.kimi-code/config.toml`)
+   quedo **anulado silenciosamente**: la actualizacion automatica de kimi
+   (`tui.toml [upgrade].auto_install = true`, refresh managed) reescribio el
+   config global y las 333 `[[permission.rules]]` + `[[hooks]]` desaparecieron.
+   Nadie lo detecto hasta revisar el archivo hoy. La copia de seguridad
+   anunciada en su momento (`~/.secrets-backup/`) tampoco existia.
+2. `scripts/detect-drift.sh` no cubre configs fuera del repo (como el config
+   global de kimi), asi que el wipe no podia saltar por ningun guardarraiz
+   determinista.
+
+**Solucion**:
+
+- `scripts/deploy-kimi-config.sh`: deploy **idempotente** del adaptador
+  (provider+modelos Ollama, 333 reglas + hook) entre marcadores
+  `# >>> better-ai deploy >>>` / `# <<< better-ai deploy <<<`, con backup
+  con timestamp, extraccion verificada de `.kimi-code/local.toml` (falla si
+  no hay exactamente 333 reglas) y autoverificacion de conteos post-deploy.
+  Idempotencia confirmada por hash estable entre ejecuciones.
+- Re-aplicado en `~/.kimi-code/config.toml` (backup previo en
+  `config.toml.bak-20260907`).
+
+**Seleccion de modelos locales** (hardware medido: i7-8700B 6C/12T, 32 GB
+RAM, GPU Intel UHD 630 -> inferencia por CPU, sin aceleracion real):
+
+| Modelo | Decision | Motivo (evidencia) |
+|---|---|---|
+| qwen2.5-coder:7b (Q4_K_M) | **Incluido** (principal de pruebas) | ~6 tok/s medidos en este equipo; mejor codigo por GB en CPU ([PromptQuorum 2026](https://www.promptquorum.com/local-llms/best-local-llms-2026): 88% HumanEval, ~5 GB RAM; [OrcaRouter 2026-08](https://www.orcarouter.ai/blog/best-local-llm-for-coding): "the reliable" en 8 GB) |
+| qwen2.5-coder:3b (Q4) | **Incluido** (tier rapido) | Sondas rapidas de la matriz de reglas sin esperar al 7B |
+| llama3.1:8b | **Excluido** | Generalista, inferior a Qwen2.5-Coder en codigo; no descargado |
+| deepseek-coder-v2:16b | **Excluido** | ~9.6 GB; en CPU seria ~2-3 tok/s (inutil para la matriz); no descargado |
+| qwen2.5-coder:14b | **Diferido** | 32 GB RAM sobran, pero ~3-4 tok/s estimados sin medir; se decidio tras medir |
+| qwen2.5-coder:1.5b, deepseek-coder:1.3b, starcoder2:7b | **Excluido** | Redundantes (3b cubre el tier rapido) o peor calidad que el 7B |
+
+**Alcances, inconvenientes y limitaciones** (explicitos):
+
+- Modelos locales: EXCLUSIVAMENTE matriz de pruebas P0/P1. NUNCA modelo
+  principal de desarrollo (regla vigente; `ollama` entra en allow list solo
+  con esa mision).
+- ~6 tok/s hace inviable cualquier uso interactivo serio; solo sondas
+  cortas de reglas.
+- Ollama debe estar corriendo (`ollama serve`); si no, el provider falla
+  (fail fast, sin fallback silencioso).
+- Tras CADA actualizacion de kimi: re-ejecutar
+  `bash scripts/deploy-kimi-config.sh` (la auto-actualizacion puede volver
+  a borrar el bloque; el script es idempotente).
+- La validacion de sintaxis TOML real ocurre al iniciar sesion de kimi;
+  el script solo verifica conteos (limitacion declarada).
+
+**Leccion**: los configs gestionados por la propia herramienta (managed
+refresh, auto-update) NO son almacenamiento fiable para guardarrailes:
+cualquier cambio manual debe vivir tambien en el repo con un script de
+deploy repetible, y el wipe se descubre solo si se audita el archivo.
+"Se aplico en su dia" no es evidencia de que siga aplicado (P0.1).
+
+**Estado**: integrado y verificado (ronda 61 en docs/PRUEBAS.md).
