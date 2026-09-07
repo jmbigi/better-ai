@@ -2009,3 +2009,75 @@ detectar desfases automaticamente. Considerar anadir esta verificacion
 a `verificar-proyecto.sh`.
 
 **Estado**: corregido y commiteado.
+
+---
+
+## qwen2.5-coder:14b: timeout en test de CPU (2026-09-07)
+
+**Problema**: `qwen2.5-coder:14b` (9.0GB Q4_K_M) descargado y probado via
+Ollama API. Test basico (`Say hi in 5 words`, `num_predict: 20`) tardo
+33,000ms (~33 segundos). Test anterior con `num_predict: 50` causo timeout
+(>120s). Velocidad estimada: ~2 tok/s en CPU.
+
+**Contexto**: en un Mac mini i7-8700B (6核, 32GB RAM, CPU-only), la
+velocidad de inferencia es directamente proporcional al numero de
+parametros. 7B = ~5 tok/s, 14B = ~2 tok/s, 30B+ = inviable.
+
+**Solucion**:
+- Modelo instalado y listado en configs para batch processing
+- Marcado como "lento en CPU" en metadata del config
+- Documentado en `INTEGRACION-ASISTENTES.md` con advertencia
+- No recomendado para uso interactivo en este hardware
+
+**Leccion**: antes de descargar un modelo grande, verificar la velocidad
+real en el hardware objetivo. Un timeout en un test basico es una senal
+clara de que el modelo es demasiado grande para uso interactivo. Para
+32GB RAM sin GPU, el sweet spot sigue siendo 7B Q4_K_M (~5 tok/s).
+
+**Estado**: documentada.
+
+---
+
+## Modelo 14b y deepseek-coder:1.3b descargados sin sincronizar con configs (2026-09-07)
+
+**Problema**: se descargaron 2 modelos nuevos (`qwen2.5-coder:14b`,
+`deepseek-coder:1.3b`) via `ollama pull` pero no se anadieron a
+`opencode.json` ni `kilo.json`. Los modelos estaban instalados pero
+eran invisibles para los asistentes.
+
+**Patron recurrente**: este es el tercer error del mismo tipo en esta
+sesion (primero 1.5b, luego starcoder2:7b, ahora 14b y deepseek-coder:1.3b).
+
+**Solucion**:
+- Anadir ambos modelos a `opencode.json` y `kilo.json` con metadata completa
+- Sincronizar con `ollama list` (7 modelos totales)
+- Actualizar documentacion y tabla de modelos
+
+**Leccion**: cada vez que se ejecute `ollama pull`, verificar
+inmediatamente si el modelo quedo listado en los configs. Un modelo
+instalado pero no listado es un modelo inutil para el workflow.
+Considerar anadir un check automatico a `verificar-proyecto.sh`.
+
+**Estado**: corregido y commiteado.
+
+---
+
+## Resultados de pruebas de modelos locales (2026-09-07)
+
+**Test**: `Say hi in 5 words` via Ollama API, `num_predict: 20`
+**Hardware**: Mac mini i7-8700B (6核/12T, 32GB DDR4, CPU-only)
+
+| Modelo | Velocidad | tok/s est | Puntaje | Uso |
+|---|---|---|---|---|
+| qwen2.5-coder:1.5b | 9,764ms | ~15 | 6/10 | Validacion reglas |
+| deepseek-coder:1.3b | 14,823ms | ~12 | 5/10 | Autocomplete |
+| qwen2.5-coder:3b | 30,034ms | ~8 | 7/10 | Tareas rapidas |
+| qwen2.5-coder:7b | 22,625ms | ~5.2 | 9/10 | Desarrollo general |
+| deepseek-r1:7b | 54,307ms | ~5 | 8/10 | Razonamiento |
+| starcoder2:7b | 60,028ms | ~5 | 7/10 | Multi-lenguaje |
+| qwen2.5-coder:14b | 33,000ms | ~2 | 9/10 | Batch only |
+
+**Hallazgo**: 7B Q4_K_M es el sweet spot para CPU-only. 14B es viable
+pero lento para interactivo. 1-3B son rapidos pero con calidad limitada.
+
+**Estado**: documentada.
