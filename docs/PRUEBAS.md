@@ -944,3 +944,22 @@ temporal `.baseline_tmp` con `get_baseline_hash()` (awk) resuelve la
 incompatibilidad con macOS bash 3.x sin perder funcionalidad. El script
 detecta drift correctamente, reporta hashes y limpia el archivo temporal tras
 cada ejecución.
+
+## Ronda 61 — Modelos locales Ollama + deploy idempotente de config Kimi (07-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 209 | `ollama list` / `curl localhost:11434/api/tags` | ✅ Ollama activo; `qwen2.5-coder:7b` presente (4.7 GB, Q4_K_M); `:3b` descargado tras reintento (primer pull agoto timeout de 600 s) |
+| 210 | Benchmark 7B en este equipo: `api/generate`, 31 tokens | ✅ ~5.9 tok/s (eval 31 tok / 5.23 s) — confirma tier "solo matriz de pruebas" |
+| 211 | `opencode models ollama` (better-ai) | ✅ Lista `ollama/qwen2.5-coder:7b` y `:3b` — provider parseado de opencode.json |
+| 212 | `kilocode models ollama` (better-ai) | ✅ Idem — provider parseado de kilo.json |
+| 213 | `kimi -p "..." -m local/qwen2.5-coder-7b` | ✅ Sesion creada y modelo respondio (config TOML valido, provider openai-compat localhost funcional); el 3B dio 404 solo porque aun no estaba descargado |
+| 214 | `bash scripts/deploy-kimi-config.sh` (1ª, 2ª y 3ª ejecucion) | ✅ 333 reglas + 1 hook cada vez; hash SHA-256 estable entre ejecuciones (idempotencia confirmada); backup con timestamp en cada corrida |
+| 215 | Auditoria de cambios 2026-09-01..07 (subagente + verificador) | ✅ check-shell-pipes 54/54, fuzz-denies 111/111, py_compile 20 archivos, node --check plugins OK; hallazgos reales: bug detect-drift.sh bash 3.2 (ya corregido en 57482c3) y README con proveedor `kimi` inexistente (corregido) |
+| 216 | `bash scripts/verificar-proyecto.sh --pre-commit` post-merge | ✅ 48 OK, 0 FALLOS |
+
+**Conclusion tecnica**: los tres asistentes (opencode, kilocode, kimi) ven el
+provider `ollama` con los dos modelos Qwen2.5-Coder. El config global de kimi
+lleva de nuevo las 333 reglas + hook entre marcadores gestionados por
+`deploy-kimi-config.sh`. Modelos grandes (14B/16B) quedan fuera por velocidad
+de CPU no verificada; pendiente medir 14B si se desea ampliar la matriz.
