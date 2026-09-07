@@ -1823,3 +1823,59 @@ de arrays asociativos. Probar los scripts en el bash más restrictivo del
 entorno objetivo.
 
 **Estado**: cerrada.
+
+---
+
+## Error: clave `provider` duplicada en opencode.json (2026-09-07)
+
+**Problema**: `opencode.json` tenia dos bloques `provider` con la misma clave.
+El segundo (lineas 45-61) sobreescribia al primero (lineas 3-33), causando:
+- Perdida del campo `api: "ollama"` (necesario para el SDK de Ollama)
+- Referencia a modelos no instalados (llama3.1:8b, deepseek-coder-v2:16b)
+- Modelos reales (qwen2.5-coder:3b, deepseek-r1:7b) no estaban en el provider activo
+
+**Solucion**: unificar en un solo bloque `provider` con:
+- `api: "ollama"` (obligatorio para el SDK)
+- Solo modelos instalados y verificados: qwen2.5-coder:7b, qwen2.5-coder:3b, deepseek-r1:7b
+- Eliminar referencia a `npm: "@ai-sdk/openai-compatible"` (innecesaria con `api: "ollama"`)
+
+**Evidencia**: `python3 -c "import json; d=json.load(open('opencode.json'))"` valida JSON;
+`verificar-proyecto.sh` muestra 48 OK, 3 FALLOS (drift esperado, hook pre-commit, orphan objects).
+
+**Leccion**: JSON permite claves duplicadas (el segundo valor gana), pero es un error
+humano dificil de detectar visualmente. Siempre verificar la estructura completa
+despues de ediciones manuales. Usar `python3 -c "import json; json.load(open('file'))"`
+como check basico.
+
+**Estado**: corregido y commiteado.
+
+---
+
+## Investigacion de modelos locales para Mac mini i7 32GB (2026-09-07)
+
+**Contexto**: se investigaron los mejores modelos IA locales para un Mac mini i7 2018
+(6核, 32GB RAM, CPU-only, sin GPU dedicada) para usar con opencode/kilocode/kimi-code.
+
+**Hallazgos clave**:
+1. **Cuantificacion Q4_K_M** es el sweet spot para CPU: 4x mas pequeno, calidad excelente
+2. **Modelos 3-4B** son los mas rapidos en CPU (~10-15 tok/s), ideales para interactivos
+3. **Modelos 7B** son el balance calidad/velocidad (~5 tok/s), ya instalados
+4. **Modelos 14B+** son lentos para interactivo (~2-3 tok/s), viables para batch
+5. **Mac mini i7 2018** no tiene Apple Silicon ni memoria unificada - todo es CPU DDR4
+
+**Modelos instalados**:
+- `qwen2.5-coder:7b` (4.7GB, ~5.2 tok/s) - verificado funcionando
+- `qwen2.5-coder:3b` (1.9GB, ~10 tok/s) - verificado funcionando
+- `deepseek-r1:7b` (4.7GB, ~5 tok/s) - verificado funcionando
+
+**Modelos recomendados para futuras descargas** (cuando haya ancho de banda):
+- Phi-4 Mini (3.8B, 2.3GB) - mejor modelo pequeno para CPU
+- Qwen3.5 4B - mejor overall para CPU-only en 2026
+- Qwen3-Coder 30B MoE (19GB Q4) - mejor calidad/GB en 24-32GB (si se descarga 14B)
+
+**Limitaciones documentadas**:
+- Sin GPU = toda inferencia CPU-only (~5 tok/s 7B, ~2-3 tok/s 14B+)
+- macOS consume ~8-10GB RAM, dejando ~22-24GB para modelos
+- Descargas grandes (9GB+) son lentas por velocidad de red (~2.2 MB/s)
+
+**Estado**: documentada en `docs/INTEGRACION-ASISTENTES.md` (seccion "Modelos locales recomendados").

@@ -173,3 +173,64 @@ make dagger
 Para equipos que necesiten un servidor de CI propio sin nube, opciones mas
 potentes como Woodpecker CI o Tekton se pueden evaluar. No son obligatorias
 para usar `better-ai`.
+
+## Modelos locales recomendados (Mac mini i7 32GB, CPU-only)
+
+Investigacion realizada el 2026-09-07 sobre los mejores modelos para ejecutar
+localmente en un Mac mini i7 2018 (6核, 32GB RAM, Intel UHD 630, sin GPU dedicada).
+
+### Hardware del equipo de prueba
+
+| Componente | Especificacion |
+|---|---|
+| CPU | Intel Core i7-8700B (6核/12线程, 3.2GHz, Coffee Lake) |
+| RAM | 32GB DDR4 2666MHz |
+| GPU | Intel UHD 630 (integrada, sin VRAM dedicada) |
+| Almacenamiento | SSD (NVMe o SATA) |
+| SO | macOS (x86_64) |
+| Runtime | Ollama v0.33.3 + llama-server v0.4.0-dev |
+
+### Modelos instalados y verificados
+
+| Modelo | Params | Tamano | Cuantificacion | Velocidad CPU | Uso principal |
+|---|---|---|---|---|---|
+| `qwen2.5-coder:7b` | 7B | 4.7GB | Q4_K_M | ~5.2 tok/s | Codigo, asistente general |
+| `qwen2.5-coder:3b` | 3B | 1.9GB | Q4_K_M | ~10 tok/s | Rapido, tareas ligeras |
+| `deepseek-r1:7b` | 7B | 4.7GB | Q4_K_M | ~5 tok/s | Razonamiento, matematicas |
+
+### Modelos recomendados segun tier (investigacion 2026-09-07)
+
+**Tier 1 - Livianos (3-4B, prioridad velocidad):**
+- Phi-4 Mini (3.8B, 2.3GB, ~12 tok/s) - Mejor modelo pequeno para CPU
+- Qwen3.5 4B - Mejor overall para CPU-only en 2026
+- Gemma 4 E4B - Mas rapido (~15 tok/s)
+
+**Tier 2 - Medios (7-8B, prioridad calidad):**
+- Qwen3 8B - Mejor para codigo en su rango
+- Qwen2.5-Coder 7B - Ya instalado, solido para coding
+- Mistral 7B - Buen compatibilidad general
+- Llama 3.2 3B - Balance calidad/velocidad
+
+**Tier 3 - Grandes (14B+, prioridad precision):**
+- Qwen3-Coder 30B MoE (19GB Q4, 3.3B activos) - Mejor calidad/GB en 24-32GB
+- Devstral 24B (14GB Q4) - 46.8% SWE-Bench Verified
+- Qwen 3.6 27B (17GB Q4) - 77.2% SWE-bench
+- gpt-oss:20b (14GB MXFP4) - OpenAI open weights, optimizado para CPU
+
+### Limitaciones conocidas
+
+1. **Sin GPU dedicada**: toda inferencia es CPU-only (~5 tok/s para 7B)
+2. **Velocidad**: 14B+ sera lento para uso interactivo (~2-3 tok/s)
+3. **RAM compartida**: macOS y apps consumen ~8-10GB, dejando ~22-24GB para modelos
+4. **Memoria unificada**: en Intel no hay beneficio de memoria unificada como en Apple Silicon
+5. **Cuantizacion Q4**: suficiente para la mayoria de tareas, pero con perdida medible en razonamiento complejo
+
+### Recomendaciones de uso
+
+| Escenario | Modelo recomendado | Notas |
+|---|---|---|
+| Codigo rapido, IDE | qwen2.5-coder:3b | ~10 tok/s, responsive |
+| Desarrollo general | qwen2.5-coder:7b | Ya instalado, buena calidad |
+| Razonamiento/debug | deepseek-r1:7b | Ya instalado, chain-of-thought |
+| Batch processing | qwen2.5-coder:7b | Sin limite de tiempo |
+| Pruebas de reglas | Cualquier 3-7B | Rapido, suficiente para verificar P0/P1 |

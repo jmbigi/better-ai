@@ -3,28 +3,28 @@
   "provider": {
     "ollama": {
       "api": "ollama",
-      "name": "Ollama Local",
+      "name": "Ollama Local (matriz de pruebas P0/P1)",
       "options": {
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
         "qwen2.5-coder:7b": {
           "id": "qwen2.5-coder:7b",
-          "name": "Qwen2.5 Coder 7B",
+          "name": "Qwen2.5 Coder 7B (4.7GB, Q4_K_M)",
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
-        "llama3.1:8b": {
-          "id": "llama3.1:8b",
-          "name": "Llama 3.1 8B",
-          "family": "llama3",
+        "qwen2.5-coder:3b": {
+          "id": "qwen2.5-coder:3b",
+          "name": "Qwen2.5 Coder 3B (1.9GB, Q4_K_M)",
+          "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
-        "deepseek-coder-v2:16b": {
-          "id": "deepseek-coder-v2:16b",
-          "name": "DeepSeek Coder V2 16B",
+        "deepseek-r1:7b": {
+          "id": "deepseek-r1:7b",
+          "name": "DeepSeek R1 7B (4.7GB, Q4_K_M)",
           "family": "deepseek",
           "tool_call": true,
           "temperature": true
@@ -41,23 +41,6 @@
       { "effect": "allow", "action": "provider.use", "resource": "deepseek" },
       { "effect": "allow", "action": "provider.use", "resource": "ollama" }
     ]
-  },
-  "provider": {
-    "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local, matriz de pruebas)",
-      "options": {
-        "baseURL": "http://localhost:11434/v1"
-      },
-      "models": {
-        "qwen2.5-coder:7b": {
-          "name": "Qwen2.5 Coder 7B local (matriz pruebas P0/P1)"
-        },
-        "qwen2.5-coder:3b": {
-          "name": "Qwen2.5 Coder 3B local (matriz pruebas P0/P1)"
-        }
-      }
-    }
   },
   "mcp": {
     "context7": {
