@@ -28,6 +28,7 @@ CRITICAL_CONFIGS=(
     "scripts/ci-local-pure.sh"
     "scripts/analyze_shell.py"
     "scripts/check-shell-pipes.py"
+    "scripts/deploy-kimi-config.sh"
 )
 
 UPDATE_BASELINE=false
