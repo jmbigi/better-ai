@@ -1,11 +1,11 @@
-# Config Baseline - Generated 2026-09-07T21:11:48Z
+# Config Baseline - Generated 2026-09-07T21:21:27Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
-d8f4d6f7ac9cb83b1b93197f317f7a95d4dec9d522cf38c4144aae86e4d514ab  opencode.json
+03c21b6dfe2580f050a9ae54afa34068240b6ed972f61173a1c48d63fe5075b9  opencode.json
 5049ce2de66ca0654cdc1bf8ac2809a2943e9f6c6a8209ea98a3c4e015b921b3  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
-548a8ba2004d764be55815ae4b1da87af0e7cd0f2b66d3da1569b2a3c58ad061  AGENTS.md
+b69b15fd0ae784640795d39ed95a780298003f690a13d0eb5c31a6f3ec367c69  AGENTS.md
 f0619f0be503de3eb36184533c86ea2000297d72f43c1595728760480fef2116  scripts/verificar-proyecto.sh
 fce9f9a63c5ba58efd11281d0a50dc57090ac836b51e3e84004a2743e7ef8dd5  scripts/probar-denies.sh
 bf4f1d220b041c496a562a6c3af25f5d4dc76472a098b194e1cefd89962a8986  scripts/rotate-secret.sh
