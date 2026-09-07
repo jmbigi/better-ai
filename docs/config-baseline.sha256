@@ -1,11 +1,11 @@
-# Config Baseline - Generated 2026-09-07T21:21:27Z
+# Config Baseline - Generated 2026-09-07T23:05:23Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
-03c21b6dfe2580f050a9ae54afa34068240b6ed972f61173a1c48d63fe5075b9  opencode.json
-5049ce2de66ca0654cdc1bf8ac2809a2943e9f6c6a8209ea98a3c4e015b921b3  kilo.json
+442de0f01054ce238236c7cbfbb8381dfb0e240765cc56ab6b33f61f0c4a86ba  opencode.json
+048354e82989f2932256d7be5b0ca7b59dea4cb4f68aba79ff395392ca753320  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
-b69b15fd0ae784640795d39ed95a780298003f690a13d0eb5c31a6f3ec367c69  AGENTS.md
+d6e281c16ca35fe9016925e5880849a3fd658d217da4c2be2c5372e12c32ba01  AGENTS.md
 f0619f0be503de3eb36184533c86ea2000297d72f43c1595728760480fef2116  scripts/verificar-proyecto.sh
 fce9f9a63c5ba58efd11281d0a50dc57090ac836b51e3e84004a2743e7ef8dd5  scripts/probar-denies.sh
 bf4f1d220b041c496a562a6c3af25f5d4dc76472a098b194e1cefd89962a8986  scripts/rotate-secret.sh
@@ -18,4 +18,4 @@ d86835642cc651654461a42b2afa56f57658b0b3554112c2d4692cb84d70a607  scripts/update
 7441abde3500fa7ad5d4fa22d0b913f5eed51d68f6b611c109ac8427e71fa272  scripts/ci-local-pure.sh
 bf05736f62d13b5629e0634a2a10ce845c643439de5b51c7a53d50ddfd136cf4  scripts/analyze_shell.py
 71babaad53d81d5f661b49927a0a165d02bb04877bb994ebcd296d080252aa3d  scripts/check-shell-pipes.py
-e3b286176ce9dfdf0c74d83b9da3df872fb67c337005e324a1ffb265c2b42263  scripts/deploy-kimi-config.sh
+d3dcffb0508ca269c3ee65cf723cd8c5fdf5c51d1d3a5f51ddfdfd23368fb134  scripts/deploy-kimi-config.sh

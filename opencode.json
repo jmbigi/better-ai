@@ -10,49 +10,49 @@
       "models": {
         "qwen2.5-coder:7b": {
           "id": "qwen2.5-coder:7b",
-          "name": "Qwen2.5 Coder 7B (4.7GB, Q4_K_M)",
+          "name": "Qwen2.5 Coder 7B Q4_K_M (base, matriz pruebas P0/P1)",
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
         "qwen2.5-coder:3b": {
           "id": "qwen2.5-coder:3b",
-          "name": "Qwen2.5 Coder 3B (1.9GB, Q4_K_M)",
+          "name": "Qwen2.5 Coder 3B (liviano, matriz pruebas P0/P1)",
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
         "deepseek-r1:7b": {
           "id": "deepseek-r1:7b",
-          "name": "DeepSeek R1 7B (4.7GB, Q4_K_M)",
+          "name": "DeepSeek R1 7B (razonamiento, matriz pruebas P0/P1)",
           "family": "deepseek",
           "tool_call": true,
           "temperature": true
         },
         "qwen2.5-coder:1.5b": {
           "id": "qwen2.5-coder:1.5b",
-          "name": "Qwen2.5 Coder 1.5B (986MB, Q4_K_M)",
+          "name": "Qwen2.5 Coder 1.5B (liviano, matriz pruebas P0/P1)",
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
         "starcoder2:7b": {
           "id": "starcoder2:7b",
-          "name": "StarCoder2 7B (4.0GB, Q4_K_M)",
+          "name": "StarCoder2 7B (programación especializada, matriz pruebas P0/P1)",
           "family": "starcoder",
           "tool_call": true,
           "temperature": true
         },
         "qwen2.5-coder:14b": {
           "id": "qwen2.5-coder:14b",
-          "name": "Qwen2.5 Coder 14B (9.0GB, Q4_K_M) - lento en CPU",
+          "name": "Qwen2.5 Coder 14B Q4_K_M (avanzado, matriz pruebas P0/P1)",
           "family": "qwen2",
           "tool_call": true,
           "temperature": true
         },
         "deepseek-coder:1.3b": {
           "id": "deepseek-coder:1.3b",
-          "name": "DeepSeek Coder 1.3B (776MB, Q4_K_M)",
+          "name": "DeepSeek Coder 1.3B (liviano, matriz pruebas P0/P1)",
           "family": "deepseek",
           "tool_call": true,
           "temperature": true
@@ -62,12 +62,36 @@
   },
   "experimental": {
     "policies": [
-      { "effect": "deny", "action": "provider.use", "resource": "*" },
-      { "effect": "allow", "action": "provider.use", "resource": "opencode" },
-      { "effect": "allow", "action": "provider.use", "resource": "opencode-go" },
-      { "effect": "allow", "action": "provider.use", "resource": "kilo" },
-      { "effect": "allow", "action": "provider.use", "resource": "deepseek" },
-      { "effect": "allow", "action": "provider.use", "resource": "ollama" }
+      {
+        "effect": "deny",
+        "action": "provider.use",
+        "resource": "*"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "opencode"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "opencode-go"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "kilo"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "deepseek"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "ollama"
+      }
     ]
   },
   "mcp": {
@@ -89,13 +113,21 @@
     },
     "verify-local": {
       "type": "local",
-      "command": ["bash", "scripts/verificar-proyecto.sh"],
+      "command": [
+        "bash",
+        "scripts/verificar-proyecto.sh"
+      ],
       "enabled": true,
       "cwd": "${workspace}"
     },
     "nemo-guardrails": {
       "type": "local",
-      "command": ["nemoguardrails", "server", "--config", ".opencode/guardrails"],
+      "command": [
+        "nemoguardrails",
+        "server",
+        "--config",
+        ".opencode/guardrails"
+      ],
       "enabled": false,
       "cwd": "${workspace}",
       "environment": {

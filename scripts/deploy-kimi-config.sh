@@ -76,6 +76,13 @@ max_context_size = 16384
 capabilities = [ "tool_use" ]
 display_name = "DeepSeek Coder 1.3B local (liviano, matriz pruebas)"
 
+[models."local/starcoder2-7b"]
+provider = "local:ollama"
+model = "starcoder2:7b"
+max_context_size = 8192
+capabilities = [ "tool_use" ]
+display_name = "StarCoder2 7B local (programacion especializada, matriz pruebas)"
+
 [models."local/qwen2.5-coder-3b"]
 provider = "local:ollama"
 model = "qwen2.5-coder:3b"
@@ -88,14 +95,7 @@ provider = "local:ollama"
 model = "qwen2.5-coder:7b"
 max_context_size = 32768
 capabilities = [ "tool_use" ]
-display_name = "Qwen2.5 Coder 7B Q4_K_M local (matriz pruebas)"
-
-[models."local/qwen2.5-coder-7b-q5"]
-provider = "local:ollama"
-model = "qwen2.5-coder:7b-q5_K_M"
-max_context_size = 32768
-capabilities = [ "tool_use" ]
-display_name = "Qwen2.5 Coder 7B Q5_K_M local (calidad, matriz pruebas)"
+display_name = "Qwen2.5 Coder 7B Q4_K_M local (base, matriz pruebas)"
 
 [models."local/qwen2.5-coder-14b"]
 provider = "local:ollama"
