@@ -42,6 +42,38 @@
       { "effect": "allow", "action": "provider.use", "resource": "ollama" }
     ]
   },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local, matriz de pruebas)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:1.5b": {
+          "name": "Qwen2.5 Coder 1.5B local (liviano, matriz pruebas P0/P1)"
+        },
+        "deepseek-coder:1.3b": {
+          "name": "DeepSeek Coder 1.3B local (liviano, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:3b": {
+          "name": "Qwen2.5 Coder 3B local (liviano, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:7b": {
+          "name": "Qwen2.5 Coder 7B Q4_K_M local (matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:7b-q5_K_M": {
+          "name": "Qwen2.5 Coder 7B Q5_K_M local (calidad, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:14b": {
+          "name": "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas P0/P1)"
+        },
+        "deepseek-r1:7b": {
+          "name": "DeepSeek R1 7B local (razonamiento, matriz pruebas P0/P1)"
+        }
+      }
+    }
+  },
   "mcp": {
     "context7": {
       "type": "remote",

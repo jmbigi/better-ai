@@ -62,19 +62,54 @@ name = "Ollama (local)"
 base_url = "http://localhost:11434/v1"
 api_key = "ollama"
 
-[models."local/qwen2.5-coder-7b"]
+[models."local/qwen2.5-coder-1.5b"]
 provider = "local:ollama"
-model = "qwen2.5-coder:7b"
+model = "qwen2.5-coder:1.5b"
 max_context_size = 32768
 capabilities = [ "tool_use" ]
-display_name = "Qwen2.5 Coder 7B local (matriz pruebas)"
+display_name = "Qwen2.5 Coder 1.5B local (liviano, matriz pruebas)"
+
+[models."local/deepseek-coder-1.3b"]
+provider = "local:ollama"
+model = "deepseek-coder:1.3b"
+max_context_size = 16384
+capabilities = [ "tool_use" ]
+display_name = "DeepSeek Coder 1.3B local (liviano, matriz pruebas)"
 
 [models."local/qwen2.5-coder-3b"]
 provider = "local:ollama"
 model = "qwen2.5-coder:3b"
 max_context_size = 32768
 capabilities = [ "tool_use" ]
-display_name = "Qwen2.5 Coder 3B local (matriz pruebas)"
+display_name = "Qwen2.5 Coder 3B local (liviano, matriz pruebas)"
+
+[models."local/qwen2.5-coder-7b"]
+provider = "local:ollama"
+model = "qwen2.5-coder:7b"
+max_context_size = 32768
+capabilities = [ "tool_use" ]
+display_name = "Qwen2.5 Coder 7B Q4_K_M local (matriz pruebas)"
+
+[models."local/qwen2.5-coder-7b-q5"]
+provider = "local:ollama"
+model = "qwen2.5-coder:7b-q5_K_M"
+max_context_size = 32768
+capabilities = [ "tool_use" ]
+display_name = "Qwen2.5 Coder 7B Q5_K_M local (calidad, matriz pruebas)"
+
+[models."local/qwen2.5-coder-14b"]
+provider = "local:ollama"
+model = "qwen2.5-coder:14b"
+max_context_size = 32768
+capabilities = [ "tool_use" ]
+display_name = "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas)"
+
+[models."local/deepseek-r1-7b"]
+provider = "local:ollama"
+model = "deepseek-r1:7b"
+max_context_size = 131072
+capabilities = [ "tool_use" ]
+display_name = "DeepSeek R1 7B local (razonamiento, matriz pruebas)"
 
 # =============================================================================
 # Ruleset P0/P1 (333 reglas + hook) — fuente: .kimi-code/local.toml del repo.

@@ -1,9 +1,9 @@
-# Config Baseline - Generated 2026-09-07T21:05:12Z
+# Config Baseline - Generated 2026-09-07T21:11:48Z
 # DO NOT EDIT MANUALLY - Use: bash scripts/detect-drift.sh --update-baseline
 # Format: <sha256>  <relative-path>
 
-53830c4b6b2705dca60b50ef5ace866b657e514c8d892255842794b673e82961  opencode.json
-1acceba79177d06c76c5e92fc37d59521f3130d93dd7ed257e16a4c027840976  kilo.json
+d8f4d6f7ac9cb83b1b93197f317f7a95d4dec9d522cf38c4144aae86e4d514ab  opencode.json
+5049ce2de66ca0654cdc1bf8ac2809a2943e9f6c6a8209ea98a3c4e015b921b3  kilo.json
 299ab5b2556e627dfa52f013e9b70df6c4fc1c241dc89e4c5aa2f2aff269e1e1  .kilo/kilo.json
 548a8ba2004d764be55815ae4b1da87af0e7cd0f2b66d3da1569b2a3c58ad061  AGENTS.md
 f0619f0be503de3eb36184533c86ea2000297d72f43c1595728760480fef2116  scripts/verificar-proyecto.sh
@@ -18,4 +18,4 @@ d86835642cc651654461a42b2afa56f57658b0b3554112c2d4692cb84d70a607  scripts/update
 7441abde3500fa7ad5d4fa22d0b913f5eed51d68f6b611c109ac8427e71fa272  scripts/ci-local-pure.sh
 bf05736f62d13b5629e0634a2a10ce845c643439de5b51c7a53d50ddfd136cf4  scripts/analyze_shell.py
 71babaad53d81d5f661b49927a0a165d02bb04877bb994ebcd296d080252aa3d  scripts/check-shell-pipes.py
-37165488e2cbd6f886157dfa71b14adc93e462eb03d50a087dad4119caed2be9  scripts/deploy-kimi-config.sh
+e3b286176ce9dfdf0c74d83b9da3df872fb67c337005e324a1ffb265c2b42263  scripts/deploy-kimi-config.sh
