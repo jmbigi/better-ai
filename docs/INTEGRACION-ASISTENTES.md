@@ -199,6 +199,8 @@ localmente en un Mac mini i7 2018 (6核, 32GB RAM, Intel UHD 630, sin GPU dedica
 | `deepseek-r1:7b` | 7B | 4.7GB | Q4_K_M | ~5 tok/s | Razonamiento, matematicas |
 | `qwen2.5-coder:1.5b` | 1.5B | 986MB | Q4_K_M | ~15 tok/s | Ultra rapido, validacion de reglas |
 | `starcoder2:7b` | 7B | 4.0GB | Q4_K_M | ~5 tok/s | Codigo multi-lenguaje (Rust, Lua, Haskell) |
+| `deepseek-coder:1.3b` | 1.3B | 776MB | Q4_K_M | ~15 tok/s | Ultra rapido, autocomplete |
+| `qwen2.5-coder:14b` | 14B | 9.0GB | Q4_K_M | ~1-2 tok/s | Alta calidad, solo batch (timeout en test) |
 
 ### Modelos recomendados segun tier (investigacion 2026-09-07)
 

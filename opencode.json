@@ -42,6 +42,20 @@
           "family": "starcoder",
           "tool_call": true,
           "temperature": true
+        },
+        "qwen2.5-coder:14b": {
+          "id": "qwen2.5-coder:14b",
+          "name": "Qwen2.5 Coder 14B (9.0GB, Q4_K_M) - lento en CPU",
+          "family": "qwen2",
+          "tool_call": true,
+          "temperature": true
+        },
+        "deepseek-coder:1.3b": {
+          "id": "deepseek-coder:1.3b",
+          "name": "DeepSeek Coder 1.3B (776MB, Q4_K_M)",
+          "family": "deepseek",
+          "tool_call": true,
+          "temperature": true
         }
       }
     }

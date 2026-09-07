@@ -86,6 +86,9 @@
         "qwen2.5-coder:1.5b": {
           "name": "Qwen2.5 Coder 1.5B local (liviano, matriz pruebas P0/P1)"
         },
+        "deepseek-coder:1.3b": {
+          "name": "DeepSeek Coder 1.3B local (liviano, matriz pruebas P0/P1)"
+        },
         "qwen2.5-coder:3b": {
           "name": "Qwen2.5 Coder 3B local (liviano, matriz pruebas P0/P1)"
         },
@@ -97,6 +100,9 @@
         },
         "starcoder2:7b": {
           "name": "StarCoder2 7B local (codigo multi-lenguaje, matriz pruebas P0/P1)"
+        },
+        "qwen2.5-coder:14b": {
+          "name": "Qwen2.5 Coder 14B Q4_K_M local (avanzado, lento en CPU, matriz pruebas P0/P1)"
         }
       }
     }
