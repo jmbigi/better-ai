@@ -104,20 +104,6 @@ max_context_size = 32768
 capabilities = [ "tool_use" ]
 display_name = "Qwen2.5 Coder 7B Q5_K_M local (calidad, HF/bartowski, matriz pruebas)"
 
-[models."local/qwen2.5-coder-14b"]
-provider = "local:ollama"
-model = "qwen2.5-coder:14b"
-max_context_size = 32768
-capabilities = [ "tool_use" ]
-display_name = "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas)"
-
-[models."local/deepseek-r1-7b"]
-provider = "local:ollama"
-model = "deepseek-r1:7b"
-max_context_size = 131072
-capabilities = [ "tool_use" ]
-display_name = "DeepSeek R1 7B local (razonamiento, matriz pruebas)"
-
 # =============================================================================
 # Ruleset P0/P1 (333 reglas + hook) — fuente: .kimi-code/local.toml del repo.
 # REAPLICAR tras cada actualizacion de kimi: bash scripts/deploy-kimi-config.sh

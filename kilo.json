@@ -124,20 +124,6 @@
           "family": "local",
           "tool_call": true,
           "temperature": true
-        },
-        "deepseek-r1:7b": {
-          "id": "deepseek-r1:7b",
-          "name": "DeepSeek R1 7B local (razonamiento, matriz pruebas P0/P1)",
-          "family": "local",
-          "tool_call": true,
-          "temperature": true
-        },
-        "qwen2.5-coder:14b": {
-          "id": "qwen2.5-coder:14b",
-          "name": "Qwen2.5 Coder 14B Q4_K_M local (avanzado, matriz pruebas P0/P1)",
-          "family": "local",
-          "tool_call": true,
-          "temperature": true
         }
       },
       "api": "ollama"

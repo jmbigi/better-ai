@@ -204,6 +204,8 @@ localmente en un Mac mini i7 2018 (6核, 32GB RAM, Intel UHD 630, sin GPU dedica
 | `deepseek-r1:7b` | 7B | 4.7GB | Q4_K_M | 4.9 tok/s | Razonamiento (thinking largo; sin tool-calling fiable) |
 | `qwen2.5-coder:14b` | 14B | 9.0GB | Q4_K_M | 1.8 tok/s | Avanzado: SOLO pruebas puntuales, inviable para iterar |
 
+Matriz activa (07-09-2026, ronda 64): SOLO los 6 modelos con > 5 tok/s medidos estan en las configs (opencode.json, kilo.json, kimi via deploy-kimi-config.sh). Fuera: deepseek-r1:7b (4.9) y qwen2.5-coder:14b (1.8) — instalados pero excluidos por velocidad.
+
 Notas de cuantificacion: Q4_K_M es el punto dulce estandar (Pareto accuracy/memoria en CPU,
 [arXiv 2510.21970](https://www.arxiv.org/pdf/2510.21970)); Q5_K_M se consigue via HF-GGUF
 (`hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF:Q5_K_M`, 5.4GB, ~5.2 tok/s) porque

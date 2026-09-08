@@ -2145,3 +2145,25 @@ existen realmente en los repositorios.
 medir. P0.1 aplica a las afirmaciones que EL PROPIO equipo documenta.
 
 **Estado**: integrado y verificado (ronda 62 en docs/PRUEBAS.md).
+
+## 2026-09-07 (ronda 64) — Criterio de admision a la matriz: velocidad medida > 5 tok/s
+
+**Problema**: la matriz de 8 modelos incluia dos que no cumplen el minimo
+de velocidad para sondas iterativas de reglas: deepseek-r1:7b (4.9 tok/s
+medidos, ademas con thinking que multiplica el coste de tokens) y
+qwen2.5-coder:14b (1.8 tok/s medidos).
+
+**Solucion**: umbral explicito y verificable: un modelo entra en las
+configs SOLO si supera 5 tok/s medidos en este equipo (mismo protocolo:
+60 tokens, prompt corto, api/generate). La matriz activa queda en 6
+modelos (1.3b, 1.5b, 3b, starcoder2, 7b, Q5_K_M). Los excluidos permanecen
+instalados en Ollama (no cuestan nada en disco) pero fuera de las configs:
+el criterio "listado ⊆ instalado" se refina a "listado = instalado AND
+velocidad > umbral".
+
+**Leccion**: sin umbral numerico declarado, toda matriz crece hasta incluir
+modelos inutilizables para su proposito. El umbral va en los docs (AGENTS.md
+y esta leccion), no solo en la cabeza del operador. La velocidad se mide,
+no se estima (ronda 62: dos estimaciones resultaron optimistas).
+
+**Estado**: integrado y verificado (ronda 64 en docs/PRUEBAS.md).

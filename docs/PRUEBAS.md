@@ -1012,3 +1012,18 @@ diversidad acotados (familia distinta / razonamiento) y limitaciones
 explicitas: starcoder2 no sigue instrucciones cortas; r1 necesita presupuestos
 de tokens 4x+ por su thinking. La diferencia Q4_K_M vs Q5_K_M no fue
 observable en esta prueba minima.
+
+## Ronda 64 — Filtro de matriz activa: velocidad > 5 tok/s (07-09-2026)
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 233 | Criterio aplicado sobre mediciones ronda 62 (> 5 tok/s estricto) | ✅ 6 entran (1.3b 35.7, 1.5b 14.8, 3b 11.2, starcoder2 7.3, 7b 5.9, Q5_K_M 5.1); 2 quedan fuera (r1-7b 4.9, 14b 1.8) |
+| 234 | `opencode models ollama` / `kilocode models ollama` tras filtro | ✅ 6/6 en ambos CLIs |
+| 235 | `deploy-kimi-config.sh` tras quitar 2 aliases | ✅ 6 aliases locales, 333 reglas + 1 hook, redeploy verificado |
+| 236 | `ollama list` vs configs (criterio listado ⊆ instalado) | ✅ Los 6 listados estan instalados; r1 y 14b siguen en disco, solo fuera de la matriz activa |
+
+**Conclusion tecnica**: la matriz activa de pruebas P0/P1 queda en 6 modelos
+que superan 5 tok/s medidos. r1-7b y 14b permanecen instalados (espacio en
+disco no es limitante: ~14 GB) pero se excluyen de las configs porque su
+velocidad los hace inviables para sondas iterativas; vuelven a entrar solo
+si se redefine el umbral o se usan para pruebas puntuales documentadas.
