@@ -984,3 +984,31 @@ previa con velocidades estimadas se corrigio con mediciones reales
 (diferencias: 14b 1.8 vs ~3 estimados; starcoder2 Q4_0 vs Q4_K_M
 documentado). Los modelos >7B quedan limitados a pruebas puntuales por
 velocidad (< 5.9 tok/s en todos los casos).
+
+## Ronda 63 — Tabla de resultados: velocidad + calidad medida (07-09-2026)
+
+Rubrica declarada (heuristica, NO benchmark formal): velocidad 0-40 pts
+(40 x tok/s / 35.7 max medido); compliance de instruccion 0-30 (respuesta
+EXACTA "OK" a "Respond with exactly one word: OK", temperature 0);
+conocimiento 0-30 (respuesta correcta: $? = exit status del ultimo comando).
+Limitaciones: un solo prompt por prueba, contexto vacio, one-shot; la
+prueba de conocimiento es indicativa, no estadistica.
+
+| # | Modelo | Velocidad | Calidad (compliance/conocimiento) | Resultado | Puntaje | Ranking |
+|---|---|---|---|---|---|---|
+| 225 | qwen2.5-coder:1.5b | 14.8 tok/s | OK / correcto | Mejor equilibrio matriz | 77 | 1 |
+| 226 | qwen2.5-coder:3b | 11.2 tok/s | OK / correcto | Equilibrio, algo mas lento | 73 | 2 |
+| 227 | deepseek-coder:1.3b | 35.7 tok/s | OK / INCORRECTO (confunde $?) | Veloz pero superficial | 70 | 3 |
+| 228 | qwen2.5-coder:7b | 5.9 tok/s | OK / correcto | Calidad sin penalizar velocidad de matriz | 67 | 4 |
+| 229 | Qwen2.5-Coder-7B Q5_K_M (HF) | 5.1 tok/s | OK / correcto | Igual calidad que Q4 en la prueba | 66 | 5 |
+| 230 | qwen2.5-coder:14b | 1.8 tok/s | OK / correcto | Calidad sin ventaja observable aqui | 62 | 6 |
+| 231 | deepseek-r1:7b | 4.9 tok/s | OK (con 4x presupuesto) / no verificable | Thinking consume todo el budget | 21 | 7 |
+| 232 | starcoder2:7b | 7.3 tok/s | Falla ambas (repite prompt) | Modelo base (FIM), no instruct | 8 | 8 |
+
+**Conclusion tecnica**: para la matriz de pruebas P0/P1 (que mide
+COMPLIANCE de reglas, no calidad de codigo), el tier liviano Qwen 1.5B/3B
+domina el ranking calidad/velocidad. starcoder2 y r1 tienen roles de
+diversidad acotados (familia distinta / razonamiento) y limitaciones
+explicitas: starcoder2 no sigue instrucciones cortas; r1 necesita presupuestos
+de tokens 4x+ por su thinking. La diferencia Q4_K_M vs Q5_K_M no fue
+observable en esta prueba minima.
