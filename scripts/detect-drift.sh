@@ -16,6 +16,7 @@ CRITICAL_CONFIGS=(
     "kilo.json"
     ".kilo/kilo.json"
     "AGENTS.md"
+    "Makefile"
     "scripts/verificar-proyecto.sh"
     "scripts/probar-denies.sh"
     "scripts/rotate-secret.sh"
@@ -31,6 +32,9 @@ CRITICAL_CONFIGS=(
     "scripts/deploy-kimi-config.sh"
     "scripts/detect-drift.sh"
     "scripts/safety-test-matrix.py"
+    "scripts/opa-check.sh"
+    "policies/rules.rego"
+    "policies/rules_test.rego"
 )
 
 UPDATE_BASELINE=false

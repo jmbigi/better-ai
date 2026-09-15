@@ -42,6 +42,63 @@ sí y qué no se puede hacer es parte de la protección (P0.1, P1.6).
 
 ---
 
+## 2026-09-15 — Incorporación selectiva de 30 consejos de control de agentes autónomos + P1.36 + prototipo OPA/Rego
+
+**Problema**: se propusieron 30 reglas/consejos para reforzar el control de agentes
+autónomos, con énfasis en exactitud, optimización, seguridad, control humano y
+trazabilidad. El riesgo era (1) sobreconstreñir el ruleset añadiendo 30 reglas nuevas
+(fuente 5 de REGLAS-COMPLETAS: las reglas contradictorias o excesivas se ignoran) y
+(2) adoptar afirmaciones numéricas sin evidencia ("99.9% de éxito"), lo que viola P0.1.
+Además, se pidió explícitamente integrar OPA/Rego como capa de Policy-as-Code.
+
+**Solución**:
+- **No añadir 30 reglas nuevas**. Enriquecer las reglas existentes con los matices
+  valiosos de las 30 propuestas y añadir una única regla nueva: **P1.36 Resolución de
+  conflictos entre reglas**, con jerarquía explícita: seguridad > legalidad > privacidad
+  > control humano > exactitud/verificabilidad > eficiencia.
+- **Rechazar explícitamente** las propuestas no aplicables o no verificables:
+  - Reglas 3 y 8 ("99.9% de éxito"): se interpretan como **meta aspiracional** (tendencia
+    hacia la máxima confiabilidad, sin pretender 100% ni fijar un número mágico sin
+    evidencia).
+  - Regla 5 (instalar herramientas de visión/OCR/navegación): es específica por
+    proyecto, no genérica; no se impone como obligatoria en un ruleset base.
+  - Regla 22 (confirmación no válida bajo presión/engaño): no es verificable por el
+    agente; se deja como principio ético, no como regla operativa.
+- **Crear prototipo OPA/Rego**: `policies/rules.rego` y `policies/rules_test.rego`
+  traducen reglas P0 críticas a un motor de políticas determinista y auditable
+  (bloqueo de `rm -rf`, `git reset --hard`, `git push --force`, operaciones destructivas
+  en BD, acceso a secretos y comandos en entorno `prod`). Se verifica con `make opa`.
+- **Sincronizar documentación**: AGENTS.md, docs/REGLAS-COMPLETAS.md, README.md,
+  CHECKLIST.md y scripts/verificar-proyecto.md actualizados con P1.36, OPA y los
+  nuevos conteos (37 P1, 51 errores en README).
+
+**Evidencia**:
+- `bash scripts/verificar-proyecto.sh --pre-commit`: 51 OK, 0 FALLOS.
+- `make ci`: 3 OK, 0 FALLOS.
+- `make opa`: 13/13 tests de OPA/Rego pasan (con OPA 1.20.2 descargado a /tmp).
+- `make safety-matrix`: 6 PASS, 0 FAIL, 2 SKIP.
+- `bash scripts/detect-drift.sh --strict`: sin drift tras actualizar baseline.
+
+**Hallazgo menor**: al documentar la actualización de la baseline en
+`docs/PRUEBAS.md` se citó `docs/config-baseline.sha256`. El verificador tenía
+un regex `(?:md|sh)` que coincidía parcialmente con `.sha256` (extraía
+`docs/config-baseline.sh`, un archivo inexistente). Se corrigió el regex a
+`(?:sha256|md|sh)` para que la extensión completa `.sha256` se valide antes
+que `.sh`. Lección: los patrones de extracción de rutas deben ordenar las
+extensiones de mayor a menor longitud para evitar coincidencias parciales.
+
+**Lección**: una lista larga de "mejoras" debe pasar por un filtro de aplicabilidad y
+verificabilidad antes de implementarse. Es mejor enriquecer reglas existentes y añadir
+una sola regla nueva coherente (P1.36) que inflar el ruleset. Los porcentajes de
+robustez sin evidencia se convierten en principios aspiracionales, no en umbrales
+contractuales. La capa OPA/Rego no reemplaza los guardarraíles de
+`opencode.json`/`kilo.json`, sino que las complementa con un motor de políticas
+auditable y testeable.
+
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — System Prompt Leakage: AGENTS.md es visible por defecto
 
 **Problema**: el análisis crítico avanzado identificó que better-ai no tenía

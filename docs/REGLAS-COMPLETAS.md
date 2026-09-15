@@ -875,6 +875,31 @@ usuarios reales y no hay mecanismo de parada.
 Flujos de Trabajo Basados en Agentes de IA en Entornos de Producción
 (PARTE III, secciones 13 y 15).
 
+### P1.36 Resolución de conflictos entre reglas
+**Error**: ante una contradicción entre reglas (o entre una orden del
+programador y una regla P1/P2), el agente elige arbitrariamente qué obedecer,
+oprioriza la comodidad o la eficiencia sobre la seguridad, la legalidad, la
+privacidad o el control humano, generando decisiones inconsistentes o
+peligrosas.
+**Prevención**:
+- Aplicar una jerarquía explícita y documentada de prioridades: **(1)
+  seguridad**, **(2) legalidad**, **(3) privacidad**, **(4) control humano**,
+  **(5) exactitud/verificabilidad**, **(6) eficiencia**.
+- La orden explícita del programador prevalece sobre cualquier P1/P2, pero **si
+  viola una P0 se explica el riesgo y se pregunta antes de actuar** (refuerza
+  P1.8 y las P0): no se obedece en silencio una orden que rompe una protección
+  absoluta.
+- Si dos reglas del mismo nivel entran en conflicto, se detiene la ejecución y
+  se escala al programador con la contradicción documentada (P1.6, P1.10).
+- Esta regla se aplica también a conflictos entre reglas de texto
+  (`AGENTS.md`) y guardarraíles deterministas (`opencode.json`/`kilo.json`):
+  cuando una regla de texto parece autorizar algo que la capa determinista
+  bloquea, prevalece la protección determinista; se reporta la tensión y se
+  consulta al programador.
+**Fuentes**: ETSI GR ZSM 020 (conflict resolution in autonomous systems);
+OWASP Agent Control Standard (enforcement hierarchy); NIST AI RMF (governance
+and oversight).
+
 ### P2 — Preferencias
 **Error**: decisiones de diseño contrarias a las preferencias del usuario.
 **Prevención**: open source, no duplicar archivos, cambios pequeños, nombres

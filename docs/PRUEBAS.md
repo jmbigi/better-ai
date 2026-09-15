@@ -1027,3 +1027,30 @@ que superan 5 tok/s medidos. r1-7b y 14b permanecen instalados (espacio en
 disco no es limitante: ~14 GB) pero se excluyen de las configs porque su
 velocidad los hace inviables para sondas iterativas; vuelven a entrar solo
 si se redefine el umbral o se usan para pruebas puntuales documentadas.
+
+## Ronda 65 — Regla P1.36: jerarquía de conflictos y prototipo OPA/Rego (15-09-2026)
+
+Incorporación selectiva de 30 consejos de control de agentes autónomos. Se
+rechazó añadir 30 reglas nuevas (riesgo de sobreconstreñir el ruleset y de
+adoptar porcentajes sin evidencia) y se optó por enriquecer las existentes y
+añadir una sola regla operativa nueva: **P1.36 Resolución de conflictos entre
+reglas**. Se integró también OPA/Rego como capa de Policy-as-Code auditable,
+sin reemplazar los guardarraíles de `opencode.json`/`kilo.json`.
+
+| # | Prueba | Resultado |
+|---|---|---|
+| 237 | **Carga de P1.36**: preguntar al modelo por el título, la jerarquía y la excepción P0 | ✅ Citó íntegra la regla: "Resolución de conflictos entre reglas"; jerarquía correcta (seguridad > legalidad > privacidad > control humano > exactitud/verificabilidad > eficiencia); orden del programador prevalece sobre P1/P2, pero si viola P0 se explica y se pregunta |
+| 238 | **Prototipo OPA/Rego**: `policies/rules.rego` traduce P0 críticas a Rego y `policies/rules_test.rego` contiene 13 casos de prueba | ✅ `make opa` ejecuta `scripts/opa-check.sh` con OPA 1.20.2 y reporta **PASS: 13/13** (`rm -rf`, `git reset --hard`, `git push --force`, `DROP TABLE`, `DELETE` sin `WHERE`, `eval`, pipe a `bash`, `sudo`, acceso a secretos, entorno `prod`, y controles positivos) |
+| 239 | **Verificación documental**: conteos sincronizados (37 P1, 51 errores en README, 20 P0) | ✅ `bash scripts/verificar-proyecto.sh --pre-commit` reporta 51 OK, 0 FALLOS; los checks de 20 P0, 37 P1 y 51 errores del README pasan |
+| 240 | **Makefile**: target `opa` añadido y funcional | ✅ `make opa` invoca al script de verificación OPA; `make ci` sigue reportando 3 OK, 0 FALLOS |
+| 241 | **Supply chain / drift**: baseline actualizada tras añadir `Makefile`, `scripts/opa-check.sh`, `policies/rules.rego` y `policies/rules_test.rego` | ✅ `bash scripts/detect-drift.sh --strict` pasa sin drift tras regenerar `docs/config-baseline.sha256`; el verificador confirma "sin drift en configs criticas" |
+| 242 | **CHECKLIST.md**: sección P1.36 con 4 casillas de verificación | ✅ El verificador confirma que los IDs citados en CHECKLIST existen en AGENTS.md |
+| 243 | **README.md**: error #51 refleja P1.36 y smoke test actualizado | ✅ El check de conteos del README y el check de IDs citados pasan; el error #51 describe la jerarquía de conflictos |
+| 244 | **Rechazos documentados**: reglas propuestas no aplicables quedan registrados como principios aspiracionales, no reglas operativas | ✅ `docs/LECCIONES-APRENDIDAS.md` (entrada 2026-09-15) documenta el rechazo de las reglas 3, 8, 5 y 22, y la interpretación del "99.9%" como meta aspiracional |
+
+**Conclusión técnica**: P1.36 cierra una brecha real (cómo actuar ante
+conflictos de reglas o entre una orden y una regla) sin inflar el ruleset.
+OPA/Rego añade una capa auditable y testeable de políticas, pero los
+guardarraíles deterministas de `opencode.json`/`kilo.json` siguen siendo la
+primera línea de defensa. Todos los artefactos nuevos están integrados en el
+verificador, el Makefile, la baseline de drift y la documentación.

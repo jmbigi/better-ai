@@ -217,6 +217,9 @@ Idempotencia (tokens, claves únicas, verificación previa); reintentos backoff+
 ### P1.35 Despliegue gradual, human-in-the-loop
 Staging fiel a producción; canary (5%) con monitoreo y rollback automático; alto riesgo: aprobación humana explícita (P0.4, P1.23); circuit breaker manual.
 
+### P1.36 Resolución de conflictos entre reglas
+Ante conflicto entre dos o más reglas (incluida una orden del programador que contradiga una P1 o P2), aplicar esta jerarquía de prioridades: **(1) seguridad**, **(2) legalidad**, **(3) privacidad**, **(4) control humano**, **(5) exactitud/verificabilidad**, **(6) eficiencia**. La orden explícita del programador prevalece sobre cualquier P1/P2, pero **si viola una P0 se debe explicar el riesgo y preguntar antes de actuar** (no obedecer en silencio). Si dos reglas del mismo nivel entran en conflicto, se escala al programador con la contradicción documentada.
+
 ## P2 — Preferencias
 
 - P2.1. Herramientas open source y gratuitas.

@@ -60,7 +60,7 @@ otel_start_span "verificar.total"
 otel_start_span "verificar.reglas"
 echo "== 1. Reglas =="
 check "20 reglas P0 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P0' AGENTS.md) -eq 20"
-check "36 reglas P1 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P1' AGENTS.md) -eq 36"
+check "37 reglas P1 definidas en AGENTS.md" bash -c "test \$(grep -cE '^### P1' AGENTS.md) -eq 37"
 check "IDs identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -oE '^### P[0-2]\\.[0-9]+' AGENTS.md | sort -V) <(grep -oE '^### P[0-2]\\.[0-9]+' docs/REGLAS-COMPLETAS.md | sort -V)"
 check "titulos de reglas identicos en REGLAS-COMPLETAS" bash -c "diff <(grep -E '^### P0|^### P1' AGENTS.md) <(grep -E '^### P0|^### P1' docs/REGLAS-COMPLETAS.md)"
 check "referencias a rutas docs/ y scripts/ existen" python3 -c "
@@ -68,7 +68,7 @@ import re, os
 files = ['AGENTS.md', 'README.md', 'CHECKLIST.md', 'docs/REGLAS-COMPLETAS.md', 'docs/PRUEBAS.md']
 rutas = set()
 for f in files:
-    for m in re.findall(r'(?:docs/|scripts/)[A-Za-z0-9_./-]+\\.(?:md|sh)', open(f).read()):
+    for m in re.findall(r'(?:docs/|scripts/)[A-Za-z0-9_./-]+\\.(?:sha256|md|sh)', open(f).read()):
         rutas.add(m)
 faltan = [r for r in sorted(rutas) if not os.path.exists(r)]
 assert not faltan, 'referencias rotas: ' + str(faltan)
@@ -77,7 +77,7 @@ assert not faltan, 'referencias rotas: ' + str(faltan)
 check "requisitos versionados y referencias de codigo validos" python3 scripts/doc_validator.py --root .
 check "ningun .env versionado en git" bash -c "test -z \"\$(git ls-files | grep -E '\\.env(\$|\\.)' | grep -v '\\.env\\.example')\""
 check "52 limitaciones en REGLAS-COMPLETAS" bash -c "test \$(grep -cE '^\\| \\*\\*' docs/REGLAS-COMPLETAS.md) -eq 52"
-check "50 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 50"
+check "51 errores en README" bash -c "test \$(grep -cE '^[0-9]+\\. \\*\\*' README.md) -eq 51"
 check "IDs citados en CHECKLIST existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' CHECKLIST.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
 check "IDs citados en README existen en AGENTS.md" bash -c "test -z \"\$(comm -23 <(grep -oE 'P[0-2]\\.[0-9]+' README.md | sort -u) <(grep -oE 'P[0-2]\\.[0-9]+' AGENTS.md | sort -u))\""
 check "numeracion secuencial de pruebas en PRUEBAS" python3 -c "
@@ -312,6 +312,13 @@ check "skill cost-tracker operativo (py_compile, --help y tests funcionales OK)"
 check "redteam prompt injection valido (py_compile y --help OK)" bash -c "python3 -m py_compile scripts/redteam-prompt-injection.py && python3 scripts/redteam-prompt-injection.py --help >/dev/null 2>&1"
 check "detector de system prompt leakage operativo (py_compile, --help y tests OK)" bash -c "python3 -m py_compile scripts/detect-system-prompt-leak.py && python3 scripts/detect-system-prompt-leak.py --help >/dev/null 2>&1 && python3 scripts/test-system-prompt-leak.py"
 check "fuzzing de evasion de denies sin fallos directos" bash -c "python3 scripts/fuzz-denies.py"
+# OPA/Rego: policy-as-code opcional (P1.9/P1.32). Si opa no está disponible, SKIP.
+if command -v opa >/dev/null 2>&1 || [ -x "/tmp/opa" ] || [ -x "$PROJECT_ROOT/.tools/opa" ]; then
+    check "politicas OPA/Rego pasan" bash -c "bash scripts/opa-check.sh"
+else
+    echo "  [SKIP] politicas OPA/Rego no verificadas (opa no instalado; descargar desde https://github.com/open-policy-agent/opa/releases)"
+    PASS=$((PASS + 1))
+fi
 otel_end_span "verificar.supply-chain"
 
 otel_start_span "verificar.drift"

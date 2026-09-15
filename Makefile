@@ -3,7 +3,7 @@
 
 SHELLCHECK_SEVERITY ?= error
 
-.PHONY: check lint test safety-matrix sync hooks hooks-lefthook ci-local dagger clean help install update ci install-ps update-ps
+.PHONY: check lint test safety-matrix opa sync hooks hooks-lefthook ci-local dagger clean help install update ci install-ps update-ps
 
 help:
 	@echo "Targets disponibles:"
@@ -12,6 +12,7 @@ help:
 	@echo "  make lint          - shellcheck (si esta disponible) y validacion JSON"
 	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
 	@echo "  make safety-matrix - Matriz de pruebas de seguridad (offline por defecto)"
+	@echo "  make opa           - Verifica politicas OPA/Rego (requiere opa o descarga a /tmp)"
 	@echo "  make sbom          - Genera SBOM SPDX con syft (requiere syft)"
 	@echo "  make vuln-scan     - Escanea vulnerabilidades con grype (requiere grype)"
 	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
@@ -48,6 +49,9 @@ test:
 
 safety-matrix:
 	python3 scripts/safety-test-matrix.py --offline
+
+opa:
+	bash scripts/opa-check.sh
 
 sbom:
 	@if command -v syft >/dev/null 2>&1; then \
