@@ -278,7 +278,7 @@ for f in sorted(os.listdir('scripts')):
         assert not pat.search(linea), (f, i, linea)
 "
 check "agentes de solo lectura con edit deny y sincronizados" bash -c "
-for a in security-auditor code-reviewer; do
+for a in security-auditor code-reviewer read-only-auditor; do
     grep -q 'edit: deny' .opencode/agents/\$a.md || exit 1
     grep -q 'mode: subagent' .opencode/agents/\$a.md || exit 1
     [ -f .kilo/agents/\$a.md ] || exit 1
@@ -292,6 +292,18 @@ echo "== 4. Supply Chain (P0.18) =="
 check "syft disponible para SBOM" bash -c "command -v syft >/dev/null || echo 'WARNING: syft no instalado; SBOM no generado'"
 check "grype disponible para vuln scan" bash -c "command -v grype >/dev/null || echo 'WARNING: grype no instalado; vuln scan no ejecutado'"
 check "SBOM generado (docs/SBOM-*.spdx.json)" bash -c "ls docs/SBOM-*.spdx.json 2>/dev/null | head -1 >/dev/null || echo 'WARNING: SBOM no encontrado en docs/'"
+check "baseline de configs criticas existe" bash -c "test -f docs/config-baseline.sha256 && grep -qE '^[a-f0-9]{64}  ' docs/config-baseline.sha256"
+check "lockfiles presentes para dependencias declaradas" python3 -c "
+import os, json
+# Si hay package.json con dependencies/devDependencies, package-lock.json debe existir
+if os.path.exists('package.json'):
+    pkg = json.load(open('package.json'))
+    if pkg.get('dependencies') or pkg.get('devDependencies'):
+        assert os.path.exists('package-lock.json'), 'package-lock.json falta'
+# Si hay requirements.txt, no requiere lockfile hash, pero advertimos si no hay constraints
+if os.path.exists('requirements.txt') and not os.path.exists('requirements-lock.txt'):
+    print('WARNING: requirements.txt sin requirements-lock.txt (opcional pero recomendado)')
+"
 if command -v grype >/dev/null 2>&1; then
     check "sin vulns CRITICAL/HIGH sin excepcion documentada" bash -c "! grype dir:. -o json 2>/dev/null | jq -e '.matches[] | select(.vulnerability.severity == \"Critical\" or .vulnerability.severity == \"High\") | .vulnerability.id' >/dev/null || echo 'INFO: vulns CRITICAL/HIGH detectadas (requieren excepcion documentada)'"
 fi
@@ -304,7 +316,14 @@ otel_end_span "verificar.supply-chain"
 
 otel_start_span "verificar.drift"
 echo "== 5. Config Drift Detection (P1.9) =="
-check "sin drift en configs criticas (baseline firmada)" bash -c "bash scripts/detect-drift.sh >/dev/null 2>&1 || (echo 'DRIFT DETECTADO - Ejecuta: bash scripts/detect-drift.sh para detalles' && exit 1)"
+check "sin drift en configs criticas (baseline firmada)" bash -c "
+bash scripts/detect-drift.sh --strict >/dev/null 2>&1 || {
+  echo 'DRIFT DETECTADO - Ejecuta: bash scripts/detect-drift.sh para detalles';
+  echo 'Si el drift es autorizado, actualiza la baseline con confirmacion explicita:';
+  echo '  bash scripts/detect-drift.sh --update-baseline';
+  exit 1;
+}
+"
 otel_end_span "verificar.drift"
 
 otel_start_span "verificar.repositorio"

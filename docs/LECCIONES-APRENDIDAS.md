@@ -3,6 +3,45 @@
 > Cada prueba, fallo o hallazgo relevante se documenta aquí con su solución.
 > Si algo falla 2+ veces, la lección pasa a ser regla en `AGENTS.md`.
 
+## 2026-09-15 — Mejoras de seguridad propuestas: aplicar solo las que cumplen las reglas del proyecto
+
+**Problema**: se propusieron 10 mejoras para llevar better-ai "cerca del 99.9%" de
+robustez. Algunas requerían acceso al runtime de inferencia de opencode/kilocode
+(`logprobs` para *confidence routing*, detención automática del agente para *circuit
+breakers*) o implicaban un cambio arquitectónico de alto esfuerzo (*Policy-as-Code*
+con OPA). Aplicarlas desde este repositorio habría violado P0.1 (afirmar sin evidencia
+o sin control real), P1.2 (alcance) y P1.24 (requerimientos aprobados).
+**Solución**:
+- Evaluar cada mejora contra `AGENTS.md`, `docs/REGLAS-COMPLETAS.md` y el estado real
+del repo antes de implementar.
+- Descartar 3 mejoras por no ser aplicables de forma segura desde este proyecto:
+  1. *Confidence Routing*: requiere runtime; contradice la filosofía determinista.
+  2. *Circuit Breakers*: requiere control del runtime; P1.6 ya impone parar tras 2 fallos.
+  3. *Policy-as-Code con OPA*: cambio arquitectónico de alto esfuerzo; requiere
+     planilla de requerimientos aprobada.
+- Aplicar 7 mejoras aplicables y verificables:
+  - Review Gates progresivas (documentar perfiles `audit`/`plan`/`build` en P1.9).
+  - Ejemplos de delimitadores `<trusted_context>` / `<untrusted_data>` en P0.13.
+  - Agente `read-only-auditor` de solo lectura.
+  - Verificación de baseline/lockfiles en `scripts/verificar-proyecto.sh`.
+  - Matriz de pruebas de seguridad (`scripts/safety-test-matrix.py` + `make safety-matrix`).
+  - Métricas de deriva de intención en `scripts/detect-drift.sh`.
+  - Runbook `docs/INCIDENT-RESPONSE.md`.
+**Evidencia**:
+- `bash scripts/verificar-proyecto.sh --pre-commit`: 50 OK, 0 FALLOS.
+- `make ci`: 3 OK, 0 FALLOS.
+- `make safety-matrix`: 6 PASS, 0 FAIL, 2 SKIP (tests que requieren runtime opencode).
+- `bash scripts/detect-drift.sh --strict`: sin drift de hashes ni de intención tras
+  actualizar baseline.
+**Lección**: ante una lista de "mejoras de alto impacto", la primera tarea no es
+implementarlas, sino **filtrarlas por seguridad y aplicabilidad real**. Una mejora que
+requiere controlar un runtime ajeno o que promete un porcentaje de robustez sin
+evidence no se puede entregar desde un ruleset determinista. La honestidad sobre qué
+sí y qué no se puede hacer es parte de la protección (P0.1, P1.6).
+**Estado**: cerrada.
+
+---
+
 ## 2026-08-28 — System Prompt Leakage: AGENTS.md es visible por defecto
 
 **Problema**: el análisis crítico avanzado identificó que better-ai no tenía

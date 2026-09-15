@@ -3,7 +3,7 @@
 
 SHELLCHECK_SEVERITY ?= error
 
-.PHONY: check lint test sync hooks hooks-lefthook ci-local dagger clean help install update ci install-ps update-ps
+.PHONY: check lint test safety-matrix sync hooks hooks-lefthook ci-local dagger clean help install update ci install-ps update-ps
 
 help:
 	@echo "Targets disponibles:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make ci            - CI local pura sin Docker (lint opcional + test + verificar)"
 	@echo "  make lint          - shellcheck (si esta disponible) y validacion JSON"
 	@echo "  make test          - doc_validator, parity de configs, symlinks y pipes peligrosos"
+	@echo "  make safety-matrix - Matriz de pruebas de seguridad (offline por defecto)"
 	@echo "  make sbom          - Genera SBOM SPDX con syft (requiere syft)"
 	@echo "  make vuln-scan     - Escanea vulnerabilidades con grype (requiere grype)"
 	@echo "  make sync          - Sincroniza .kilo/agents con .opencode/agents"
@@ -44,6 +45,9 @@ test:
 	python3 scripts/check-config-parity.py
 	bash scripts/check-symlinks.sh
 	python3 scripts/check-shell-pipes.py
+
+safety-matrix:
+	python3 scripts/safety-test-matrix.py --offline
 
 sbom:
 	@if command -v syft >/dev/null 2>&1; then \

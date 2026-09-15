@@ -29,6 +29,8 @@ CRITICAL_CONFIGS=(
     "scripts/analyze_shell.py"
     "scripts/check-shell-pipes.py"
     "scripts/deploy-kimi-config.sh"
+    "scripts/detect-drift.sh"
+    "scripts/safety-test-matrix.py"
 )
 
 UPDATE_BASELINE=false
@@ -107,6 +109,75 @@ get_baseline_hash() {
     fi
 }
 
+count_denies() {
+    python3 -c "
+import json, sys
+for f in ['${PROJECT_ROOT}/opencode.json', '${PROJECT_ROOT}/kilo.json']:
+    cfg = json.load(open(f))
+    n = sum(1 for v in cfg['permission']['bash'].values() if v == 'deny')
+    print(f'{f.split(\"/\")[-1]}:{n}')
+"
+}
+
+check_intent_drift() {
+    local intent_drift=false
+    echo
+    echo "=== Intent Drift Detection (deriva de intención de reglas) ==="
+    echo
+
+    # 1. Contar denies actuales y comparar con el valor esperado del proyecto
+    local expected_denies=218
+    local deny_counts
+    deny_counts=$(count_denies)
+    echo "Denies actuales:"
+    echo "$deny_counts"
+    while IFS=: read -r fname count; do
+        if [[ "$count" -lt "$expected_denies" ]]; then
+            echo -e "  \033[0;31m[ALERTA] $fname tiene $count denies (< $expected_denies esperados)\033[0m"
+            log_audit "ALERT" "Intent drift: $fname deny count decreased to $count (expected $expected_denies)"
+            intent_drift=true
+        fi
+    done <<< "$deny_counts"
+
+    # 2. Buscar indicios de debilitamiento de reglas P0 en el diff reciente de AGENTS.md
+    #    (solo cambios no commiteados; evita falsos positivos con el lenguaje normativo existente).
+    local weakening_patterns=("excepción a P0" "override de" "bypass de" "waive" "relax de" "deshabilitar P0" "desactivar P0" "deshabilitar deny" "desactivar deny")
+    local weakening_found=()
+    if git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        for pattern in "${weakening_patterns[@]}"; do
+            # Buscar en el diff del working tree contra HEAD
+            while IFS= read -r line; do
+                # diff añadido empieza con '+', ignorar headers (+++)
+                if [[ "$line" == +++* ]]; then
+                    continue
+                fi
+                if [[ "$line" == +*"$pattern"* ]]; then
+                    weakening_found+=("$pattern")
+                    break
+                fi
+            done < <(git -C "${PROJECT_ROOT}" diff -- AGENTS.md 2>/dev/null || true)
+        done
+    fi
+    if [[ ${#weakening_found[@]} -gt 0 ]]; then
+        echo -e "  \033[0;33m[ADVERTENCIA] AGENTS.md (diff no commiteado) contiene términos que pueden indicar debilitamiento de reglas: ${weakening_found[*]}\033[0m"
+        log_audit "WARNING" "Intent drift: weakening patterns found in AGENTS.md diff: ${weakening_found[*]}"
+        intent_drift=true
+    else
+        echo "  [OK] No se detectaron patrones de debilitamiento en el diff de AGENTS.md"
+    fi
+
+    if [[ "$intent_drift" == "true" ]]; then
+        echo
+        echo "Revisa manualmente que los cambios no debiliten protecciones P0."
+        if [[ "$STRICT_MODE" == "true" ]]; then
+            return 1
+        fi
+    else
+        echo "  [OK] Sin indicios de deriva de intención"
+    fi
+    return 0
+}
+
 check_drift() {
     local drift_found=false
     local drift_details=()
@@ -152,7 +223,10 @@ check_drift() {
     done
     
     echo
-    if [[ "$drift_found" == "true" ]]; then
+    local intent_exit=0
+    check_intent_drift || intent_exit=$?
+
+    if [[ "$drift_found" == "true" || $intent_exit -ne 0 ]]; then
         echo -e "\033[0;31m⚠️  DRIFT DETECTADO en ${#drift_details[@]} config(s)\033[0m"
         echo
         echo "Acciones requeridas (P1.9, P1.23):"
@@ -160,7 +234,7 @@ check_drift() {
         echo "  2. Si son cambios autorizados: bash scripts/detect-drift.sh --update-baseline"
         echo "  3. Si NO son autorizados: RESTAURA desde git (git checkout -- <config>)"
         echo "  4. Requiere autorización explícita del programador para actualizar baseline"
-        log_audit "ALERT" "Drift detection completed - ${#drift_details[@]} drifts found"
+        log_audit "ALERT" "Drift detection completed - ${#drift_details[@]} drifts found, intent drift exit=$intent_exit"
         rm -f "$BASELINE_TMP"
         return 1
     else
